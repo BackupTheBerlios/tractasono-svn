@@ -4,7 +4,6 @@
 
 
 // Callback Funktionen
-
 void some_signal_handler_func(GtkWidget *widget, gpointer user_data) {
   /* do something useful here */
 }
