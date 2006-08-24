@@ -1,0 +1,9 @@
+#SConstruct build file for tractasono
+
+# Edit the following two lines
+sourcefiles = Split("main.c")
+dependencies = "gtk+-2.0 libglade-2.0 gstreamer-0.10 libgpod-1.0"
+
+env = Environment()
+env.ParseConfig("pkg-config --cflags --libs " + dependencies)
+env.Program("tractasono", sourcefiles)
