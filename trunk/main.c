@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 
-
+// Ein simpler Kommentar
 
 // Callback Funktionen
 void some_signal_handler_func(GtkWidget *widget, gpointer user_data) {
