@@ -1,7 +1,12 @@
-#SConstruct build file for tractasono
+#########################
+# SCons build instructions for tractasono
+# =======================
+# run "scons" to build the entire project
+# run "scons -c" to clean up the project
+#########################
 
 # Edit the following two lines
-sourcefiles = Split("main.c")
+sourcefiles = Split("main.c ipod.c")
 dependencies = "gtk+-2.0 libglade-2.0 gstreamer-0.10 libgpod-1.0"
 
 env = Environment()

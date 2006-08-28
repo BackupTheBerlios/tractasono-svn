@@ -3,7 +3,7 @@
 
 <glade-interface>
 
-<widget class="GtkWindow" id="mainwindow">
+<widget class="GtkWindow" id="main_window">
   <property name="visible">True</property>
   <property name="title">Tractasono</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
@@ -20,6 +20,8 @@
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
+  <signal name="delete_event" handler="on_main_window_delete_event" last_modification_time="Mon, 28 Aug 2006 22:45:13 GMT"/>
+  <signal name="destroy" handler="on_main_window_destroy" last_modification_time="Mon, 28 Aug 2006 23:08:09 GMT"/>
 
   <child>
     <widget class="GtkVBox" id="vbox2">
@@ -219,12 +221,13 @@
 	      <property name="spacing">0</property>
 
 	      <child>
-		<widget class="GtkButton" id="button12">
+		<widget class="GtkButton" id="button_music">
 		  <property name="visible">True</property>
 		  <property name="can_default">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
 		  <property name="focus_on_click">True</property>
+		  <signal name="clicked" handler="on_button_music_clicked" last_modification_time="Mon, 28 Aug 2006 22:40:00 GMT"/>
 
 		  <child>
 		    <widget class="GtkImage" id="image9">
@@ -262,12 +265,13 @@
 	      </child>
 
 	      <child>
-		<widget class="GtkButton" id="button14">
+		<widget class="GtkButton" id="button_ripping">
 		  <property name="visible">True</property>
 		  <property name="can_default">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
 		  <property name="focus_on_click">True</property>
+		  <signal name="clicked" handler="on_button_ripping_clicked" last_modification_time="Mon, 28 Aug 2006 22:41:50 GMT"/>
 
 		  <child>
 		    <widget class="GtkImage" id="image13">
@@ -283,12 +287,13 @@
 	      </child>
 
 	      <child>
-		<widget class="GtkButton" id="button15">
+		<widget class="GtkButton" id="button_fullscreen">
 		  <property name="visible">True</property>
 		  <property name="can_default">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="relief">GTK_RELIEF_NORMAL</property>
 		  <property name="focus_on_click">True</property>
+		  <signal name="clicked" handler="on_button_fullscreen_clicked" last_modification_time="Mon, 28 Aug 2006 22:42:18 GMT"/>
 
 		  <child>
 		    <widget class="GtkImage" id="image12">
