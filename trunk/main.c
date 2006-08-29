@@ -92,6 +92,24 @@ int main(int argc, char *argv[])
 	/* Das Interface laden */
 	xml = glade_xml_new("tractasono.glade", "main_window", NULL);
 
+
+
+	// Einstellungen Window holen
+	GladeXML *xmlSettings;
+	xmlSettings = glade_xml_new("tractasono.glade", "window_settings", NULL);
+
+	GtkWidget *settings = NULL;
+	settings = glade_xml_get_widget(xmlSettings, "window_settings");
+
+	if (settings == NULL) {
+		g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
+	}
+
+
+
+
+
+
 	/* Verbinde die Signale automatisch mit dem Interface */
 	glade_xml_signal_autoconnect(xml);
 
@@ -130,16 +148,6 @@ int main(int argc, char *argv[])
 	* function is NULL and is ignored in the callback function. */
 	//g_signal_connect(G_OBJECT (window), "delete_event", G_CALLBACK (delete_event), NULL);
 
-
-
-
-	// Einstellungen Window holen
-	GtkWidget *settings = NULL;
-	settings = glade_xml_get_widget(xml, "window_music");
-
-	if (settings == NULL) {
-		g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
-	}
 
 
 
