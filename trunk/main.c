@@ -49,6 +49,18 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Einstellungen gedrückt!\n");
+
+
+	// Einstellungen Window holen
+	//GtkWidget *settings = NULL;
+	//settings = glade_xml_get_widget(xml, "window_music");
+
+	//if (settings == NULL) {
+	//	g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
+	//}
+
+	//gtk_destroy_widget("");
+
 }
 
 // Event-Handler für den Rippen Button
@@ -117,6 +129,20 @@ int main(int argc, char *argv[])
 	* as defined above. The data passed to the callback
 	* function is NULL and is ignored in the callback function. */
 	//g_signal_connect(G_OBJECT (window), "delete_event", G_CALLBACK (delete_event), NULL);
+
+
+
+
+	// Einstellungen Window holen
+	GtkWidget *settings = NULL;
+	settings = glade_xml_get_widget(xml, "window_music");
+
+	if (settings == NULL) {
+		g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
+	}
+
+
+
 
 	/* Programmloop starten */
 	gtk_main();
