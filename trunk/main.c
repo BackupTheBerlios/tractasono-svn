@@ -93,6 +93,14 @@ int main(int argc, char *argv[])
 	xml = glade_xml_new("tractasono.glade", "main_window", NULL);
 
 
+	// Schrift vergrössern
+	//GtkLabel *playerlabel = NULL;
+	//playerlabel = (GtkLabel *)glade_xml_get_widget(xml, "vbox3");
+	//if (playerlabel == NULL) {
+		//g_print("Fehler: Konnte das playerlabel nicht holen!\n");
+	//}
+	//gtk_label_set_markup (GTK_LABEL (label), "<small>Small text</small>");
+
 
 	// Einstellungen Window holen
 	GladeXML *xmlSettings;
@@ -120,8 +128,9 @@ int main(int argc, char *argv[])
 
 	gtk_widget_destroy(placeholder);
 
-	//gtk_container_add (GTK_CONTAINER (vbox3, settings);
-	gtk_box_pack_end_defaults(GTK_BOX (vbox3), settings);
+	//sleep(3);
+	//gtk_container_add (vbox3, settings);
+	//gtk_box_pack_end_defaults(GTK_BOX (vbox3), settings);
 
 	//gtk_widget_show (settings);
 
