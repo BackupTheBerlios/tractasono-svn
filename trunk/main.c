@@ -105,7 +105,25 @@ int main(int argc, char *argv[])
 		g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
 	}
 
+	GtkVBox *vbox3 = NULL;
+	GtkWidget *placeholder = NULL;
 
+	vbox3 = (GtkVBox*)glade_xml_get_widget(xml, "vbox3");
+	if (vbox3 == NULL) {
+		g_print("Fehler: Konnte vbox3 nicht holen!\n");
+	}
+
+	placeholder = glade_xml_get_widget(xml, "label_placeholder");
+	if (placeholder == NULL) {
+		g_print("Fehler: Konnte placeholder nicht holen!\n");
+	}
+
+	gtk_widget_destroy(placeholder);
+
+	//gtk_container_add (GTK_CONTAINER (vbox3, settings);
+	gtk_box_pack_end_defaults(GTK_BOX (vbox3), settings);
+
+	//gtk_widget_show (settings);
 
 
 
