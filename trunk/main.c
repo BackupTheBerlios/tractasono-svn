@@ -32,6 +32,16 @@ void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Musik gedrückt!\n");
+
+
+
+	// Musik Window holen
+	//GtkWidget *window = NULL;
+	//window = glade_xml_get_widget(xml, "window_music");
+
+	//gtk_destroy_widget("");
+
+
 }
 
 // Event-Handler für den Einstellungen Button
@@ -61,17 +71,37 @@ int main(int argc, char *argv[])
 {
 	// Lokale Variablen
 	GladeXML *xml;
-	GtkWidget *window;
+	//GtkWidget *window;
 
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
 	glade_init();
 
 	/* Das Interface laden */
-	xml = glade_xml_new("tractasono.glade", NULL, NULL);
+	xml = glade_xml_new("tractasono.glade", "main_window", NULL);
 
 	/* Verbinde die Signale automatisch mit dem Interface */
 	glade_xml_signal_autoconnect(xml);
+
+
+	// Musik Window holen
+	//GtkBoxChild *vbox3 = NULL;
+	//GtkWidget *vbox3 = NULL;
+	//GtkWidget *placeholder = NULL;
+	//GtkWidget *musicwindow = NULL;
+	//vbox3 = (GtkBoxChild *)glade_xml_get_widget(xml, "vbox3");
+	//placeholder = glade_xml_get_widget(xml, "label_placeholder");
+	//musicwindow = glade_xml_get_widget(xml, "window_music");
+
+	//gtk_widget_destroy(placeholder);
+
+	// Musik Window hinzufügen
+	//gtk_container_add (GTK_CONTAINER (vbox3, musicwindow);
+	//gtk_box_pack_end_defaults(GTK_BOX (vbox3), musicwindow);
+
+	/* The final step is to display this newly created widget. */
+	//gtk_widget_show (musicwindow);
+	
 
 	// Hauptwindow holen
 	//window = glade_xml_get_widget(xml, "main_window");
