@@ -517,17 +517,6 @@
       <property name="spacing">0</property>
 
       <child>
-	<widget class="GtkHSeparator" id="hseparator4">
-	  <property name="visible">True</property>
-	</widget>
-	<packing>
-	  <property name="padding">0</property>
-	  <property name="expand">False</property>
-	  <property name="fill">True</property>
-	</packing>
-      </child>
-
-      <child>
 	<widget class="GtkNotebook" id="notebook1">
 	  <property name="visible">True</property>
 	  <property name="can_focus">True</property>
@@ -839,7 +828,7 @@
 		      <child>
 			<widget class="GtkLabel" id="label10">
 			  <property name="visible">True</property>
-			  <property name="label" translatable="yes">Rippen</property>
+			  <property name="label" translatable="yes">Import</property>
 			  <property name="use_underline">True</property>
 			  <property name="use_markup">False</property>
 			  <property name="justify">GTK_JUSTIFY_LEFT</property>
