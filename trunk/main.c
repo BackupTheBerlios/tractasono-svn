@@ -36,22 +36,11 @@ void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Musik gedrückt!\n");
-
-
-
-	// Musik Window holen
-	//GtkWidget *window = NULL;
-	//window = glade_xml_get_widget(xml, "window_music");
-
-	//gtk_destroy_widget("");
-
-
 }
 
 // Event-Handler für den Einstellungen Button
 void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 {
-	// Hier sollte noch etwas Code rein
 	g_print("Einstellungen gedrückt!\n");
 
 	if (xmlSettings == NULL) {
@@ -75,8 +64,7 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 
 		gtk_widget_reparent (vbox5, vbox3);
 		gtk_widget_show (vbox5);
-	}
-
+	} 
 }
 
 // Event-Handler für den Rippen Button
@@ -101,7 +89,6 @@ int main(int argc, char *argv[])
 	xml = NULL;
 	xmlSettings = NULL;
 
-
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
 	glade_init();
@@ -111,45 +98,6 @@ int main(int argc, char *argv[])
 
 	/* Verbinde die Signale automatisch mit dem Interface */
 	glade_xml_signal_autoconnect(xml);
-
-
-	// Musik Window holen
-	//GtkBoxChild *vbox3 = NULL;
-	//GtkWidget *vbox3 = NULL;
-	//GtkWidget *placeholder = NULL;
-	//GtkWidget *musicwindow = NULL;
-	//vbox3 = (GtkBoxChild *)glade_xml_get_widget(xml, "vbox3");
-	//placeholder = glade_xml_get_widget(xml, "label_placeholder");
-	//musicwindow = glade_xml_get_widget(xml, "window_music");
-
-	//gtk_widget_destroy(placeholder);
-
-	// Musik Window hinzufügen
-	//gtk_container_add (GTK_CONTAINER (vbox3, musicwindow);
-	//gtk_box_pack_end_defaults(GTK_BOX (vbox3), musicwindow);
-
-	/* The final step is to display this newly created widget. */
-	//gtk_widget_show (musicwindow);
-	
-
-	// Hauptwindow holen
-	//window = glade_xml_get_widget(xml, "main_window");
-
-	/* Here we connect the "destroy" event to a signal handler.
-	* This event occurs when we call gtk_widget_destroy() on the window,
-	* or if we return FALSE in the "delete_event" callback. */
-	//g_signal_connect(G_OBJECT (window), "destroy", G_CALLBACK (destroy), NULL);
-
-	/* When the window is given the "delete_event" signal (this is given
-	* by the window manager, usually by the "close" option, or on the
-	* titlebar), we ask it to call the delete_event () function
-	* as defined above. The data passed to the callback
-	* function is NULL and is ignored in the callback function. */
-	//g_signal_connect(G_OBJECT (window), "delete_event", G_CALLBACK (delete_event), NULL);
-
-
-
-
 
 	/* Programmloop starten */
 	gtk_main();
