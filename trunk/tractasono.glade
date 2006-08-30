@@ -40,7 +40,7 @@
 	  <child>
 	    <widget class="GtkLabel" id="song">
 	      <property name="visible">True</property>
-	      <property name="label" translatable="yes">&lt;span size=&quot;xx-large&quot; weight=&quot;heavy&quot;&gt;Pink Floyd - High Hopes  3:29&lt;/span&gt;</property>
+	      <property name="label" translatable="yes">&lt;span size=&quot;xx-large&quot; weight=&quot;heavy&quot;&gt;sie sorry aber äää, do chunt gar kei musig&lt;/span&gt;</property>
 	      <property name="use_underline">False</property>
 	      <property name="use_markup">True</property>
 	      <property name="justify">GTK_JUSTIFY_LEFT</property>
