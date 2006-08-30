@@ -460,6 +460,8 @@
 </widget>
 
 <widget class="GtkWindow" id="window_settings">
+  <property name="width_request">640</property>
+  <property name="height_request">480</property>
   <property name="title" translatable="yes">Einstellungen</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
@@ -491,7 +493,7 @@
 	  <property name="enable_popup">False</property>
 
 	  <child>
-	    <widget class="GtkVBox" id="vbox7">
+	    <widget class="GtkVBox" id="vbox20">
 	      <property name="border_width">5</property>
 	      <property name="visible">True</property>
 	      <property name="homogeneous">False</property>
@@ -938,34 +940,31 @@
 	      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
 	      <child>
-		<widget class="GtkVBox" id="vbox8">
+		<widget class="GtkViewport" id="viewport1">
 		  <property name="visible">True</property>
-		  <property name="homogeneous">False</property>
-		  <property name="spacing">0</property>
+		  <property name="shadow_type">GTK_SHADOW_IN</property>
 
 		  <child>
-		    <widget class="GtkImage" id="image24">
-		      <property name="height_request">130</property>
-		      <property name="visible">True</property>
-		      <property name="pixbuf">tractasono.png</property>
-		      <property name="xalign">0.5</property>
-		      <property name="yalign">0.5</property>
-		      <property name="xpad">0</property>
-		      <property name="ypad">0</property>
-		    </widget>
-		    <packing>
-		      <property name="padding">0</property>
-		      <property name="expand">False</property>
-		      <property name="fill">False</property>
-		    </packing>
-		  </child>
-
-		  <child>
-		    <widget class="GtkVBox" id="vbox9">
-		      <property name="height_request">100</property>
+		    <widget class="GtkVBox" id="vbox8">
 		      <property name="visible">True</property>
 		      <property name="homogeneous">False</property>
 		      <property name="spacing">0</property>
+
+		      <child>
+			<widget class="GtkImage" id="image24">
+			  <property name="visible">True</property>
+			  <property name="pixbuf">tractasono.png</property>
+			  <property name="xalign">0.5</property>
+			  <property name="yalign">0.5</property>
+			  <property name="xpad">0</property>
+			  <property name="ypad">15</property>
+			</widget>
+			<packing>
+			  <property name="padding">0</property>
+			  <property name="expand">False</property>
+			  <property name="fill">False</property>
+			</packing>
+		      </child>
 
 		      <child>
 			<widget class="GtkLabel" id="label21">
@@ -979,7 +978,7 @@
 			  <property name="xalign">0.5</property>
 			  <property name="yalign">0.5</property>
 			  <property name="xpad">0</property>
-			  <property name="ypad">10</property>
+			  <property name="ypad">15</property>
 			  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
 			  <property name="width_chars">-1</property>
 			  <property name="single_line_mode">False</property>
@@ -995,7 +994,7 @@
 		      <child>
 			<widget class="GtkLabel" id="label24">
 			  <property name="visible">True</property>
-			  <property name="label" translatable="yes">tractasono bildet zusammen mit der entsprechenden Hardware eine ultimative Musik-Jukebox</property>
+			  <property name="label" translatable="yes">tractasono bildet zusammen mit der entsprechenden Hardware die ultimative Musik-Jukebox</property>
 			  <property name="use_underline">False</property>
 			  <property name="use_markup">False</property>
 			  <property name="justify">GTK_JUSTIFY_CENTER</property>
@@ -1004,7 +1003,7 @@
 			  <property name="xalign">0.5</property>
 			  <property name="yalign">0.5</property>
 			  <property name="xpad">0</property>
-			  <property name="ypad">10</property>
+			  <property name="ypad">15</property>
 			  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
 			  <property name="width_chars">-1</property>
 			  <property name="single_line_mode">False</property>
@@ -1029,7 +1028,7 @@
 			  <property name="xalign">0.5</property>
 			  <property name="yalign">0.5</property>
 			  <property name="xpad">0</property>
-			  <property name="ypad">10</property>
+			  <property name="ypad">15</property>
 			  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
 			  <property name="width_chars">-1</property>
 			  <property name="single_line_mode">False</property>
@@ -1042,11 +1041,6 @@
 			</packing>
 		      </child>
 		    </widget>
-		    <packing>
-		      <property name="padding">0</property>
-		      <property name="expand">False</property>
-		      <property name="fill">False</property>
-		    </packing>
 		  </child>
 		</widget>
 	      </child>
@@ -1121,6 +1115,8 @@
 </widget>
 
 <widget class="GtkWindow" id="window_keyboard">
+  <property name="width_request">640</property>
+  <property name="height_request">200</property>
   <property name="title" translatable="yes">keyboard</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
