@@ -4,6 +4,10 @@
 
 #include "ipod.h"
 
+// Globale Variablen
+GladeXML *xml;
+GladeXML *xmlSettings;
+
 // Allgemeiner Destroy-Event
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
 {
@@ -50,16 +54,28 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 	// Hier sollte noch etwas Code rein
 	g_print("Einstellungen gedrückt!\n");
 
+	if (xmlSettings == NULL) {
+		// Einstellungen Window holen
+		xmlSettings = glade_xml_new("tractasono.glade", "window_settings", NULL);
+		if (xmlSettings == NULL) {
+			g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
+		}
 
-	// Einstellungen Window holen
-	//GtkWidget *settings = NULL;
-	//settings = glade_xml_get_widget(xml, "window_music");
+		GtkWidget *vbox5 = NULL;
+		vbox5 = glade_xml_get_widget(xmlSettings, "vbox5");
+		if (vbox5 == NULL) {
+			g_print("Fehler: Konnte vbox5 nicht holen!\n");
+		}
 
-	//if (settings == NULL) {
-	//	g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
-	//}
+		GtkWidget *vbox3 = NULL;
+		vbox3 = glade_xml_get_widget(xml, "vbox3");
+		if (vbox3 == NULL) {
+			g_print("Fehler: Konnte vbox3 nicht holen!\n");
+		}
 
-	//gtk_destroy_widget("");
+		gtk_widget_reparent (vbox5, vbox3);
+		gtk_widget_show (vbox5);
+	}
 
 }
 
@@ -81,9 +97,10 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
-	// Lokale Variablen
-	GladeXML *xml;
-	//GtkWidget *window;
+	// Variablen initialisieren
+	xml = NULL;
+	xmlSettings = NULL;
+
 
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
@@ -91,51 +108,6 @@ int main(int argc, char *argv[])
 
 	/* Das Interface laden */
 	xml = glade_xml_new("tractasono.glade", "main_window", NULL);
-
-
-	// Schrift vergrössern
-	//GtkLabel *playerlabel = NULL;
-	//playerlabel = (GtkLabel *)glade_xml_get_widget(xml, "vbox3");
-	//if (playerlabel == NULL) {
-		//g_print("Fehler: Konnte das playerlabel nicht holen!\n");
-	//}
-	//gtk_label_set_markup (GTK_LABEL (label), "<small>Small text</small>");
-
-
-	// Einstellungen Window holen
-	GladeXML *xmlSettings;
-	xmlSettings = glade_xml_new("tractasono.glade", "window_settings", NULL);
-
-	GtkWidget *settings = NULL;
-	settings = glade_xml_get_widget(xmlSettings, "window_settings");
-
-	if (settings == NULL) {
-		g_print("Fehler: Konnte Einstellungen Window nicht holen!\n");
-	}
-
-	GtkVBox *vbox3 = NULL;
-	GtkWidget *placeholder = NULL;
-
-	vbox3 = (GtkVBox*)glade_xml_get_widget(xml, "vbox3");
-	if (vbox3 == NULL) {
-		g_print("Fehler: Konnte vbox3 nicht holen!\n");
-	}
-
-	placeholder = glade_xml_get_widget(xml, "label_placeholder");
-	if (placeholder == NULL) {
-		g_print("Fehler: Konnte placeholder nicht holen!\n");
-	}
-
-	gtk_widget_destroy(placeholder);
-
-	//sleep(3);
-	//gtk_container_add (vbox3, settings);
-	//gtk_box_pack_end_defaults(GTK_BOX (vbox3), settings);
-
-	//gtk_widget_show (settings);
-
-
-
 
 	/* Verbinde die Signale automatisch mit dem Interface */
 	glade_xml_signal_autoconnect(xml);
