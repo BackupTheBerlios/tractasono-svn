@@ -3,6 +3,7 @@
 #include <glade/glade.h>
 
 #include "ipod.h"
+#include "database.h"
 
 // Globale Variablen
 GladeXML *xml;
@@ -79,6 +80,9 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Rippen gedrückt!\n");
+
+	// Database Testfunktion
+	database_test();
 }
 
 // Event-Handler für den Vollbild Button
