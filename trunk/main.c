@@ -88,22 +88,8 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 // Event-Handler für den Vollbild Button
 void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 {
+	// Hier sollte noch etwas Code rein
 	g_print("Vollbild gedrückt!\n");
-
-	// Diese Funktione wird momentan zu Testzwecken für das Keyboard genutzt!
-	gboolean visible;
-	g_object_get(vbox_keyboard, "visible", &visible, NULL);
-
-	if (visible == FALSE) {
-		// Keyboard anzeigen
-		g_print("Keyboard anzeigen!\n");
-		
-		gtk_widget_show(vbox_keyboard);
-	} else {
-		// Keyboard ausblenden
-		g_print("Keyboard ausblenden!\n");
-		gtk_widget_hide(vbox_keyboard);
-	}
 }
 
 // Event-Handler für den Test Button
@@ -113,24 +99,51 @@ void on_testbutton_clicked(GtkWidget *widget, gpointer user_data)
 	g_print("Testbutton wurde gedrückt!\n");
 }
 
+// Zeige das Oncreen Keyboard an
+void show_keyboard(gboolean show)
+{
+	if (show) {
+		// Keyboard anzeigen
+		g_print("Keyboard wird angezeigt!\n");
 
-// Event-Handler für das Eingabefeld
-void on_entry_devicename_activate(GtkEntry *entry, gpointer user_data)
+		gboolean visible;
+		g_object_get(vbox_keyboard, "visible", &visible, NULL);
+		if (!visible) {	
+			gtk_widget_show(vbox_keyboard);
+		}
+		
+	} else {
+		// Keyboard ausblenden
+		g_print("Keyboard wird ausgeblendet!\n");
+		gtk_widget_hide(vbox_keyboard);
+	}
+}
+
+// Event-Handler für den Enter Button auf dem Oncreen Keyboard
+void on_key_eingabe_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("Enter wurde auf dem Keyboard gedrückt, Keyboard wird geschlossen!\n");
+	show_keyboard(FALSE);
+}
+
+// Event-Handler für Eingabefelder (Fokus In)
+gboolean on_entry_focus_in_event(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
-	g_print("Testbutton wurde gedrückt!\n");
+	g_print("Eingabefeld hat Fokus bekommen!\n");
+	show_keyboard(TRUE);
 
 	return FALSE;
 }
 
-gboolean on_hscale_song_value_changed(GtkRange* range)
+
+gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
 {
 	gdouble pos = 0;
 
 	pos = gtk_range_get_value (range);
 
-	g_print("Song Slider: Value %f \n", pos);
-
+	g_print("Song Slider Value: %.0f\n", pos);
 
 	return FALSE;
 }
@@ -177,8 +190,8 @@ int main(int argc, char *argv[])
 	// Song Range setzen (Test)
 	GtkRange *range = NULL;
 	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
-	//gtk_range_set_range(range, 0, 100);
-	//gtk_range_set_value(range, 0);
+	gtk_range_set_range(range, 0, 168);
+	gtk_range_set_value(range, 0);
 
 	// Programmloop starten
 	gtk_main();
