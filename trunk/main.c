@@ -123,13 +123,14 @@ void on_entry_devicename_activate(GtkEntry *entry, gpointer user_data)
 	return FALSE;
 }
 
-gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
+gboolean on_hscale_song_value_changed(GtkRange* range)
 {
 	gdouble pos = 0;
 
 	pos = gtk_range_get_value (range);
 
-	g_print("Song Slider: Value %d!\n", pos);
+	g_print("Song Slider: Value %f \n", pos);
+
 
 	return FALSE;
 }
@@ -176,8 +177,8 @@ int main(int argc, char *argv[])
 	// Song Range setzen (Test)
 	GtkRange *range = NULL;
 	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
-	gtk_range_set_range(range, 0, 168);
-	gtk_range_set_value(range, 0);
+	//gtk_range_set_range(range, 0, 100);
+	//gtk_range_set_value(range, 0);
 
 	// Programmloop starten
 	gtk_main();
