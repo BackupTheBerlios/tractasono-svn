@@ -33,6 +33,27 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 	return FALSE;
 }
 
+
+// Zeige das Oncreen Keyboard an
+void show_keyboard(gboolean show)
+{
+	if (show) {
+		// Keyboard anzeigen
+		g_print("Keyboard wird angezeigt!\n");
+
+		gboolean visible;
+		g_object_get(vbox_keyboard, "visible", &visible, NULL);
+		if (!visible) {	
+			gtk_widget_show(vbox_keyboard);
+		}
+		
+	} else {
+		// Keyboard ausblenden
+		g_print("Keyboard wird ausgeblendet!\n");
+		gtk_widget_hide(vbox_keyboard);
+	}
+}
+
 // Event-Handler für den Musik Button
 void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
 {
@@ -89,9 +110,11 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 // Handler für Fukuswechler auf dem Settings-Reiter
 void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
+	// Funktioniert nonig
+	gtk_container_set_focus_child(GTK_CONTAINER(notebook), GTK_WIDGET(notebook));
 	// Keyboard ausblenden in Settings Reiter
+	g_print("Reiter gewechselt, schliesse Tastatur\n");
 	show_keyboard(FALSE);
-
 }
 
 // Event-Handler für den Vollbild Button
@@ -106,26 +129,6 @@ void on_testbutton_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Testbutton wurde gedrückt!\n");
-}
-
-// Zeige das Oncreen Keyboard an
-void show_keyboard(gboolean show)
-{
-	if (show) {
-		// Keyboard anzeigen
-		g_print("Keyboard wird angezeigt!\n");
-
-		gboolean visible;
-		g_object_get(vbox_keyboard, "visible", &visible, NULL);
-		if (!visible) {	
-			gtk_widget_show(vbox_keyboard);
-		}
-		
-	} else {
-		// Keyboard ausblenden
-		g_print("Keyboard wird ausgeblendet!\n");
-		gtk_widget_hide(vbox_keyboard);
-	}
 }
 
 // Event-Handler für den Enter Button auf dem Oncreen Keyboard
