@@ -149,7 +149,7 @@ gboolean on_entry_focus_in_event(GtkWidget *widget, GdkEventFocus *event, gpoint
 	return FALSE;
 }
 
-
+// Song Slider Event Handler
 gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
 {
 	gdouble pos = 0;
