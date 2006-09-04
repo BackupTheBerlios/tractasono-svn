@@ -71,6 +71,28 @@ void clean_placeholder()
 	}
 }
 
+// Setze die Song Informationen (Artist - Title   (Seconds))
+void set_song_info(const gchar *artist, const gchar *title, gint seconds)
+{
+	GtkLabel *song = NULL;
+	song = GTK_LABEL(glade_xml_get_widget(xml, "label_song"));
+
+	if (song == NULL) {
+		g_print("Fehler: Konnte label_song nicht holen!\n");
+	}
+
+	GString *newsong = NULL;
+
+	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
+	g_string_append(newsong, title);
+	g_string_append(newsong, " - ");
+	g_string_append(newsong, title);
+	//g_string_append(newsong, "   ()");
+	g_string_append(newsong, "</span>");
+
+	gtk_label_set_label(song, newsong->str);
+}
+
 // Zeige das Oncreen Keyboard an
 void show_keyboard(gboolean show)
 {
@@ -247,6 +269,8 @@ int main(int argc, char *argv[])
 	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
 	gtk_range_set_range(range, 0, 168);
 	gtk_range_set_value(range, 0);
+
+	set_song_info("Helloween", "The Dark Ride", 0);
 
 	// Programmloop starten
 	gtk_main();
