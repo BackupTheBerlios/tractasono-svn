@@ -33,6 +33,7 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 	return FALSE;
 }
 
+// hallo schorsch
 
 // Zeige das Oncreen Keyboard an
 void show_keyboard(gboolean show)
