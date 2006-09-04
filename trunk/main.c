@@ -10,6 +10,11 @@ GladeXML *xml;
 GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
 
+GtkWidget *window_music;
+GtkWidget *window_import;
+GtkWidget *window_settings;
+GtkWidget *window_fullscreen;
+
 // Allgemeiner Destroy-Event
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
 {
@@ -33,7 +38,38 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 	return FALSE;
 }
 
-// hallo schorsch
+// Zeige ein Widget im Platzhalter an
+void add_to_placeholder(GtkWidget *widget)
+{
+	gtk_widget_ref(widget);
+	if (widget->parent) {
+		gtk_container_remove(GTK_CONTAINER(widget->parent), widget);
+	}
+	gtk_container_add(GTK_CONTAINER(vbox_placeholder), widget);
+	gtk_widget_unref(widget);
+
+	gtk_widget_show(widget);
+}
+
+// Räume alle Fenster im placeholder auf
+void clean_placeholder()
+{
+	GtkContainer *container = NULL;
+	GtkWidget *child = NULL;
+	GList* children = NULL;
+	//gchararray name;
+
+	container = GTK_CONTAINER(vbox_placeholder);
+	children = gtk_container_get_children(container);
+
+	//g_print("Anzahl Children: %u\n", g_list_length(children));
+
+	for (children = g_list_first(children); children; children = g_list_next(children)) {
+		//g_object_get(GTK_OBJECT(children->data), "name", &name, NULL);
+		//g_print("Child name: %s\n", name);
+		gtk_container_remove(container, children->data);
+	}
+}
 
 // Zeige das Oncreen Keyboard an
 void show_keyboard(gboolean show)
@@ -68,16 +104,8 @@ void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
 		g_print("Fehler: Konnte notebook_music nicht holen!\n");
 	}
 
-	/*GtkWidget *child = NULL;
-	GList* children = NULL;
-	children = gtk_container_get_children(vbox_placeholder);
-	for (child = g_list_first(children); child; child = g_list_next(children)) {
-		g_print("Loop!\n");
-		gtk_container_remove(vbox_placeholder, child);
-	}*/
-
-	gtk_widget_reparent(notebook_music, vbox_placeholder);
-	gtk_widget_show(notebook_music);
+	clean_placeholder();
+	add_to_placeholder(notebook_music);
 }
 
 // Event-Handler für den Einstellungen Button
@@ -93,8 +121,8 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 		g_print("Fehler: Konnte vbox_settings nicht holen!\n");
 	}
 
-	gtk_widget_reparent(vbox_settings, vbox_placeholder);
-	gtk_widget_show(vbox_settings);
+	clean_placeholder();
+	add_to_placeholder(vbox_settings);
 }
 
 // Event-Handler für den Rippen Button
@@ -102,6 +130,8 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Rippen gedrückt!\n");
+
+	clean_placeholder();
 
 	// Database Testfunktion
 	database_test();
@@ -123,6 +153,8 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Vollbild gedrückt!\n");
+
+	clean_placeholder();
 }
 
 // Event-Handler für den Test Button
@@ -162,7 +194,6 @@ gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
 }
 
 
-
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
@@ -170,6 +201,11 @@ int main(int argc, char *argv[])
 	xml = NULL;
 	vbox_placeholder = NULL;
 	vbox_keyboard = NULL;
+
+	window_music = NULL;
+	window_import = NULL;
+	window_settings = NULL;
+	window_fullscreen = NULL;
 
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
@@ -186,6 +222,12 @@ int main(int argc, char *argv[])
 	if (vbox_placeholder == NULL) {
 		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
 	}
+
+	// Die einzelnen Windows laden und referenzieren
+	window_music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
+	//window_import = g_object_ref(glade_xml_get_widget(xml, "");
+	window_settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
+	//window_fullscreen = g_object_ref(glade_xml_get_widget(xml, ""));
 
 	// Keyboard laden
 	GtkWidget *vbox_placeholder_keyboard = NULL;
