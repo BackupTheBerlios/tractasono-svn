@@ -7,6 +7,7 @@
 
 // Globale Variablen
 GladeXML *xml;
+GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
 
@@ -14,6 +15,8 @@ GtkWidget *window_music;
 GtkWidget *window_import;
 GtkWidget *window_settings;
 GtkWidget *window_fullscreen;
+
+GtkEntry *actual_entry;
 
 // Allgemeiner Destroy-Event
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
@@ -84,7 +87,7 @@ void set_song_info(const gchar *artist, const gchar *title, gint seconds)
 	GString *newsong = NULL;
 
 	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
-	g_string_append(newsong, title);
+	g_string_append(newsong, artist);
 	g_string_append(newsong, " - ");
 	g_string_append(newsong, title);
 	//g_string_append(newsong, "   ()");
@@ -195,30 +198,84 @@ void on_testbutton_clicked(GtkWidget *widget, gpointer user_data)
 	g_print("Testbutton wurde gedrückt!\n");
 }
 
-// Event-Handler für den Enter Button auf dem Oncreen Keyboard
-void on_key_eingabe_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Enter wurde auf dem Keyboard gedrückt, Keyboard wird geschlossen!\n");
-	show_keyboard(FALSE);
-}
-
-// Event-Handler für Eingabefelder (Fokus In)
-/*gboolean on_entry_focus_in_event(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
-{
-	// Hier sollte noch etwas Code rein
-	g_print("Eingabefeld hat Fokus bekommen!\n");
-	show_keyboard(TRUE);
-
-	return FALSE;
-}*/
-
 gboolean on_entry_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	g_print("Eingabefeld hat Fokus bekommen!\n");
 
+	actual_entry = GTK_ENTRY(widget);
 	show_keyboard(TRUE);
 
 	return(FALSE);
+}
+
+void add_text_to_entry(const GString *text)
+{
+	const gchar *origtext = NULL;
+	GString *newtext = NULL;
+
+	origtext = gtk_entry_get_text(actual_entry);
+	newtext = g_string_new(origtext);
+	g_string_append(newtext, text->str);
+	
+	gtk_entry_set_text(actual_entry, newtext->str);
+
+	gtk_widget_grab_focus(GTK_WIDGET(actual_entry));
+}
+
+// Tastatur Spezial Tastenhandler
+void on_specialkey_clicked(GtkButton *button, gpointer user_data)
+{
+	gchararray name;
+
+	g_object_get(G_OBJECT(button), "name", &name, NULL);
+
+	
+	if (g_strcasecmp (name, "key_enter") == 0) {
+		g_print("space\n");
+		show_keyboard(FALSE);
+		return;
+	}
+
+	if (g_strcasecmp (name, "key_esc") == 0) {
+		g_print("ESC\n");
+		return;
+	}
+
+	if (g_strcasecmp (name, "key_back") == 0) {
+		g_print("Back\n");
+		return;
+	}
+
+	if (g_strcasecmp (name, "key_caps") == 0) {
+		g_print("caps\n");
+		return;
+	}
+
+	if (g_strcasecmp (name, "key_lshift") == 0) {
+		g_print("shift\n");
+		return;
+	}
+
+	if (g_strcasecmp (name, "key_rshift") == 0) {
+		g_print("shift\n");
+		return;
+	}
+
+	if (g_strcasecmp (name, "key_space") == 0) {
+		g_print("space\n");
+		GString *text = g_string_new(" ");
+		add_text_to_entry(text);
+		return;
+	}
+}
+
+// Tastatur Tastenhandler
+void on_key_clicked(GtkButton *button, gpointer user_data)
+{
+	GString tastenlabel;
+	
+	g_object_get(G_OBJECT(button), "label", &tastenlabel, NULL);
+	add_text_to_entry(&tastenlabel);
 }
 
 // Song Slider Event Handler
@@ -239,6 +296,7 @@ int main(int argc, char *argv[])
 {
 	// Variablen initialisieren
 	xml = NULL;
+	mainwindow = NULL;
 	vbox_placeholder = NULL;
 	vbox_keyboard = NULL;
 
@@ -246,6 +304,8 @@ int main(int argc, char *argv[])
 	window_import = NULL;
 	window_settings = NULL;
 	window_fullscreen = NULL;
+
+	actual_entry = NULL;
 
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
@@ -256,6 +316,12 @@ int main(int argc, char *argv[])
 
 	// Verbinde die Signale automatisch mit dem Interface
 	glade_xml_signal_autoconnect(xml);
+
+	// Hauptfenster holen
+	mainwindow = glade_xml_get_widget(xml, "window_main");
+	if (mainwindow == NULL) {
+		g_print("Fehler: Konnte window_main nicht holen!\n");
+	}
 
 	// Placeholder holen
 	vbox_placeholder = glade_xml_get_widget(xml, "vbox_placeholder");
@@ -288,7 +354,7 @@ int main(int argc, char *argv[])
 	gtk_range_set_range(range, 0, 168);
 	gtk_range_set_value(range, 0);
 
-	set_song_info("Helloween", "The Dark Ride", 0);
+	//set_song_info("Helloween", "The Dark Ride", 0);
 
 	// Programmloop starten
 	gtk_main();
