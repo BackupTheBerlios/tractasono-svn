@@ -1397,7 +1397,7 @@
 		      <property name="has_frame">True</property>
 		      <property name="invisible_char">●</property>
 		      <property name="activates_default">False</property>
-		      <signal name="focus_in_event" handler="on_entry_focus_in_event" last_modification_time="Sat, 02 Sep 2006 18:55:18 GMT"/>
+		      <signal name="button_press_event" handler="on_entry_button_press_event" last_modification_time="Mon, 04 Sep 2006 17:00:31 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="padding">5</property>

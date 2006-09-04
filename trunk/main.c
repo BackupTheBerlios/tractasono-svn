@@ -164,10 +164,19 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
 	// Funktioniert nonig
-	gtk_container_set_focus_child(GTK_CONTAINER(notebook), GTK_WIDGET(notebook));
+	//gtk_container_set_focus_chain(GTK_CONTAINER(notebook), NULL);
 	// Keyboard ausblenden in Settings Reiter
+	
+	gchararray name;
+	g_object_get(notebook, "name", &name, NULL);
+	g_print("Page name: %s\n", name);
+	
+	//gtk_container_set_focus_chain(GTK_CONTAINER(notebook), NULL);
+	//gtk_container_set_focus_child(GTK_CONTAINER(notebook), NULL);
+	//gtk_container_unset_focus_chain (GTK_CONTAINER(notebook));
+
 	g_print("Reiter gewechselt, schliesse Tastatur\n");
-	show_keyboard(FALSE);
+	//show_keyboard(FALSE);
 }
 
 // Event-Handler für den Vollbild Button
@@ -194,13 +203,22 @@ void on_key_eingabe_clicked(GtkWidget *widget, gpointer user_data)
 }
 
 // Event-Handler für Eingabefelder (Fokus In)
-gboolean on_entry_focus_in_event(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
+/*gboolean on_entry_focus_in_event(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Eingabefeld hat Fokus bekommen!\n");
 	show_keyboard(TRUE);
 
 	return FALSE;
+}*/
+
+gboolean on_entry_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	g_print("Eingabefeld hat Fokus bekommen!\n");
+
+	show_keyboard(TRUE);
+
+	return(FALSE);
 }
 
 // Song Slider Event Handler
