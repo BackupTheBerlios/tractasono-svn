@@ -85,6 +85,15 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 	database_test();
 }
 
+
+// Handler für Fukuswechler auf dem Settings-Reiter
+void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
+{
+	// Keyboard ausblenden in Settings Reiter
+	show_keyboard(FALSE);
+
+}
+
 // Event-Handler für den Vollbild Button
 void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 {
