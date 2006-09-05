@@ -179,7 +179,7 @@ void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guin
 	//gtk_container_unset_focus_chain (GTK_CONTAINER(notebook));
 
 	g_print("Reiter gewechselt, schliesse Tastatur\n");
-	//show_keyboard(FALSE);
+	show_keyboard(FALSE);
 }
 
 // Event-Handler für den Vollbild Button
