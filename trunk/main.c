@@ -66,7 +66,7 @@ void clean_placeholder()
 	children = gtk_container_get_children(container);
 
 	//g_print("Anzahl Children: %u\n", g_list_length(children));
-
+	gtk_widget_hide(vbox_keyboard);
 	for (children = g_list_first(children); children; children = g_list_next(children)) {
 		//g_object_get(GTK_OBJECT(children->data), "name", &name, NULL);
 		//g_print("Child name: %s\n", name);
@@ -186,6 +186,9 @@ void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guin
 void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
+
+
+
 	g_print("Vollbild gedrückt!\n");
 
 	clean_placeholder();
