@@ -1,7 +1,9 @@
 // Includes
 #include <gtk/gtk.h>
 #include <glade/glade.h>
+#include <getopt.h>
 
+#include "settings.h"
 #include "ipod.h"
 #include "database.h"
 
@@ -241,11 +243,16 @@ void on_specialkey_clicked(GtkButton *button, gpointer user_data)
 
 	if (g_strcasecmp (name, "key_esc") == 0) {
 		g_print("ESC\n");
+		show_keyboard(FALSE);
 		return;
 	}
 
 	if (g_strcasecmp (name, "key_back") == 0) {
 		g_print("Back\n");
+		GString *temptext = NULL;
+		temptext = g_string_new(gtk_entry_get_text(actual_entry));
+		g_string_truncate(temptext, temptext->len -1);
+		add_text_to_entry(temptext);
 		return;
 	}
 
@@ -313,6 +320,9 @@ int main(int argc, char *argv[])
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
 	glade_init();
+
+	// Settings initialisieren
+	init_settings();
 
 	// Das Interface laden
 	xml = glade_xml_new("tractasono.glade", NULL, NULL);
