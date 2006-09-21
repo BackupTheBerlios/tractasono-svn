@@ -6,6 +6,7 @@
 #include "settings.h"
 #include "ipod.h"
 #include "database.h"
+#include "drives.h"
 
 // Globale Variablen
 GladeXML *xml;
@@ -320,6 +321,9 @@ int main(int argc, char *argv[])
 	// GTK und Glade initialisieren
 	gtk_init(&argc, &argv);
 	glade_init();
+
+	// GnomeVFS initialisieren
+	init_drives();
 
 	// Settings initialisieren
 	init_settings();
