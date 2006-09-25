@@ -322,11 +322,11 @@ int main(int argc, char *argv[])
 	gtk_init(&argc, &argv);
 	glade_init();
 
-	// GnomeVFS initialisieren
-	init_drives();
+	// Drives initialisieren
+	drives_init();
 
 	// Settings initialisieren
-	init_settings();
+	settings_init();
 
 	// Das Interface laden
 	xml = glade_xml_new("tractasono.glade", NULL, NULL);

@@ -1,6 +1,31 @@
 #include "drives.h"
+#include "settings.h"
 
-int init_drives()
+
+// Drive-Connected Signal
+void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
+{
+	if (gnome_vfs_drive_is_user_visible (drive)) {
+		char *drivename;
+		drivename = gnome_vfs_drive_get_display_name(drive);
+		g_print("Drive \"%s\" connected!\n", drivename);
+		//print_drive(drive);
+		settings_set_cdrom(drive);
+	}
+}
+
+// Drive-Disconnected Signal
+void drive_disconnected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
+{
+	if (gnome_vfs_drive_is_user_visible (drive)) {
+		char *drivename;
+		drivename = gnome_vfs_drive_get_display_name(drive);
+		g_print("Drive \"%s\" disconnected!\n", drivename);
+		//print_drive(drive);
+	}
+}
+
+int drives_init()
 {
 	if (!gnome_vfs_init ()) {
 		printf ("Could not initialize GnomeVFS\n");
@@ -69,28 +94,6 @@ static void print_volume(GnomeVFSVolume *volume)
 	g_free (icon);
 	g_free (name);
 	gnome_vfs_drive_unref (drive);
-}
-
-// Drive-Connected Signal
-void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
-{
-	if (gnome_vfs_drive_is_user_visible (drive)) {
-		char *drivename;
-		drivename = gnome_vfs_drive_get_display_name(drive);
-		g_print("Drive \"%s\" connected!\n", drivename);
-		//print_drive(drive);
-	}
-}
-
-// Drive-Disconnected Signal
-void drive_disconnected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
-{
-	if (gnome_vfs_drive_is_user_visible (drive)) {
-		char *drivename;
-		drivename = gnome_vfs_drive_get_display_name(drive);
-		g_print("Drive \"%s\" disconnected!\n", drivename);
-		//print_drive(drive);
-	}
 }
 
 int print_error (GnomeVFSResult result, const char *uri_string)
