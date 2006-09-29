@@ -2,6 +2,7 @@
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 #include <getopt.h>
+#include <gst/gst.h>
 
 #include "settings.h"
 #include "ipod.h"
@@ -18,8 +19,23 @@ GtkWidget *window_music;
 GtkWidget *window_import;
 GtkWidget *window_settings;
 GtkWidget *window_fullscreen;
+GtkWidget *window_disc;
 
 GtkEntry *actual_entry;
+
+GstElement *pipeline;
+
+
+enum
+{
+	NR_COLUMN,
+	TITLE_COLUMN,
+	ARTIST_COLUMN,
+	ALBUM_COLUMN,
+	N_COLUMNS
+};
+
+
 
 // Allgemeiner Destroy-Event
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
@@ -153,33 +169,33 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 	add_to_placeholder(vbox_settings);
 }
 
-// Event-Handler für den Rippen Button
+// Event-Handler für den CD Button
 void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 {
-	// Hier sollte noch etwas Code rein
-	g_print("Rippen gedrückt!\n");
+	g_print("CD gedrückt!\n");
+
+	// CD Window holen
+	GtkWidget *notebook_cd = NULL;
+
+	notebook_cd = glade_xml_get_widget(xml, "notebook_cd");
+	if (notebook_cd == NULL) {
+		g_print("Fehler: Konnte notebook_cd nicht holen!\n");
+	}
 
 	clean_placeholder();
+	add_to_placeholder(notebook_cd);
 
 	// Database Testfunktion
-	database_test();
+	//database_test();
 }
 
 
 // Handler für Fukuswechler auf dem Settings-Reiter
 void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
-	// Funktioniert nonig
-	//gtk_container_set_focus_chain(GTK_CONTAINER(notebook), NULL);
-	// Keyboard ausblenden in Settings Reiter
-	
 	gchararray name;
 	g_object_get(notebook, "name", &name, NULL);
 	g_print("Page name: %s\n", name);
-	
-	//gtk_container_set_focus_chain(GTK_CONTAINER(notebook), NULL);
-	//gtk_container_set_focus_child(GTK_CONTAINER(notebook), NULL);
-	//gtk_container_unset_focus_chain (GTK_CONTAINER(notebook));
 
 	g_print("Reiter gewechselt, schliesse Tastatur\n");
 	show_keyboard(FALSE);
@@ -189,9 +205,6 @@ void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guin
 void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
-
-
-
 	g_print("Vollbild gedrückt!\n");
 
 	clean_placeholder();
@@ -301,6 +314,138 @@ gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
 	return FALSE;
 }
 
+static gboolean my_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
+{
+	g_print ("GStreamer: Got %s message\n", GST_MESSAGE_TYPE_NAME (message));
+
+	switch (GST_MESSAGE_TYPE (message)) {
+		case GST_MESSAGE_ERROR: {
+			GError *err;
+			gchar *debug;
+
+			gst_message_parse_error (message, &err, &debug);
+			g_print ("\tError: %s\n", err->message);
+			g_error_free (err);
+			g_free (debug);
+			break;
+		}
+		case GST_MESSAGE_EOS: {
+			/* end-of-stream */
+			g_print ("\tEnd Of Stream\n");
+			break;
+		}
+		default: {
+			/* unhandled message */
+			g_print ("\tUnhandled Message %i\n", GST_MESSAGE_TYPE (message));
+			break;
+		}
+	}
+
+	/* we want to be notified again the next time there is a message
+	* on the bus, so returning TRUE (FALSE means we want to stop watching
+	* for messages on the bus and our callback should not be called again) */
+	return TRUE;
+}
+
+
+void on_trackplay_clicked(GtkButton *button, gpointer user_data)
+{
+	g_print("Track play\n");
+	
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
+
+}
+
+void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
+{
+	g_print("Track stopp\n");
+
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PAUSED);
+
+}
+
+void on_button_read_toc_clicked(GtkButton *button, gpointer user_data)
+{
+	g_print("Read TOC\n");
+
+	/*
+	GtkTreeView *tree = NULL;
+	GtkTreeIter   iter;
+	GtkTreeStore *store = NULL;
+
+	tree = (GtkTreeView*) glade_xml_get_widget(xml, "treeview_actual_cd");
+	if (tree == NULL) {
+		g_print("Fehler: Konnte treeview_actual_cd nicht holen!\n");
+	}
+
+	store = gtk_tree_store_new (	N_COLUMNS,
+							G_TYPE_INT,
+							G_TYPE_STRING,
+							G_TYPE_STRING,
+							G_TYPE_STRING);
+
+
+	gtk_tree_view_set_model(tree, store);
+
+	gtk_tree_store_append (store, &iter, NULL);
+
+	gtk_tree_store_set (store, &iter,	NR_COLUMN, 1,
+								TITLE_COLUMN, "The Principle of Reason",
+								ARTIST_COLUMN, "Martin Heidegger",
+								ALBUM_COLUMN, "Test", -1);
+	*/
+
+
+	
+	
+	GstElement *source, *filter, *sink;
+	GstBus *bus;
+
+	pipeline = gst_pipeline_new ("my-pipeline");
+	
+	source = gst_element_factory_make ("filesrc", "source");
+	g_object_set (source, "location", "test.mp3", NULL);
+
+	filter = gst_element_factory_make ("mad", "filter");
+	sink = gst_element_factory_make ("alsasink", "sink");
+
+
+	gst_bin_add_many (GST_BIN (pipeline), source, filter, sink, NULL);
+
+	/* adds a watch for new message on our pipeline's message bus to
+	* the default GLib main context, which is the main context that our
+	* GLib main loop is attached to below */
+	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
+	gst_bus_add_watch (bus, my_bus_callback, NULL);
+	gst_object_unref (bus);
+
+
+	if (!gst_element_link_many (source, filter, sink, NULL)) {
+		g_warning ("Failed to link elements!");
+	}
+
+}
+
+// GStreamer initialisieren
+void gstreamer_init()
+{
+	g_print("GStreamer initialisieren\n");
+
+	const gchar *nano_str;
+  	guint major, minor, micro, nano;
+
+	gst_version (&major, &minor, &micro, &nano);
+
+	if (nano == 1)
+		nano_str = "(CVS)";
+	else if (nano == 2)
+		nano_str = "(Prerelease)";
+	else
+		nano_str = "";
+
+	g_print("This program is linked against GStreamer %d.%d.%d %s\n", major, minor, micro, nano_str);
+}
+
 
 // Programmeinstieg
 int main(int argc, char *argv[])
@@ -315,6 +460,7 @@ int main(int argc, char *argv[])
 	window_import = NULL;
 	window_settings = NULL;
 	window_fullscreen = NULL;
+	window_disc = NULL;
 
 	actual_entry = NULL;
 
@@ -322,11 +468,17 @@ int main(int argc, char *argv[])
 	gtk_init(&argc, &argv);
 	glade_init();
 
+	// GStreamer initialisieren
+	gst_init (&argc, &argv);
+	gstreamer_init();
+
 	// Drives initialisieren
 	drives_init();
 
 	// Settings initialisieren
 	settings_init();
+
+	
 
 	// Das Interface laden
 	xml = glade_xml_new("tractasono.glade", NULL, NULL);
@@ -348,7 +500,7 @@ int main(int argc, char *argv[])
 
 	// Die einzelnen Windows laden und referenzieren
 	window_music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
-	//window_import = g_object_ref(glade_xml_get_widget(xml, "");
+	window_disc = g_object_ref(glade_xml_get_widget(xml, "notebook_cd"));
 	window_settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
 	//window_fullscreen = g_object_ref(glade_xml_get_widget(xml, ""));
 
