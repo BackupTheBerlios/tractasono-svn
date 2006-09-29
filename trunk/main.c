@@ -404,7 +404,7 @@ void on_button_read_toc_clicked(GtkButton *button, gpointer user_data)
 	pipeline = gst_pipeline_new ("my-pipeline");
 	
 	source = gst_element_factory_make ("filesrc", "source");
-	g_object_set (source, "location", "test.mp3", NULL);
+	g_object_set (source, "location", "data/test.mp3", NULL);
 
 	filter = gst_element_factory_make ("mad", "filter");
 	sink = gst_element_factory_make ("alsasink", "sink");
