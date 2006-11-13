@@ -1,38 +1,14 @@
-// Includes
-#include <gtk/gtk.h>
-#include <glade/glade.h>
+// Globale Includes
 #include <getopt.h>
 
+// Lokale Includes
+#include "tractasono.h"
 #include "settings.h"
 #include "ipod.h"
 #include "database.h"
 #include "drives.h"
 #include "player.h"
-
-// Globale Variablen
-GladeXML *xml;
-GtkWidget *mainwindow;
-GtkWidget *vbox_placeholder;
-GtkWidget *vbox_keyboard;
-
-GtkWidget *window_music;
-GtkWidget *window_import;
-GtkWidget *window_settings;
-GtkWidget *window_fullscreen;
-GtkWidget *window_disc;
-
-GtkEntry *actual_entry;
-
-
-enum
-{
-	NR_COLUMN,
-	TITLE_COLUMN,
-	ARTIST_COLUMN,
-	ALBUM_COLUMN,
-	N_COLUMNS
-};
-
+#include "interface.h"
 
 
 // Allgemeiner Destroy-Event
@@ -77,40 +53,14 @@ void clean_placeholder()
 	GtkContainer *container = NULL;
 	GtkWidget *child = NULL;
 	GList* children = NULL;
-	//gchararray name;
 
 	container = GTK_CONTAINER(vbox_placeholder);
 	children = gtk_container_get_children(container);
 
-	//g_print("Anzahl Children: %u\n", g_list_length(children));
 	gtk_widget_hide(vbox_keyboard);
 	for (children = g_list_first(children); children; children = g_list_next(children)) {
-		//g_object_get(GTK_OBJECT(children->data), "name", &name, NULL);
-		//g_print("Child name: %s\n", name);
 		gtk_container_remove(container, children->data);
 	}
-}
-
-// Setze die Song Informationen (Artist - Title   (Seconds))
-void set_song_info(const gchar *artist, const gchar *title, gint seconds)
-{
-	GtkLabel *song = NULL;
-	song = GTK_LABEL(glade_xml_get_widget(xml, "label_song"));
-
-	if (song == NULL) {
-		g_print("Fehler: Konnte label_song nicht holen!\n");
-	}
-
-	GString *newsong = NULL;
-
-	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
-	g_string_append(newsong, artist);
-	g_string_append(newsong, " - ");
-	g_string_append(newsong, title);
-	//g_string_append(newsong, "   ()");
-	g_string_append(newsong, "</span>");
-
-	gtk_label_set_label(song, newsong->str);
 }
 
 // Zeige das Oncreen Keyboard an
@@ -349,66 +299,20 @@ int main(int argc, char *argv[])
 
 	actual_entry = NULL;
 
-	// GTK und Glade initialisieren
-	gtk_init(&argc, &argv);
-	glade_init();
+	// Interface initialisieren
+	interface_init(&argc, &argv);
 
-	// GStreamer initialisieren
-	gst_init (&argc, &argv);
-	gstreamer_init();
+	// Player initialisieren
+	player_init(&argc, &argv);
+	
+	// Settings initialisieren
+	settings_init();
 
 	// Drives initialisieren
 	drives_init();
 
-	// Settings initialisieren
-	settings_init();
-
-	
-
 	// Das Interface laden
-	xml = glade_xml_new("tractasono.glade", NULL, NULL);
-
-	// Verbinde die Signale automatisch mit dem Interface
-	glade_xml_signal_autoconnect(xml);
-
-	// Hauptfenster holen
-	mainwindow = glade_xml_get_widget(xml, "window_main");
-	if (mainwindow == NULL) {
-		g_print("Fehler: Konnte window_main nicht holen!\n");
-	}
-
-	// Placeholder holen
-	vbox_placeholder = glade_xml_get_widget(xml, "vbox_placeholder");
-	if (vbox_placeholder == NULL) {
-		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
-	}
-
-	// Die einzelnen Windows laden und referenzieren
-	window_music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
-	window_disc = g_object_ref(glade_xml_get_widget(xml, "notebook_cd"));
-	window_settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
-	//window_fullscreen = g_object_ref(glade_xml_get_widget(xml, ""));
-
-	// Keyboard laden
-	GtkWidget *vbox_placeholder_keyboard = NULL;
-	vbox_placeholder_keyboard = glade_xml_get_widget(xml, "vbox_placeholder_keyboard");
-	if (vbox_placeholder_keyboard == NULL) {
-		g_print("Fehler: Konnte vbox_placeholder_keyboard nicht holen!\n");
-	}
-	vbox_keyboard = glade_xml_get_widget(xml, "vbox_keyboard");
-	if (vbox_keyboard == NULL) {
-		g_print("Fehler: Konnte vbox_keyboard nicht holen!\n");
-	}
-	gtk_widget_reparent(vbox_keyboard, vbox_placeholder_keyboard);
-	gtk_widget_hide(vbox_keyboard);
-
-	// Song Range setzen (Test)
-	GtkRange *range = NULL;
-	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
-	gtk_range_set_range(range, 0, 168);
-	gtk_range_set_value(range, 0);
-
-	//set_song_info("Helloween", "The Dark Ride", 0);
+	interface_load("tractasono.glade");
 
 	// Programmloop starten
 	gtk_main();

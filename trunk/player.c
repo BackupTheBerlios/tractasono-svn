@@ -6,24 +6,11 @@
 
 GstElement *pipeline;
 
-// GStreamer initialisieren
-void gstreamer_init()
+// Player initialisieren
+void player_init(int *argc, char **argv[])
 {
-	g_print("GStreamer initialisieren\n");
-
-	const gchar *nano_str;
-  	guint major, minor, micro, nano;
-
-	gst_version (&major, &minor, &micro, &nano);
-
-	if (nano == 1)
-		nano_str = "(CVS)";
-	else if (nano == 2)
-		nano_str = "(Prerelease)";
-	else
-		nano_str = "";
-
-	g_print("This program is linked against GStreamer %d.%d.%d %s\n", major, minor, micro, nano_str);
+	g_print("Player initialisieren\n");
+	gst_init (argc, argv);
 }
 
 // Callback Behandlung
@@ -80,6 +67,22 @@ void player_set_stop()
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PAUSED);
 }
 
+static gboolean
+cb_print_position (GstElement *pipeline)
+{
+  GstFormat fmt = GST_FORMAT_TIME;
+  gint64 pos, len;
+
+  if (gst_element_query_position (pipeline, &fmt, &pos)
+    && gst_element_query_duration (pipeline, &fmt, &len)) {
+    g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT "\r",
+	     GST_TIME_ARGS (pos), GST_TIME_ARGS (len));
+  }
+
+  /* call me again */
+  return TRUE;
+}
+
 // Spiele Testfile ab
 void player_play_testfile()
 {
@@ -106,4 +109,6 @@ void player_play_testfile()
 	if (!gst_element_link_many (source, filter, sink, NULL)) {
 		g_warning ("Failed to link elements!");
 	}
+	
+	g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
 }
