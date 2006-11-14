@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+	#include <config.h>
+#endif
+
 // Globale Includes
 #include <getopt.h>
 
@@ -285,6 +289,11 @@ void on_button_read_toc_clicked(GtkButton *button, gpointer user_data)
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
+	#ifdef ENABLE_NLS
+		bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+		textdomain (PACKAGE);
+	#endif
+	
 	// Variablen initialisieren
 	xml = NULL;
 	mainwindow = NULL;
@@ -319,4 +328,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-

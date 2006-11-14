@@ -282,7 +282,7 @@
 		  <child>
 		    <widget class="GtkImage" id="image_music">
 		      <property name="visible">True</property>
-		      <property name="pixbuf">music.png</property>
+		      <property name="pixbuf">pixmaps/music.png</property>
 		      <property name="xalign">0.5</property>
 		      <property name="yalign">0.5</property>
 		      <property name="xpad">0</property>
@@ -304,7 +304,7 @@
 		  <child>
 		    <widget class="GtkImage" id="image_import">
 		      <property name="visible">True</property>
-		      <property name="pixbuf">disc.png</property>
+		      <property name="pixbuf">pixmaps/disc.png</property>
 		      <property name="xalign">0.5</property>
 		      <property name="yalign">0.5</property>
 		      <property name="xpad">0</property>
@@ -326,7 +326,7 @@
 		  <child>
 		    <widget class="GtkImage" id="image_settings">
 		      <property name="visible">True</property>
-		      <property name="pixbuf">settings.png</property>
+		      <property name="pixbuf">pixmaps/settings.png</property>
 		      <property name="xalign">0.5</property>
 		      <property name="yalign">0.5</property>
 		      <property name="xpad">0</property>
@@ -348,7 +348,7 @@
 		  <child>
 		    <widget class="GtkImage" id="image_fullscreen">
 		      <property name="visible">True</property>
-		      <property name="pixbuf">fullscreen.png</property>
+		      <property name="pixbuf">pixmaps/fullscreen.png</property>
 		      <property name="xalign">0.5</property>
 		      <property name="yalign">0.5</property>
 		      <property name="xpad">0</property>
@@ -1769,7 +1769,7 @@
 		      <child>
 			<widget class="GtkImage" id="image24">
 			  <property name="visible">True</property>
-			  <property name="pixbuf">tractasono.png</property>
+			  <property name="pixbuf">pixmaps/tractasono.png</property>
 			  <property name="xalign">0.5</property>
 			  <property name="yalign">0.5</property>
 			  <property name="xpad">0</property>
