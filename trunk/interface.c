@@ -15,6 +15,8 @@ GtkRange *range = NULL;
 
 GtkEntry *actual_entry;
 
+gboolean slidermove;
+
 
 
 void interface_init(int *argc, char ***argv)
@@ -22,6 +24,8 @@ void interface_init(int *argc, char ***argv)
 	g_print("Interface initialisieren\n");
 	gtk_init(argc, argv);
 	glade_init();
+
+	slidermove = FALSE;
 }
 
 void interface_set_song_position(gdouble position)
@@ -114,4 +118,14 @@ void interface_set_songinfo(const gchar *artist,
 	
 	interface_set_song_duration(0);
 	interface_set_song_position(0);
+}
+
+void interface_set_slidermove(gboolean move)
+{
+	slidermove = move;
+}
+
+gboolean interface_get_slidermove()
+{
+	return slidermove;
 }

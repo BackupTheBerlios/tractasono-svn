@@ -91,6 +91,8 @@
 		      <property name="inverted">False</property>
 		      <property name="adjustment">0 0 100 1 1 0</property>
 		      <signal name="value_changed" handler="on_hscale_song_value_changed" last_modification_time="Fri, 01 Sep 2006 16:41:39 GMT"/>
+		      <signal name="button_release_event" handler="on_hscale_song_button_release_event" last_modification_time="Tue, 14 Nov 2006 23:13:28 GMT"/>
+		      <signal name="button_press_event" handler="on_hscale_song_button_press_event" last_modification_time="Tue, 14 Nov 2006 23:46:08 GMT"/>
 		    </widget>
 		  </child>
 		</widget>
@@ -280,7 +282,7 @@
 		  <signal name="clicked" handler="on_button_music_clicked" last_modification_time="Mon, 28 Aug 2006 22:40:00 GMT"/>
 
 		  <child>
-		    <widget class="GtkImage" id="image_music">
+		    <widget class="GtkImage" id="image25">
 		      <property name="visible">True</property>
 		      <property name="pixbuf">pixmaps/music.png</property>
 		      <property name="xalign">0.5</property>

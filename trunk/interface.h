@@ -13,3 +13,6 @@ void interface_set_songinfo(const gchar *artist,
 
 void interface_set_song_position(gdouble position);
 void interface_set_song_duration(gdouble duration);
+
+void interface_set_slidermove(gboolean move);
+gboolean interface_get_slidermove();

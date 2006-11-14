@@ -78,6 +78,10 @@ void player_set_stop()
 static gboolean
 cb_print_position (GstElement *pipeline)
 {
+	if (interface_get_slidermove()) {
+		return TRUE;
+	}
+
 	gint64 pos, len;
 	GstFormat fmt = GST_FORMAT_TIME;
 	
@@ -120,5 +124,25 @@ void player_play_testfile()
 		g_warning ("Failed to link elements!");
 	}
 	
-	g_timeout_add (500, (GSourceFunc) cb_print_position, pipeline);
+	g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
+}
+
+// Seeking
+void player_seek_to_position(gint64 position)
+{
+	g_print("Seeking to position: %lli\n", position);
+
+	GstEvent* seekevent = gst_event_new_seek(1,
+							     GST_FORMAT_TIME,
+							     GST_SEEK_FLAG_ACCURATE,
+							     GST_SEEK_TYPE_SET,
+							     position,
+							     GST_SEEK_TYPE_NONE,
+							     0);
+
+	if (gst_element_send_event(pipeline, seekevent)) {
+		g_print("Seek Event konnte verschickt werden!\n");
+	}
+
+	
 }
