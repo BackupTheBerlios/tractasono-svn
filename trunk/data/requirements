@@ -1,18 +1,6 @@
 Ubuntu Dapper requirements for tractasono development
 =====================================================
 
-apt-get install
-
-build-essential
-gnome-devel
-gnome-dev-doc
-libgpod-dev
-libgstreamer0.10-dev
-libgstreamer-plugins-base0.10-dev
-gstreamer0.10-plugins-bad
-gstreamer0.10-plugins-bad-multiverse
-gstreamer0.10-plugins-ugly
-gstreamer0.10-plugins-ugly-multiverse
-libmysqlclient15-dev
+apt-get install build-essential gnome-devel gnome-dev-doc libgpod-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-ugly gstreamer0.10-plugins-ugly-multiverse libmysqlclient15-dev
 
 
