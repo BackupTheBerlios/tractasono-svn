@@ -10,7 +10,11 @@ sourcefiles = Split("main.c ipod.c database.c settings.c drives.c player.c inter
 dependencies = "gtk+-2.0 libglade-2.0 gstreamer-0.10 libgpod-1.0 gconf-2.0 gnome-vfs-2.0"
 mysql = "mysql_config --cflags --libs"
 
-env = Environment()
+if ARGUMENTS.get("debug", 0):
+	env = Environment(CCFLAGS = "-g")
+else:
+	env = Environment()
+
 env.ParseConfig("pkg-config --cflags --libs " + dependencies)
 env.ParseConfig(mysql)
 env.Program("tractasono", sourcefiles)

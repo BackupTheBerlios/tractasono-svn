@@ -22,7 +22,7 @@ void interface_init(int *argc, char ***argv)
 	glade_init();
 }
 
-void interface_set_position_in_song(gint64 position)
+void interface_set_position_in_song(gdouble position)
 {
 	GtkRange *range = NULL;
 	
@@ -33,7 +33,6 @@ void interface_set_position_in_song(gint64 position)
 		g_print("Fehler: Konnte hscale_song nicht holen!\n");
 	}
 	
-
 	gtk_range_set_value(range, position);
 }
 
@@ -85,7 +84,7 @@ void interface_load(const gchar *gladefile)
 // Setze die Song Informationen
 void interface_set_songinfo(const gchar *artist,
 							const gchar *title,
-							guint seconds)
+							gdouble seconds)
 {
 	GtkLabel *song = NULL;
 	GtkRange *range = NULL;

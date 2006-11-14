@@ -60,6 +60,14 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 void player_set_play()
 {
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
+	
+	GstFormat fmt = GST_FORMAT_TIME;
+	gint64 len;
+
+	gst_element_query_duration (pipeline, &fmt, &len);
+	g_print ("Range lenght: %d\n", (gdouble)len);
+	
+	interface_set_songinfo("hallo", "velo", len);
 }
 
 // Stop
@@ -112,14 +120,6 @@ void player_play_testfile()
 	if (!gst_element_link_many (source, filter, sink, NULL)) {
 		g_warning ("Failed to link elements!");
 	}
-	
-	GstFormat fmt = GST_FORMAT_TIME;
-	gint64 len;
-
-	gst_element_query_duration (pipeline, &fmt, &len);
-
-	
-	interface_set_songinfo("hallo", "velo", len/GST_SECOND);
 	
 	g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
 }

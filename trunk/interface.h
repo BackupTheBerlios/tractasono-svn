@@ -9,6 +9,6 @@ void interface_load(const gchar *gladefile);
 
 void interface_set_songinfo(const gchar *artist,
 							const gchar *title,
-							guint seconds);
+							gdouble seconds);
 
-void interface_set_position_in_song(gint64 position);
+void interface_set_position_in_song(gdouble position);
