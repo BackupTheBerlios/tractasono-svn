@@ -22,6 +22,21 @@ void interface_init(int *argc, char ***argv)
 	glade_init();
 }
 
+void interface_set_position_in_song(gint64 position)
+{
+	GtkRange *range = NULL;
+	
+	// Range setzen
+	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
+	
+	if (range == NULL) {
+		g_print("Fehler: Konnte hscale_song nicht holen!\n");
+	}
+	
+
+	gtk_range_set_value(range, position);
+}
+
 
 void interface_load(const gchar *gladefile)
 {
@@ -94,7 +109,7 @@ void interface_set_songinfo(const gchar *artist,
 	// Range setzen
 	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
 	
-	if (song == NULL) {
+	if (range == NULL) {
 		g_print("Fehler: Konnte hscale_song nicht holen!\n");
 	}
 	

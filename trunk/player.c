@@ -2,6 +2,7 @@
 #include <gst/gst.h>
  
 #include "player.h"
+#include "interface.h"
 
 
 GstElement *pipeline;
@@ -77,7 +78,9 @@ cb_print_position (GstElement *pipeline)
     && gst_element_query_duration (pipeline, &fmt, &len)) {
     g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT "\r",
 	     GST_TIME_ARGS (pos), GST_TIME_ARGS (len));
-  }
+	     //g_print ("pos %lli\r", pos/GST_SECOND); 
+	interface_set_position_in_song(pos/1000000000);
+	}
 
   /* call me again */
   return TRUE;
@@ -109,6 +112,14 @@ void player_play_testfile()
 	if (!gst_element_link_many (source, filter, sink, NULL)) {
 		g_warning ("Failed to link elements!");
 	}
+	
+	GstFormat fmt = GST_FORMAT_TIME;
+	gint64 len;
+
+	gst_element_query_duration (pipeline, &fmt, &len);
+
+	
+	interface_set_songinfo("hallo", "velo", len/GST_SECOND);
 	
 	g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
 }
