@@ -11,4 +11,5 @@ void interface_set_songinfo(const gchar *artist,
 							const gchar *title,
 							gdouble seconds);
 
-void interface_set_position_in_song(gdouble position);
+void interface_set_song_position(gdouble position);
+void interface_set_song_duration(gdouble duration);

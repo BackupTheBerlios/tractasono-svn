@@ -11,6 +11,8 @@ GtkWidget *window_settings;
 GtkWidget *window_fullscreen;
 GtkWidget *window_disc;
 
+GtkRange *range = NULL;
+
 GtkEntry *actual_entry;
 
 
@@ -22,18 +24,16 @@ void interface_init(int *argc, char ***argv)
 	glade_init();
 }
 
-void interface_set_position_in_song(gdouble position)
-{
-	GtkRange *range = NULL;
-	
-	// Range setzen
-	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
-	
-	if (range == NULL) {
-		g_print("Fehler: Konnte hscale_song nicht holen!\n");
-	}
-	
+void interface_set_song_position(gdouble position)
+{	
+	g_print("interface_set_song_position: %f\n", position);
 	gtk_range_set_value(range, position);
+}
+
+void interface_set_song_duration(gdouble duration)
+{		
+	g_print("interface_set_song_duration: %f\n", duration);
+	gtk_range_set_range(range, 0, duration);
 }
 
 
@@ -79,6 +79,13 @@ void interface_load(const gchar *gladefile)
 	}
 	gtk_widget_reparent(vbox_keyboard, vbox_placeholder_keyboard);
 	gtk_widget_hide(vbox_keyboard);
+	
+	// Range laden
+	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
+	
+	if (range == NULL) {
+		g_print("Fehler: Konnte hscale_song nicht holen!\n");
+	}
 }
 
 // Setze die Song Informationen
@@ -105,13 +112,6 @@ void interface_set_songinfo(const gchar *artist,
 
 	gtk_label_set_label(song, newsong->str);
 	
-	// Range setzen
-	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
-	
-	if (range == NULL) {
-		g_print("Fehler: Konnte hscale_song nicht holen!\n");
-	}
-	
-	gtk_range_set_range(range, 0, seconds);
-	gtk_range_set_value(range, 0);
+	interface_set_song_duration(0);
+	interface_set_song_position(0);
 }

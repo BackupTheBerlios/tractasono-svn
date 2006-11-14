@@ -61,13 +61,12 @@ void player_set_play()
 {
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
 	
-	GstFormat fmt = GST_FORMAT_TIME;
+	/*GstFormat fmt = GST_FORMAT_TIME;
 	gint64 len;
 
 	gst_element_query_duration (pipeline, &fmt, &len);
-	g_print ("Range lenght: %d\n", (gdouble)len);
 	
-	interface_set_songinfo("hallo", "velo", len);
+	interface_set_song_duration(len/1000000);*/
 }
 
 // Stop
@@ -79,19 +78,19 @@ void player_set_stop()
 static gboolean
 cb_print_position (GstElement *pipeline)
 {
-  GstFormat fmt = GST_FORMAT_TIME;
-  gint64 pos, len;
-
-  if (gst_element_query_position (pipeline, &fmt, &pos)
-    && gst_element_query_duration (pipeline, &fmt, &len)) {
-    g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT "\r",
-	     GST_TIME_ARGS (pos), GST_TIME_ARGS (len));
-	     //g_print ("pos %lli\r", pos/GST_SECOND); 
-	interface_set_position_in_song(pos/1000000000);
-	}
-
-  /* call me again */
-  return TRUE;
+	gint64 pos, len;
+	GstFormat fmt = GST_FORMAT_TIME;
+	
+	gst_element_query_position (pipeline, &fmt, &pos);
+	gst_element_query_duration (pipeline, &fmt, &len);
+	
+	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (pos));*/
+			 
+	interface_set_song_duration(len);
+	interface_set_song_position(pos);
+	
+	/* call me again */
+	return TRUE;
 }
 
 // Spiele Testfile ab
@@ -121,5 +120,5 @@ void player_play_testfile()
 		g_warning ("Failed to link elements!");
 	}
 	
-	g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
+	g_timeout_add (500, (GSourceFunc) cb_print_position, pipeline);
 }

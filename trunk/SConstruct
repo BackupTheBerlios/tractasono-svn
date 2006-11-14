@@ -11,9 +11,9 @@ dependencies = "gtk+-2.0 libglade-2.0 gstreamer-0.10 libgpod-1.0 gconf-2.0 gnome
 mysql = "mysql_config --cflags --libs"
 
 if ARGUMENTS.get("debug", 0):
-	env = Environment(CCFLAGS = "-g")
+	env = Environment(CCFLAGS = "-g -Wall")
 else:
-	env = Environment()
+	env = Environment(CCFLAGS = "-Wall")
 
 env.ParseConfig("pkg-config --cflags --libs " + dependencies)
 env.ParseConfig(mysql)

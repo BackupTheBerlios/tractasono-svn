@@ -55,7 +55,6 @@ void add_to_placeholder(GtkWidget *widget)
 void clean_placeholder()
 {
 	GtkContainer *container = NULL;
-	GtkWidget *child = NULL;
 	GList* children = NULL;
 
 	container = GTK_CONTAINER(vbox_placeholder);
