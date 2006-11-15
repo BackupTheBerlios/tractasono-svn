@@ -14,6 +14,16 @@ void player_init(int *argc, char **argv[])
 	gst_init (argc, argv);
 }
 
+gint64 player_get_song_duration()
+{
+	gint64 duration;
+	GstFormat fmt = GST_FORMAT_TIME;
+
+	gst_element_query_duration (pipeline, &fmt, &duration);
+
+	return duration;
+}
+
 // Callback Behandlung
 static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
@@ -31,12 +41,21 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 			break;
 		}
 		case GST_MESSAGE_STATE_CHANGED: {
-			//GstState *oldstate, *newstate, *pending;
-			/*gst_message_parse_state_changed (message,
-											 oldstate,
-                                             newstate,
-                                             pending);*/
-			//g_print("\told: %d, new: %d, pending: %d", oldstate, newstate, pending);
+			GstState oldstate, newstate, pending;
+			gst_message_parse_state_changed (message,
+											 &oldstate,
+                                             						&newstate,
+                                             						&pending);
+
+			g_print("old: %i, new: %i, pending: %i\n", oldstate, newstate, pending);
+
+			if ((newstate == 3) && (pending == 4))
+			{
+				gint64 dur = player_get_song_duration();
+				interface_set_song_duration(dur);
+				g_print("Song duration: %lli\n", dur);
+			}
+			
 		}
 		case GST_MESSAGE_EOS: {
 			/* end-of-stream */
@@ -60,13 +79,6 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 void player_set_play()
 {
 	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PLAYING);
-	
-	/*GstFormat fmt = GST_FORMAT_TIME;
-	gint64 len;
-
-	gst_element_query_duration (pipeline, &fmt, &len);
-	
-	interface_set_song_duration(len/1000000);*/
 }
 
 // Stop
@@ -82,15 +94,12 @@ cb_print_position (GstElement *pipeline)
 		return TRUE;
 	}
 
-	gint64 pos, len;
+	gint64 pos;
 	GstFormat fmt = GST_FORMAT_TIME;
 	
 	gst_element_query_position (pipeline, &fmt, &pos);
-	gst_element_query_duration (pipeline, &fmt, &len);
 	
 	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (pos));*/
-			 
-	interface_set_song_duration(len);
 	interface_set_song_position(pos);
 	
 	/* call me again */

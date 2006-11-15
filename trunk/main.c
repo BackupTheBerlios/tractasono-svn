@@ -142,9 +142,9 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 
 gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-	interface_set_slidermove(TRUE);
+	g_print("Slider Button pressed!\n");
 
-	g_print("Button pressed!\n");
+	interface_set_slidermove(TRUE);
 
 	return FALSE;
 }
@@ -152,10 +152,12 @@ gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *ev
 // Handler für seeking
 gboolean on_hscale_song_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-	GtkRange *range = GTK_RANGE(widget);
+	g_print("Slider Button released!\n");
+
+	/*GtkRange *range = GTK_RANGE(widget);
 
 	gdouble pos = gtk_range_get_value(range);
-	player_seek_to_position(pos);
+	player_seek_to_position(pos);*/
 
 	interface_set_slidermove(FALSE);
 
