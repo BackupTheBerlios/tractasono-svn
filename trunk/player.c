@@ -14,14 +14,34 @@ void player_init(int *argc, char **argv[])
 	gst_init (argc, argv);
 }
 
+/*
+	Gibt die Länge des Songs in Sekunden zurück
+*/
 gint64 player_get_song_duration()
 {
 	gint64 duration;
 	GstFormat fmt = GST_FORMAT_TIME;
 
 	gst_element_query_duration (pipeline, &fmt, &duration);
+	
+	duration = duration / 1000000000;
 
 	return duration;
+}
+
+/*
+	Gibt die Position des Songs in Sekunden zurück
+*/
+gint64 player_get_song_position()
+{
+	gint64 position;
+	GstFormat fmt = GST_FORMAT_TIME;
+
+	gst_element_query_position (pipeline, &fmt, &position);
+	
+	position = position / 1000000000;
+
+	return position;
 }
 
 // Callback Behandlung
@@ -43,9 +63,9 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState oldstate, newstate, pending;
 			gst_message_parse_state_changed (message,
-											 &oldstate,
-                                             						&newstate,
-                                             						&pending);
+									&oldstate,
+                                             				&newstate,
+                                             				&pending);
 
 			g_print("old: %i, new: %i, pending: %i\n", oldstate, newstate, pending);
 
@@ -95,9 +115,8 @@ cb_print_position (GstElement *pipeline)
 	}
 
 	gint64 pos;
-	GstFormat fmt = GST_FORMAT_TIME;
 	
-	gst_element_query_position (pipeline, &fmt, &pos);
+	pos = player_get_song_position();
 	
 	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (pos));*/
 	interface_set_song_position(pos);
@@ -133,7 +152,7 @@ void player_play_testfile()
 		g_warning ("Failed to link elements!");
 	}
 	
-	g_timeout_add (200, (GSourceFunc) cb_print_position, pipeline);
+	g_timeout_add (1000, (GSourceFunc) cb_print_position, pipeline);
 }
 
 // Seeking

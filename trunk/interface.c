@@ -109,7 +109,7 @@ void interface_set_songinfo(const gchar *artist,
 	GString *newsong = NULL;
 
 	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
-	g_string_append(newsong, artist);
+	g_string_append(newsong, "Franz Ferdinand");
 	g_string_append(newsong, " - ");
 	g_string_append(newsong, title);
 	g_string_append(newsong, "</span>");
