@@ -47,7 +47,11 @@ gint64 player_get_song_position()
 // Callback Behandlung
 static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	//g_print ("GStreamer: Got %s message\n", GST_MESSAGE_TYPE_NAME (message));
+	//g_print ("GStreamer: Got %s message | %d | %d\n", GST_MESSAGE_TYPE_NAME (message), GST_MESSAGE_SRC(message), pipeline);
+	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {
+		return TRUE;
+	}
+	
 
 	switch (GST_MESSAGE_TYPE (message)) {
 		case GST_MESSAGE_ERROR: {
@@ -62,24 +66,34 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 		}
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState oldstate, newstate, pending;
-			gst_message_parse_state_changed (message,
-									&oldstate,
-                                             				&newstate,
-                                             				&pending);
+			
+			gst_message_parse_state_changed(message,
+											&oldstate,
+											&newstate,
+											&pending);
 
-			g_print("old: %i, new: %i, pending: %i\n", oldstate, newstate, pending);
+			/*g_print("\tState Message: old: %i, new: %i, pending: %i\n",
+					oldstate,
+					newstate,
+					pending);*/
 
-			if ((newstate == 3) && (pending == 4))
-			{
+			if (newstate == 4) {
 				gint64 dur = player_get_song_duration();
+				interface_set_playing(TRUE);
 				interface_set_song_duration(dur);
-				g_print("Song duration: %lli\n", dur);
+				//g_print("Song duration: %lli\n", dur);
+				g_print("Player Play\n");
+			}
+			
+			if ((newstate == 3) && (oldstate == 4)) {
+				interface_set_playing(FALSE);
+				g_print("Player Pause\n");
 			}
 			
 		}
 		case GST_MESSAGE_EOS: {
 			/* end-of-stream */
-			g_print ("\tEnd Of Stream\n");
+			//g_print ("\tEnd Of Stream\n");
 			break;
 		}
 		default: {
@@ -171,6 +185,4 @@ void player_seek_to_position(gint64 position)
 	if (gst_element_send_event(pipeline, seekevent)) {
 		g_print("Seek Event konnte verschickt werden!\n");
 	}
-
-	
 }

@@ -73,7 +73,7 @@ int inspect_ipod(char *mountpoint)
 	}
 
 	// iTunesDB Pointer ausgeben
-	printf("iTunesDB Pointer: %i\n", db);
+	printf("iTunesDB Pointer: %p\n", db);
 
 	// Anzahl Tracks auslesen
 	trackcount = itdb_tracks_number (db);

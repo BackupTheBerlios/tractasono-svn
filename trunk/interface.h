@@ -16,3 +16,7 @@ void interface_set_song_duration(gdouble duration);
 
 void interface_set_slidermove(gboolean move);
 gboolean interface_get_slidermove();
+
+void interface_set_playing(gboolean isplaying);
+gboolean interface_get_playing();
+

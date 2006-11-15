@@ -16,6 +16,7 @@ GtkRange *range = NULL;
 GtkEntry *actual_entry;
 
 gboolean slidermove;
+gboolean playing;
 
 
 
@@ -26,17 +27,18 @@ void interface_init(int *argc, char ***argv)
 	glade_init();
 
 	slidermove = FALSE;
+	playing = FALSE;
 }
 
 void interface_set_song_position(gdouble position)
 {	
-	g_print("interface_set_song_position: %f\n", position);
+	//g_print("interface_set_song_position: %.0f\n", position);
 	gtk_range_set_value(range, position);
 }
 
 void interface_set_song_duration(gdouble duration)
 {		
-	g_print("interface_set_song_duration: %f\n", duration);
+	//g_print("interface_set_song_duration: %.0f\n", duration);
 	gtk_range_set_range(range, 0, duration);
 }
 
@@ -98,7 +100,6 @@ void interface_set_songinfo(const gchar *artist,
 							gdouble seconds)
 {
 	GtkLabel *song = NULL;
-	GtkRange *range = NULL;
 	
 	song = GTK_LABEL(glade_xml_get_widget(xml, "label_song"));
 
@@ -129,3 +130,35 @@ gboolean interface_get_slidermove()
 {
 	return slidermove;
 }
+
+void interface_set_playimage(const gchar *stock_id)
+{
+	GtkImage *playimage = NULL;
+	
+	playimage = GTK_IMAGE(glade_xml_get_widget(xml, "image_play"));
+	
+	if (playimage == NULL) {
+		g_print("Fehler beim play Bild holen!\n");
+	} else {
+		gtk_image_set_from_stock(playimage,
+								 stock_id,
+								 GTK_ICON_SIZE_BUTTON);
+	}
+}
+
+void interface_set_playing(gboolean isplaying)
+{
+	playing = isplaying;
+	
+	if (playing) {
+		interface_set_playimage("gtk-media-pause");
+	} else {
+		interface_set_playimage("gtk-media-play");
+	}
+}
+
+gboolean interface_get_playing()
+{
+	return playing;
+}
+

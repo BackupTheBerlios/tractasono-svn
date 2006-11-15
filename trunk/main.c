@@ -15,6 +15,7 @@
 #include "interface.h"
 
 
+
 // Allgemeiner Destroy-Event
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
 {
@@ -291,15 +292,20 @@ gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
 
 
 void on_trackplay_clicked(GtkButton *button, gpointer user_data)
-{
-	g_print("Play wurde gedrückt\n");
-	player_set_play();
+{	
+	if (interface_get_playing()) {
+		g_print("Pause wurde gedrückt\n");
+		player_set_stop();
+	} else {
+		g_print("Play wurde gedrückt\n");
+		player_set_play();
+	}
 }
 
 void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
 {
-	g_print("Stop wurde gedrückt\n");
-	player_set_stop();
+	//g_print("Stop wurde gedrückt\n");
+	//player_set_stop();
 }
 
 void on_button_read_toc_clicked(GtkButton *button, gpointer user_data)

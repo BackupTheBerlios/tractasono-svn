@@ -42,7 +42,7 @@ int drives_init()
 	return DRIVES_SUCCESS;
 }
 
-static void print_drive(GnomeVFSDrive *drive)
+/*static void print_drive(GnomeVFSDrive *drive)
 {
 	char *path, *uri, *name, *icon;
 	GnomeVFSVolume *volume;
@@ -94,7 +94,7 @@ static void print_volume(GnomeVFSVolume *volume)
 	g_free (icon);
 	g_free (name);
 	gnome_vfs_drive_unref (drive);
-}
+}*/
 
 int print_error (GnomeVFSResult result, const char *uri_string)
 {
