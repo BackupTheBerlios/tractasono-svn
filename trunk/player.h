@@ -5,4 +5,4 @@ void player_set_stop();
 
 void player_play_testfile();
 
-void player_seek_to_position(gint64 position);
+void player_seek_to_position(gint seconds);

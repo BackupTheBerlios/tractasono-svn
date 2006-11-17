@@ -6,12 +6,28 @@
 
 
 GstElement *pipeline;
+GstElement *source;
+GstElement *filter;
+GstElement *sink;
+GstBus *bus;
 
 // Player initialisieren
 void player_init(int *argc, char **argv[])
 {
 	g_print("Player initialisieren\n");
 	gst_init (argc, argv);
+}
+
+static GstElement* gst_element_factory_make_or_warn(gchar * type,
+													gchar * name)
+{
+  GstElement *element = gst_element_factory_make(type, name);
+
+  if (!element) {
+    g_warning("Failed to create element %s of type %s", name, type);
+  }
+
+  return element;
 }
 
 /*
@@ -25,6 +41,19 @@ gint64 player_get_song_duration()
 	gst_element_query_duration (pipeline, &fmt, &duration);
 	
 	duration = duration / 1000000000;
+
+	return duration;
+}
+
+/*
+	Gibt die Länge des Songs in Nanosekunden zurück
+*/
+gint64 player_get_song_duration_ns()
+{
+	gint64 duration;
+	GstFormat fmt = GST_FORMAT_TIME;
+
+	gst_element_query_duration (pipeline, &fmt, &duration);
 
 	return duration;
 }
@@ -142,17 +171,16 @@ cb_print_position (GstElement *pipeline)
 // Spiele Testfile ab
 void player_play_testfile()
 {
-	GstElement *source, *filter, *sink;
-	GstBus *bus;
-
-	pipeline = gst_pipeline_new ("my-pipeline");
+	pipeline = gst_pipeline_new ("player-pipeline");
 	
-	source = gst_element_factory_make ("filesrc", "source");
+	source = gst_element_factory_make_or_warn("filesrc", "source");
+	filter = gst_element_factory_make_or_warn("mad", "filter");
+	sink = gst_element_factory_make_or_warn("alsasink", "sink");
+	
+	// Location setzen
 	g_object_set (source, "location", "data/test.mp3", NULL);
 
-	filter = gst_element_factory_make ("mad", "filter");
-	sink = gst_element_factory_make ("alsasink", "sink");
-
+	// Elemente zur Pipeline hinzufügen
 	gst_bin_add_many (GST_BIN (pipeline), source, filter, sink, NULL);
 
 	/* adds a watch for new message on our pipeline's message bus to
@@ -162,27 +190,40 @@ void player_play_testfile()
 	gst_bus_add_watch (bus, player_bus_callback, NULL);
 	gst_object_unref (bus);
 
+	// Alles zusammenlinken
 	if (!gst_element_link_many (source, filter, sink, NULL)) {
 		g_warning ("Failed to link elements!");
 	}
 	
+	// Watch hinzufügen
 	g_timeout_add (1000, (GSourceFunc) cb_print_position, pipeline);
 }
 
 // Seeking
-void player_seek_to_position(gint64 position)
+void player_seek_to_position(gint seconds)
 {
-	g_print("Seeking to position: %lli\n", position);
+	g_print("Seeking to position: %i\n", seconds);
 
-	GstEvent* seekevent = gst_event_new_seek(1,
-							     GST_FORMAT_TIME,
-							     GST_SEEK_FLAG_ACCURATE,
-							     GST_SEEK_TYPE_SET,
-							     position,
-							     GST_SEEK_TYPE_NONE,
-							     0);
+	GstEvent *event;
+	seconds = seconds * GST_SECOND;
+	
+	if (gst_element_set_state(pipeline, GST_STATE_PAUSED) != GST_STATE_CHANGE_SUCCESS) {
+		g_print("Fehler: Konnte state paused nicht setzen!\n");
+	}
+							 
+	event = gst_event_new_seek(1.0,
+							   GST_FORMAT_TIME,
+							   GST_SEEK_FLAG_FLUSH,
+							   GST_SEEK_TYPE_SET,
+							   seconds,
+							   GST_SEEK_TYPE_NONE,
+							   0);
 
-	if (gst_element_send_event(pipeline, seekevent)) {
+	if (gst_element_send_event (source, event)) {
 		g_print("Seek Event konnte verschickt werden!\n");
+	}
+	
+	if (gst_element_set_state(pipeline, GST_STATE_PLAYING) != GST_STATE_CHANGE_SUCCESS) {
+		g_print("Fehler: Konnte state play nicht setzen!\n");
 	}
 }

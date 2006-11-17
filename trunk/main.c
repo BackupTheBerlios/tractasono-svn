@@ -155,10 +155,10 @@ gboolean on_hscale_song_button_release_event(GtkWidget *widget, GdkEventButton *
 {
 	g_print("Slider Button released!\n");
 
-	/*GtkRange *range = GTK_RANGE(widget);
+	GtkRange *range = GTK_RANGE(widget);
 
 	gdouble pos = gtk_range_get_value(range);
-	player_seek_to_position(pos);*/
+	player_seek_to_position(pos);
 
 	interface_set_slidermove(FALSE);
 
