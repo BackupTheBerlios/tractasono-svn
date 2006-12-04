@@ -12,6 +12,7 @@ GtkWidget *window_fullscreen;
 GtkWidget *window_disc;
 
 GtkRange *range = NULL;
+GtkAdjustment *adjustment;
 
 GtkEntry *actual_entry;
 
@@ -28,6 +29,8 @@ void interface_init(int *argc, char ***argv)
 
 	slidermove = FALSE;
 	playing = FALSE;
+	adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.00, 100.0,
+												   0.1, 1.0, 1.0));
 }
 
 void interface_set_song_position(gdouble position)

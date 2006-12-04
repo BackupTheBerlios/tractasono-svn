@@ -858,8 +858,7 @@ static seek_format seek_formats[] = {
   {NULL, 0},
 };
 
-G_GNUC_UNUSED static void
-query_rates (void)
+static void player_query_rates()
 {
   GList *walk = rate_pads;
 

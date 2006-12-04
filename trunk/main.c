@@ -145,7 +145,8 @@ gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *ev
 {
 	g_print("Slider Button pressed!\n");
 
-	interface_set_slidermove(TRUE);
+	//interface_set_slidermove(TRUE);
+	player_start_seek(widget, event, user_data);
 
 	return FALSE;
 }
@@ -157,10 +158,12 @@ gboolean on_hscale_song_button_release_event(GtkWidget *widget, GdkEventButton *
 
 	GtkRange *range = GTK_RANGE(widget);
 
-	gdouble pos = gtk_range_get_value(range);
+	player_stop_seek(range, user_data);
+
+	/*gdouble pos = gtk_range_get_value(range);
 	player_seek_to_position(pos);
 
-	interface_set_slidermove(FALSE);
+	interface_set_slidermove(FALSE);*/
 
 	return FALSE;
 }
