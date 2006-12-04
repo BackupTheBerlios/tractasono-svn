@@ -67,6 +67,20 @@ void clean_placeholder()
 	}
 }
 
+// Räume alle Fenster auf
+void clean_all()
+{
+	GtkContainer *root = NULL;
+	GList* children = NULL;
+
+	root = GTK_CONTAINER(vbox_tractasono);
+	children = gtk_container_get_children(root);
+
+	for (children = g_list_first(children); children; children = g_list_next(children)) {
+		gtk_container_remove(root, children->data);
+	}
+}
+
 // Zeige das Oncreen Keyboard an
 void show_keyboard(gboolean show)
 {
@@ -186,7 +200,15 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 	// Hier sollte noch etwas Code rein
 	g_print("Vollbild gedrückt!\n");
 
-	clean_placeholder();
+	//clean_placeholder();
+	clean_all();
+}
+
+void on_window_fullscreen_button_press_event(GtkWidget *widget, gpointer user_data)
+{
+	// Hier sollte noch etwas Code rein
+	g_print("Fullscreen back gedrückt!\n");
+	
 }
 
 // Event-Handler für den Test Button
@@ -331,6 +353,7 @@ int main(int argc, char *argv[])
 	mainwindow = NULL;
 	vbox_placeholder = NULL;
 	vbox_keyboard = NULL;
+	vbox_tractasono = NULL;
 
 	window_music = NULL;
 	window_import = NULL;

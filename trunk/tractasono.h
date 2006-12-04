@@ -7,6 +7,7 @@ GladeXML *xml;
 GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
+GtkWidget *vbox_tractasono;
 
 GtkWidget *window_music;
 GtkWidget *window_import;

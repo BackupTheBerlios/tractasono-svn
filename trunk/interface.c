@@ -1,9 +1,11 @@
 #include "interface.h"
+#include "player.h"
 
-GladeXML *xml;
+GladeXML  *xml;
 GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
+GtkWidget *vbox_tractasono;
 
 GtkWidget *window_music;
 GtkWidget *window_import;
@@ -68,6 +70,12 @@ void interface_load(const gchar *gladefile)
 	vbox_placeholder = glade_xml_get_widget(xml, "vbox_placeholder");
 	if (vbox_placeholder == NULL) {
 		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
+	}
+	
+	// Tractasono Root holen
+	vbox_tractasono = glade_xml_get_widget(xml, "vbox_tractasono");
+	if (vbox_tractasono == NULL) {
+		g_print("Fehler: Konnte vbox_tractasono nicht holen!\n");
 	}
 
 	// Die einzelnen Windows laden und referenzieren

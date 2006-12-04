@@ -263,7 +263,7 @@ void player_seek_to_position(gint seconds)
 	}
 }
 
-GstElement* player_make_flac_pipeline(const gchar * location)
+GstElement* player_make_flac_pipeline(const gchar *location)
 {
 	GstPad *seekable;
 	
@@ -528,7 +528,7 @@ static gboolean player_send_event(GstEvent *event)
 	}*/
 	
 	gst_event_ref(event);
-	res = gst_element_send_event(src, event);
+	res = gst_element_send_event(pipeline, event);
 	gst_event_unref(event);
 	
 	return res;
@@ -573,4 +573,21 @@ gboolean player_stop_seek (GtkWidget * widget, gpointer user_data)
 	}
 	
 	return FALSE;
+}
+
+// Formatiert die Scrollbalken Anzeige auf Minuten:Sekunden (00:00)
+gchar* on_hscale_song_format_value (GtkScale * scale, gdouble value)
+{
+	gint64 duration = 0;
+	gint64 real;
+	gint64 seconds;
+	
+	if (pipeline) {
+		duration = player_get_song_duration_ns();
+	}
+	
+	real = value * duration / 100;
+	seconds = (gint64) real / GST_SECOND;
+
+	return g_strdup_printf("%02lli:%02lli", seconds/60, seconds%60);
 }
