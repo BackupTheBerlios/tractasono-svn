@@ -107,12 +107,14 @@ gint64 player_get_song_duration_ns()
 */
 gint64 player_get_song_position()
 {
-	gint64 position;
+	gint64 position, duration;
 	GstFormat fmt = GST_FORMAT_TIME;
 
+	duration = player_get_song_duration_ns();
 	gst_element_query_position (pipeline, &fmt, &position);
 	
-	position = position / 1000000000;
+	position = position * 100.0 / duration;
+	//position = position / 1000000000;
 
 	return position;
 }
@@ -153,7 +155,7 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 			if (newstate == 4) {
 				gint64 dur = player_get_song_duration();
 				interface_set_playing(TRUE);
-				interface_set_song_duration(dur);
+				//interface_set_song_duration(dur);
 				//g_print("Song duration: %lli\n", dur);
 				g_print("Player Play\n");
 			}
@@ -367,7 +369,10 @@ static void player_do_seek(GtkWidget *widget)
 	
 	g_print("Duration: %lli \n", duration);
 	
-	real = gtk_range_get_value (GTK_RANGE (widget)) * duration / 100;
+	gint64 pos = gtk_range_get_value(GTK_RANGE (widget));
+	g_print("Position: %lli \n", pos);
+	
+	real = gtk_range_get_value(GTK_RANGE (widget)) * duration / 100;
 	
 	g_print("Real range: %lli \n", real);
 	
@@ -385,7 +390,7 @@ static void player_do_seek(GtkWidget *widget)
 		flags |= GST_SEEK_FLAG_SEGMENT;
 	}
 	
-	real = 30000000000;
+	//real = 30000000000;
 	
 	s_event = gst_event_new_seek (1.0, GST_FORMAT_TIME, flags,
 								  GST_SEEK_TYPE_SET, real,
