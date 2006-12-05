@@ -329,8 +329,8 @@ void on_trackplay_clicked(GtkButton *button, gpointer user_data)
 
 void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
 {
-	//g_print("Stop wurde gedrückt\n");
-	//player_set_stop();
+	g_print("Stop wurde gedrückt\n");
+	player_set_stop();
 }
 
 void on_button_read_toc_clicked(GtkButton *button, gpointer user_data)

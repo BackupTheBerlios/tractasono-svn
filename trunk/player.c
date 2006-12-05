@@ -195,9 +195,9 @@ void player_set_play()
 // Stop
 void player_set_stop()
 {
-	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_PAUSED);
+	gst_element_set_state (GST_ELEMENT (pipeline), GST_STATE_READY);
 	
-	state = GST_STATE_PAUSED;
+	state = GST_STATE_READY;
 }
 
 static gboolean
