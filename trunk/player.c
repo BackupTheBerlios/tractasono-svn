@@ -52,6 +52,7 @@ static void player_query_positions_pads();
 static void player_query_positions_elems();
 static void player_query_rates();
 static gboolean player_send_event(GstEvent *event);
+void player_handle_tag_message(GstMessage *message);
 
 
 
@@ -122,11 +123,15 @@ gint64 player_get_song_position()
 // Callback Behandlung
 static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	//g_print ("GStreamer: Got %s message | %d | %d\n", GST_MESSAGE_TYPE_NAME (message), GST_MESSAGE_SRC(message), pipeline);
-	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {
-		return TRUE;
+	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
+		/* Musik Tags */
+		player_handle_tag_message(message);
 	}
 	
+	//g_print ("GStreamer: Got %s message | %d | %d\n", GST_MESSAGE_TYPE_NAME (message), GST_MESSAGE_SRC(message), pipeline);
+	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
+		return TRUE;
+	}
 
 	switch (GST_MESSAGE_TYPE (message)) {
 		case GST_MESSAGE_ERROR: {
@@ -153,7 +158,7 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 					pending);*/
 
 			if (newstate == 4) {
-				gint64 dur = player_get_song_duration();
+				//gint64 dur = player_get_song_duration();
 				interface_set_playing(TRUE);
 				//interface_set_song_duration(dur);
 				//g_print("Song duration: %lli\n", dur);
@@ -391,6 +396,10 @@ static void player_do_seek(GtkWidget *widget)
 	}
 	
 	//real = 30000000000;
+
+	if (real >= duration) {
+		real = 0;
+	}
 	
 	s_event = gst_event_new_seek (1.0, GST_FORMAT_TIME, flags,
 								  GST_SEEK_TYPE_SET, real,
@@ -504,34 +513,6 @@ static gboolean player_send_event(GstEvent *event)
 {
 	gboolean res = FALSE;
 	
-	/*if (!elem_seek) {
-		GList *walk = seekable_pads;
-		
-		while (walk) {
-			GstPad *seekable = GST_PAD(walk->data);
-			
-			GST_DEBUG("send event on pad %s:%s", GST_DEBUG_PAD_NAME (seekable));
-			
-			gst_event_ref(event);
-			res = gst_pad_send_event(seekable, event);
-			
-			walk = g_list_next(walk);
-		}
-	} else {
-		GList *walk = seekable_elements;
-		
-		while (walk) {
-			GstElement *seekable = GST_ELEMENT(walk->data);
-			
-			GST_DEBUG("send event on element %s", GST_ELEMENT_NAME (seekable));
-			
-			gst_event_ref(event);
-			res = gst_element_send_event(seekable, event);
-			
-			walk = g_list_next(walk);
-		}
-	}*/
-	
 	gst_event_ref(event);
 	res = gst_element_send_event(pipeline, event);
 	gst_event_unref(event);
@@ -595,4 +576,40 @@ gchar* on_hscale_song_format_value (GtkScale * scale, gdouble value)
 	seconds = (gint64) real / GST_SECOND;
 
 	return g_strdup_printf("%02lli:%02lli", seconds/60, seconds%60);
+}
+
+
+void player_handle_tag_message(GstMessage *message)
+{
+	/*const GstStructure *s;
+	
+	s = gst_message_get_structure(message);
+	g_print ("message from \"%s\" (%s): ",
+	GST_STR_NULL (GST_ELEMENT_NAME (GST_MESSAGE_SRC (message))),
+				  gst_message_type_get_name (GST_MESSAGE_TYPE (message)));
+	if (s) {
+		gchar *sstr;
+		
+		sstr = gst_structure_to_string (s);
+		g_print ("%s\n", sstr);
+		g_free (sstr);
+	} else {
+		g_print ("no message details\n");
+	}*/
+	
+	GstTagList *tag_list;
+	gchar *artist = NULL;
+	gchar *title = NULL;
+	
+	gst_message_parse_tag(message, &tag_list);
+	
+	gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &artist);
+	gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &title);
+	
+	interface_set_songinfo(artist, title, 0);
+	
+	g_free(artist);
+	g_free(title);
+	gst_tag_list_free(tag_list);
+	
 }
