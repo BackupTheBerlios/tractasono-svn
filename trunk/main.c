@@ -8,7 +8,7 @@
 // Lokale Includes
 #include "tractasono.h"
 #include "settings.h"
-#include "ipod.h"
+//#include "ipod.h"
 #include "database.h"
 #include "drives.h"
 #include "player.h"

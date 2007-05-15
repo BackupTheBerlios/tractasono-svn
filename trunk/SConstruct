@@ -6,14 +6,14 @@
 #########################
 
 # Edit the following two lines
-sourcefiles = Split("main.c ipod.c database.c settings.c drives.c player.c interface.c")
-dependencies = "gtk+-2.0 libglade-2.0 gstreamer-0.10 libgpod-1.0 gconf-2.0 gnome-vfs-2.0"
+sourcefiles = Split("main.c database.c settings.c drives.c player.c interface.c")
+dependencies = "gtk+-2.0 libglade-2.0 gstreamer-0.10 gconf-2.0 gnome-vfs-2.0"
 mysql = "mysql_config --cflags --libs"
 
 if ARGUMENTS.get("debug", 0):
-	env = Environment(CCFLAGS = "-g")
+	env = Environment(CCFLAGS = "-g", LDFLAGS = "-d -E")
 else:
-	env = Environment(CCFLAGS = "-Wall")
+	env = Environment(CCFLAGS = "-Wall", LDFLAGS = "-d -E")
 
 env.ParseConfig("pkg-config --cflags --libs " + dependencies)
 env.ParseConfig(mysql)
