@@ -14,7 +14,7 @@
 #include "player.h"
 #include "interface.h"
 
-
+// Alles klar ade Bar? funktionierts sch? Esch alles Fertig?
 
 // Allgemeiner Destroy-Event
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
