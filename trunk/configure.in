@@ -1,7 +1,7 @@
 AC_INIT(configure.in)
 AM_INIT_AUTOMAKE(tractasono, 0.1)
 AC_PREFIX_DEFAULT("/usr/local")
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(src/config.h)
 
 CFLAGS=""
 AC_SUBST(CFLAGS)
