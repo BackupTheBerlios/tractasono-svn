@@ -7,5 +7,4 @@ echo "Running automake"
 automake --add-missing --copy
 echo "Running autoconf"
 autoconf
-echo "Running configure"
-./configure
+echo "All automatic stuff completed: Now you can run configure!"
