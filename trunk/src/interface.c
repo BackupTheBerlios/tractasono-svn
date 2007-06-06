@@ -59,8 +59,8 @@ void interface_load(const gchar *gladefile)
 	buildfile = g_string_append(buildfile, "/data/tractasono.glade");
 	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
 		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
-  }
-  xml = glade_xml_new(buildfile->str, NULL, NULL);
+	}
+	xml = glade_xml_new(buildfile->str, NULL, NULL);
 	
 	// Verbinde die Signale automatisch mit dem Interface
 	glade_xml_signal_autoconnect(xml);
