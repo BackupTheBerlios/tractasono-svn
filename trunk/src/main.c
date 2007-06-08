@@ -134,6 +134,15 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 	add_to_placeholder(vbox_settings);
 }
 
+// Event-Handler für den Internetradio Button
+void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("Internetradio gedrückt!\n");
+ 
+  // mach ganz vell schlaui sache...
+ 
+}
+
 // Event-Handler für den CD Button
 void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 {
