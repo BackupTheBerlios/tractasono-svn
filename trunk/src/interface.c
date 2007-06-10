@@ -1,5 +1,6 @@
 #include "interface.h"
 #include "player.h"
+#include <string.h>
 
 GladeXML  *xml;
 GtkWidget *mainwindow;
@@ -126,9 +127,17 @@ void interface_set_songinfo(const gchar *artist,
 	GString *newsong = NULL;
 
 	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
-	g_string_append(newsong, artist);
-	g_string_append(newsong, " - ");
-	g_string_append(newsong, title);
+	if (strcmp(&artist, "") == 0 && strcmp(&title, "") == 0) {
+		g_string_append(newsong, "Keine Song Informationen vorhanden!");
+	} else if(strcmp(&artist, "") != 0 && strcmp(&title, "") == 0) {
+		g_string_append(newsong, artist);
+	} else if(strcmp(&artist, "") == 0 && strcmp(&title, "") != 0) {
+		g_string_append(newsong, title);
+	} else if(strcmp(&artist, "") != 0 && strcmp(&title, "") != 0) {
+		g_string_append(newsong, artist);
+		g_string_append(newsong, " - ");
+		g_string_append(newsong, title);
+	}
 	g_string_append(newsong, "</span>");
 
 	gtk_label_set_label(song, newsong->str);

@@ -138,6 +138,17 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 {
 	g_print("Internetradio gedrückt!\n");
+	
+	// Einstellungen Window holen
+	GtkWidget *table_radio = NULL;
+
+	table_radio = glade_xml_get_widget(xml, "table_radio");
+	if (table_radio == NULL) {
+		g_print("Fehler: Konnte table_radio nicht holen!\n");
+	}
+
+	clean_placeholder();
+	add_to_placeholder(table_radio);
  
   // mach ganz vell schlaui sache...
  
@@ -225,6 +236,18 @@ void on_testbutton_clicked(GtkWidget *widget, gpointer user_data)
 	// Hier sollte noch etwas Code rein
 	g_print("Testbutton wurde gedrückt!\n");
 }
+
+// Event-Handler für den URL Stream Button
+void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
+{
+	// Hier sollte noch etwas Code rein
+	g_print("URL Stream Button wurde gedrückt!\n");
+	
+	GtkWidget *entry = glade_xml_get_widget(xml, "entry_radio_url");
+	
+	player_play_stream(gtk_entry_get_text(entry));
+}
+
 
 gboolean on_entry_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
@@ -364,6 +387,7 @@ int main(int argc, char *argv[])
 	vbox_tractasono = NULL;
 
 	window_music = NULL;
+	window_radio = NULL;
 	window_import = NULL;
 	window_settings = NULL;
 	window_fullscreen = NULL;

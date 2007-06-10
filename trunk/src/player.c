@@ -48,6 +48,7 @@ gboolean scrub = FALSE;
 
 // Prototypen
 GstElement* player_make_flac_pipeline(const gchar * location);
+GstElement* player_make_stream_pipeline(const gchar *url);
 static void player_query_positions_pads();
 static void player_query_positions_elems();
 static void player_query_rates();
@@ -147,38 +148,32 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 		case GST_MESSAGE_STATE_CHANGED: {
 			GstState oldstate, newstate, pending;
 			
-			gst_message_parse_state_changed(message,
-											&oldstate,
-											&newstate,
-											&pending);
-
-			/*g_print("\tState Message: old: %i, new: %i, pending: %i\n",
-					oldstate,
-					newstate,
-					pending);*/
+			gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
+			g_print("\tStates: (old=%i, new=%i, pending=%i)\n", oldstate, newstate, pending);
 
 			if (newstate == 4) {
 				//gint64 dur = player_get_song_duration();
 				interface_set_playing(TRUE);
 				//interface_set_song_duration(dur);
 				//g_print("Song duration: %lli\n", dur);
-				g_print("Player Play\n");
+				g_print("GStreamer is now playing!\n");
 			}
 			
 			if ((newstate == 3) && (oldstate == 4)) {
 				interface_set_playing(FALSE);
-				g_print("Player Pause\n");
+				g_print("GStreamer is now paused!\n");
 			}
 			
 		}
 		case GST_MESSAGE_EOS: {
 			/* end-of-stream */
-			//g_print ("\tEnd Of Stream\n");
+			g_print ("\tEnd Of Stream\n");
+			//interface_set_playimage("gtk-media-play");
 			break;
 		}
 		default: {
 			/* unhandled message */
-			//g_print ("\tUnhandled Message %i\n", GST_MESSAGE_TYPE (message));
+			g_print ("\tUnhandled Message %i\n", GST_MESSAGE_TYPE (message));
 			break;
 		}
 	}
@@ -241,6 +236,27 @@ void player_play_testfile()
 	g_timeout_add (1000, (GSourceFunc) cb_print_position, pipeline);
 }
 
+
+// Play a stream
+void player_play_stream(const gchar *url)
+{
+	pipeline = player_make_stream_pipeline(url);
+	
+	/* adds a watch for new message on our pipeline's message bus to
+	* the default GLib main context, which is the main context that our
+	* GLib main loop is attached to below */
+	GstBus *bus;
+
+	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
+	gst_bus_add_watch (bus, player_bus_callback, NULL);
+	gst_object_unref (bus);
+	
+	// Watch hinzufügen
+	g_timeout_add (1000, (GSourceFunc) cb_print_position, pipeline);
+
+
+}
+
 // Seeking
 void player_seek_to_position(gint seconds)
 {
@@ -296,6 +312,20 @@ GstElement* player_make_flac_pipeline(const gchar *location)
 	rate_pads = g_list_prepend (rate_pads, gst_element_get_pad (decoder, "sink"));
 	
 	return pipeline;
+}
+
+GstElement* player_make_stream_pipeline(const gchar *url)
+{
+	GstElement *play;
+	
+	/* set up */
+  play = gst_element_factory_make ("playbin", "play");
+  g_object_set (G_OBJECT (play), "uri", url, NULL);
+  
+  
+  gst_element_set_state (play, GST_STATE_PLAYING);
+  
+  return play;
 }
 
 static gchar* player_format_value(GtkScale * scale, gdouble value)

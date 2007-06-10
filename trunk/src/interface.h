@@ -20,3 +20,5 @@ gboolean interface_get_slidermove();
 void interface_set_playing(gboolean isplaying);
 gboolean interface_get_playing();
 
+void interface_set_playimage(const gchar *stock_id);
+

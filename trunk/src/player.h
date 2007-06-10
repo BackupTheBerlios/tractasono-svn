@@ -4,6 +4,7 @@ void player_set_play();
 void player_set_stop();
 
 void player_play_testfile();
+void player_play_stream(const gchar *url);
 
 void player_seek_to_position(gint seconds);
 

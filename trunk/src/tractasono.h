@@ -10,6 +10,7 @@ GtkWidget *vbox_keyboard;
 GtkWidget *vbox_tractasono;
 
 GtkWidget *window_music;
+GtkWidget *window_radio;
 GtkWidget *window_import;
 GtkWidget *window_settings;
 GtkWidget *window_fullscreen;
