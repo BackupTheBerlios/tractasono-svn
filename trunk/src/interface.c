@@ -1,6 +1,6 @@
 #include "interface.h"
 #include "player.h"
-#include <string.h>
+#include "radio.h"
 
 GladeXML  *xml;
 GtkWidget *mainwindow;
@@ -27,6 +27,7 @@ gboolean playing;
 #define INSTALLED_GLADE DATADIR"/tractasono/tractasono.glade"
 
 
+
 void interface_init(int *argc, char ***argv)
 {
 	g_print("Interface initialisieren\n");
@@ -38,6 +39,65 @@ void interface_init(int *argc, char ***argv)
 	adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.00, 100.0,
 												   0.1, 1.0, 1.0));
 }
+
+
+
+// Alle Button Switches hier
+
+
+// Event-Handler für den Internetradio Button
+void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("Button Internetradio wurde gedrückt!\n");
+	
+	// Modul holen
+	GtkWidget *radio_modul = NULL;
+
+	//radio_modul = glade_xml_get_widget(xml, "radio_modul");
+	radio_modul = glade_xml_get_widget(xml, "table_radio");
+	if (radio_modul == NULL) {
+		g_print("Fehler: Konnte radio_modul nicht holen!\n");
+	}
+
+	interface_clean();
+	interface_add_modul(radio_modul);
+	
+	init_radio_modul(); 
+}
+
+
+
+
+// Räume alle Fenster im placeholder auf
+void interface_clean(){
+	GtkContainer *container = NULL;
+	GList* children = NULL;
+
+	container = GTK_CONTAINER(vbox_placeholder);
+	children = gtk_container_get_children(container);
+
+	gtk_widget_hide(vbox_keyboard);
+	for (children = g_list_first(children); children; children = g_list_next(children)) {
+		gtk_container_remove(container, children->data);
+	}
+}
+
+
+// Zeige ein Modul im Platzhalter an
+void interface_add_modul(GtkWidget *widget)
+{
+	gtk_widget_ref(widget);
+	if (widget->parent) {
+		gtk_container_remove(GTK_CONTAINER(widget->parent), widget);
+	}
+	gtk_container_add(GTK_CONTAINER(vbox_placeholder), widget);
+	gtk_widget_unref(widget);
+
+	gtk_widget_show(widget);
+}
+
+
+
 
 void interface_set_song_position(gdouble position)
 {	
@@ -127,13 +187,13 @@ void interface_set_songinfo(const gchar *artist,
 	GString *newsong = NULL;
 
 	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
-	if (strcmp(&artist, "") == 0 && strcmp(&title, "") == 0) {
+	if (g_ascii_strcasecmp(artist, "") == 0 && g_ascii_strcasecmp(title, "") == 0) {
 		g_string_append(newsong, "Keine Song Informationen vorhanden!");
-	} else if(strcmp(&artist, "") != 0 && strcmp(&title, "") == 0) {
+	} else if(g_ascii_strcasecmp(artist, "") != 0 && g_ascii_strcasecmp(title, "") == 0) {
 		g_string_append(newsong, artist);
-	} else if(strcmp(&artist, "") == 0 && strcmp(&title, "") != 0) {
+	} else if(g_ascii_strcasecmp(artist, "") == 0 && g_ascii_strcasecmp(title, "") != 0) {
 		g_string_append(newsong, title);
-	} else if(strcmp(&artist, "") != 0 && strcmp(&title, "") != 0) {
+	} else if(g_ascii_strcasecmp(artist, "") != 0 && g_ascii_strcasecmp(title, "") != 0) {
 		g_string_append(newsong, artist);
 		g_string_append(newsong, " - ");
 		g_string_append(newsong, title);
@@ -186,4 +246,10 @@ gboolean interface_get_playing()
 {
 	return playing;
 }
+
+
+
+
+
+
 

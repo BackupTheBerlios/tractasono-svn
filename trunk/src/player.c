@@ -19,13 +19,6 @@ typedef struct
 }
 seek_format;
 
-static seek_format seek_formats[] = {
-  {"tim", GST_FORMAT_TIME},
-  {"byt", GST_FORMAT_BYTES},
-  {"buf", GST_FORMAT_BUFFERS},
-  {"def", GST_FORMAT_DEFAULT},
-  {NULL, 0},
-};
 
 /* seek timeout */
 #define SEEK_TIMEOUT 40 * GST_MSECOND
@@ -49,9 +42,6 @@ gboolean scrub = FALSE;
 // Prototypen
 GstElement* player_make_flac_pipeline(const gchar * location);
 GstElement* player_make_stream_pipeline(const gchar *url);
-static void player_query_positions_pads();
-static void player_query_positions_elems();
-static void player_query_rates();
 static gboolean player_send_event(GstEvent *event);
 void player_handle_tag_message(GstMessage *message);
 
@@ -328,68 +318,6 @@ GstElement* player_make_stream_pipeline(const gchar *url)
   return play;
 }
 
-static gchar* player_format_value(GtkScale * scale, gdouble value)
-{
-	gint64 real;
-	gint64 duration;
-	gint64 seconds;
-	gint64 subseconds;
-	
-	duration = player_get_song_duration_ns();
-	
-	real = value * duration / 100;
-	seconds = (gint64) real / GST_SECOND;
-	subseconds = (gint64) real / (GST_SECOND / 100);
-	
-	return g_strdup_printf ("%02" G_GINT64_FORMAT ":%02" G_GINT64_FORMAT ":%02" 
-		   G_GINT64_FORMAT, seconds / 60, seconds % 60, subseconds % 100);
-}
-
-static gboolean player_update_scale(gpointer data)
-{
-	GstFormat format;
-	
-	position = 0;
-	
-	format = GST_FORMAT_TIME;
-	
-	if (elem_seek) {
-		if (seekable_elements) {
-			GstElement *element = GST_ELEMENT (seekable_elements->data);
-			
-			gst_element_query_position (element, &format, &position);
-			//gst_element_query_duration (element, &format, &duration);
-		}
-	} else {
-		if (seekable_pads) {
-			GstPad *pad = GST_PAD (seekable_pads->data);
-			
-			gst_pad_query_position (pad, &format, &position);
-			//gst_pad_query_duration (pad, &format, &duration);
-		}
-	}
-	
-	if (stats) {
-		if (elem_seek) {
-			player_query_positions_elems();
-		} else {
-			player_query_positions_pads();
-		}
-		player_query_rates();
-	}
-	
-	/*if (position >= duration) {
-		duration = position;
-	}*/
-	
-	//if (duration > 0) {
-		//gtk_adjustment_set_value (adjustment, position * 100.0 / duration);
-		//gtk_widget_queue_draw (hscale);
-	//}
-	
-	return TRUE;
-}
-
 
 static void player_do_seek(GtkWidget *widget)
 {
@@ -450,94 +378,7 @@ static void player_do_seek(GtkWidget *widget)
 	}
 }
 
-static void player_query_positions_elems()
-{
-	GList *walk = seekable_elements;
-	
-	while (walk) {
-		GstElement *element = GST_ELEMENT (walk->data);
-		gint i = 0;
 
-		g_print ("positions %8.8s: ", GST_ELEMENT_NAME (element));
-		while (seek_formats[i].name) {
-			gint64 position, total;
-			GstFormat format;
-			
-			format = seek_formats[i].format;
-			
-			if (gst_element_query_position (element, &format, &position) &&
-				gst_element_query_duration (element, &format, &total)) {
-					g_print ("%s %13" G_GINT64_FORMAT " / %13" G_GINT64_FORMAT " | ",
-					seek_formats[i].name, position, total);
-			} else {
-				g_print ("%s %13.13s / %13.13s | ", seek_formats[i].name, "*NA*", "*NA*");
-			}
-			i++;
-		}
-		g_print (" %s\n", GST_ELEMENT_NAME (element));
-		
-		walk = g_list_next (walk);
-	}
-}
-
-static void player_query_positions_pads()
-{
-	GList *walk = seekable_pads;
-	
-	while (walk) {
-		GstPad *pad = GST_PAD (walk->data);
-		gint i = 0;
-		
-		g_print ("positions %8.8s: ", GST_PAD_NAME (pad));
-		while (seek_formats[i].name) {
-			GstFormat format;
-			gint64 position, total;
-			
-			format = seek_formats[i].format;
-			
-			if (gst_pad_query_position (pad, &format, &position) &&
-				gst_pad_query_duration (pad, &format, &total)) {
-					g_print ("%s %13" G_GINT64_FORMAT " / %13" G_GINT64_FORMAT " | ",
-					seek_formats[i].name, position, total);
-			} else {
-				g_print ("%s %13.13s / %13.13s | ", seek_formats[i].name, "*NA*", "*NA*");
-			}
-			i++;
-		}
-		g_print (" %s:%s\n", GST_DEBUG_PAD_NAME (pad));
-		
-		walk = g_list_next (walk);
-	}
-}
-
-static void player_query_rates()
-{
-	GList *walk = rate_pads;
-	
-	while (walk) {
-		GstPad *pad = GST_PAD(walk->data);
-		gint i = 0;
-		
-		g_print("rate/sec  %8.8s: ", GST_PAD_NAME(pad));
-		while (seek_formats[i].name) {
-			gint64 value;
-			GstFormat format;
-			
-			format = seek_formats[i].format;
-			
-			if (gst_pad_query_convert (pad, GST_FORMAT_TIME, GST_SECOND, &format,
-				&value)) {
-					g_print ("%s %13" G_GINT64_FORMAT " | ", seek_formats[i].name, value);
-			} else {
-				g_print("%s %13.13s | ", seek_formats[i].name, "*NA*");
-			}
-			i++;
-		}
-		g_print(" %s:%s\n", GST_DEBUG_PAD_NAME(pad));
-		
-		walk = g_list_next(walk);
-	}
-}
 
 static gboolean player_send_event(GstEvent *event)
 {

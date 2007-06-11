@@ -7,6 +7,10 @@ void interface_init(int *argc, char ***argv);
 
 void interface_load(const gchar *gladefile);
 
+void interface_clean();
+
+void interface_add_modul(GtkWidget *widget);
+
 void interface_set_songinfo(const gchar *artist,
 							const gchar *title,
 							gdouble seconds);

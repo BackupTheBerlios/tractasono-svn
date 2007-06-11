@@ -51,20 +51,7 @@ void add_to_placeholder(GtkWidget *widget)
 	gtk_widget_show(widget);
 }
 
-// Räume alle Fenster im placeholder auf
-void clean_placeholder()
-{
-	GtkContainer *container = NULL;
-	GList* children = NULL;
 
-	container = GTK_CONTAINER(vbox_placeholder);
-	children = gtk_container_get_children(container);
-
-	gtk_widget_hide(vbox_keyboard);
-	for (children = g_list_first(children); children; children = g_list_next(children)) {
-		gtk_container_remove(container, children->data);
-	}
-}
 
 // Räume alle Fenster auf
 void clean_all()
@@ -113,7 +100,7 @@ void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
 		g_print("Fehler: Konnte notebook_music nicht holen!\n");
 	}
 
-	clean_placeholder();
+	interface_clean();
 	add_to_placeholder(notebook_music);
 }
 
@@ -130,29 +117,10 @@ void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
 		g_print("Fehler: Konnte vbox_settings nicht holen!\n");
 	}
 
-	clean_placeholder();
+	interface_clean();
 	add_to_placeholder(vbox_settings);
 }
 
-// Event-Handler für den Internetradio Button
-void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Internetradio gedrückt!\n");
-	
-	// Einstellungen Window holen
-	GtkWidget *table_radio = NULL;
-
-	table_radio = glade_xml_get_widget(xml, "table_radio");
-	if (table_radio == NULL) {
-		g_print("Fehler: Konnte table_radio nicht holen!\n");
-	}
-
-	clean_placeholder();
-	add_to_placeholder(table_radio);
- 
-  // mach ganz vell schlaui sache...
- 
-}
 
 // Event-Handler für den CD Button
 void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
@@ -167,7 +135,7 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 		g_print("Fehler: Konnte notebook_cd nicht holen!\n");
 	}
 
-	clean_placeholder();
+	interface_clean();
 	add_to_placeholder(notebook_cd);
 
 	// Database Testfunktion
@@ -191,7 +159,7 @@ gboolean on_hscale_song_button_release_event(GtkWidget *widget, GdkEventButton *
 
 	GtkRange *range = GTK_RANGE(widget);
 
-	player_stop_seek(range, user_data);
+	player_stop_seek(GTK_WIDGET(range), user_data);
 
 	/*gdouble pos = gtk_range_get_value(range);
 	player_seek_to_position(pos);*/
@@ -235,17 +203,6 @@ void on_testbutton_clicked(GtkWidget *widget, gpointer user_data)
 {
 	// Hier sollte noch etwas Code rein
 	g_print("Testbutton wurde gedrückt!\n");
-}
-
-// Event-Handler für den URL Stream Button
-void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
-{
-	// Hier sollte noch etwas Code rein
-	g_print("URL Stream Button wurde gedrückt!\n");
-	
-	GtkWidget *entry = glade_xml_get_widget(xml, "entry_radio_url");
-	
-	player_play_stream(gtk_entry_get_text(entry));
 }
 
 
