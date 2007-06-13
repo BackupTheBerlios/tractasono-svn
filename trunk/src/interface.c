@@ -1,6 +1,6 @@
 #include "interface.h"
 #include "player.h"
-#include "radio.h"
+//#include "radio.h"
 
 GladeXML  *xml;
 GtkWidget *mainwindow;
@@ -62,7 +62,7 @@ void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 	interface_clean();
 	interface_add_modul(radio_modul);
 	
-	init_radio_modul(); 
+	//init_radio_modul(); 
 }
 
 
