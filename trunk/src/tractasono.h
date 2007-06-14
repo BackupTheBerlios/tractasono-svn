@@ -9,14 +9,15 @@ GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
 GtkWidget *vbox_tractasono;
 
-GtkWidget *window_music;
-GtkWidget *window_radio;
-GtkWidget *window_import;
-GtkWidget *window_settings;
-GtkWidget *window_fullscreen;
-GtkWidget *window_disc;
-
 GtkEntry *actual_entry;
 
+typedef struct {
+	GtkWidget *music;
+	GtkWidget *radio;
+	GtkWidget *import;
+	GtkWidget *settings;
+	GtkWidget *fullscreen;
+	GtkWidget *disc;
+} WindowModule;
 
-
+WindowModule module;

@@ -38,34 +38,6 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 	return FALSE;
 }
 
-// Zeige ein Widget im Platzhalter an
-void add_to_placeholder(GtkWidget *widget)
-{
-	gtk_widget_ref(widget);
-	if (widget->parent) {
-		gtk_container_remove(GTK_CONTAINER(widget->parent), widget);
-	}
-	gtk_container_add(GTK_CONTAINER(vbox_placeholder), widget);
-	gtk_widget_unref(widget);
-
-	gtk_widget_show(widget);
-}
-
-
-
-// Räume alle Fenster auf
-void clean_all()
-{
-	GtkContainer *root = NULL;
-	GList* children = NULL;
-
-	root = GTK_CONTAINER(vbox_tractasono);
-	children = gtk_container_get_children(root);
-
-	for (children = g_list_first(children); children; children = g_list_next(children)) {
-		gtk_container_remove(root, children->data);
-	}
-}
 
 // Zeige das Oncreen Keyboard an
 void show_keyboard(gboolean show)
@@ -87,60 +59,8 @@ void show_keyboard(gboolean show)
 	}
 }
 
-// Event-Handler für den Musik Button
-void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Musik gedrückt!\n");
-
-	// Einstellungen Window holen
-	GtkWidget *notebook_music = NULL;
-
-	notebook_music = glade_xml_get_widget(xml, "notebook_music");
-	if (notebook_music == NULL) {
-		g_print("Fehler: Konnte notebook_music nicht holen!\n");
-	}
-
-	interface_clean();
-	add_to_placeholder(notebook_music);
-}
-
-// Event-Handler für den Einstellungen Button
-void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Einstellungen gedrückt!\n");
-
-	// Einstellungen Window holen
-	GtkWidget *vbox_settings = NULL;
-
-	vbox_settings = glade_xml_get_widget(xml, "vbox_settings");
-	if (vbox_settings == NULL) {
-		g_print("Fehler: Konnte vbox_settings nicht holen!\n");
-	}
-
-	interface_clean();
-	add_to_placeholder(vbox_settings);
-}
 
 
-// Event-Handler für den CD Button
-void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("CD gedrückt!\n");
-
-	// CD Window holen
-	GtkWidget *notebook_cd = NULL;
-
-	notebook_cd = glade_xml_get_widget(xml, "notebook_cd");
-	if (notebook_cd == NULL) {
-		g_print("Fehler: Konnte notebook_cd nicht holen!\n");
-	}
-
-	interface_clean();
-	add_to_placeholder(notebook_cd);
-
-	// Database Testfunktion
-	//database_test();
-}
 
 gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
@@ -179,16 +99,6 @@ void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guin
 
 	g_print("Reiter gewechselt, schliesse Tastatur\n");
 	show_keyboard(FALSE);
-}
-
-// Event-Handler für den Vollbild Button
-void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
-{
-	// Hier sollte noch etwas Code rein
-	g_print("Vollbild gedrückt!\n");
-
-	//clean_placeholder();
-	clean_all();
 }
 
 void on_window_fullscreen_button_press_event(GtkWidget *widget, gpointer user_data)
@@ -342,13 +252,6 @@ int main(int argc, char *argv[])
 	vbox_placeholder = NULL;
 	vbox_keyboard = NULL;
 	vbox_tractasono = NULL;
-
-	window_music = NULL;
-	window_radio = NULL;
-	window_import = NULL;
-	window_settings = NULL;
-	window_fullscreen = NULL;
-	window_disc = NULL;
 
 	actual_entry = NULL;
 

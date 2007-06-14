@@ -1,18 +1,13 @@
 #include "interface.h"
 #include "player.h"
 //#include "radio.h"
+#include "tractasono.h"
 
 GladeXML  *xml;
 GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
 GtkWidget *vbox_tractasono;
-
-GtkWidget *window_music;
-GtkWidget *window_import;
-GtkWidget *window_settings;
-GtkWidget *window_fullscreen;
-GtkWidget *window_disc;
 
 GtkRange *range = NULL;
 GtkAdjustment *adjustment;
@@ -33,6 +28,13 @@ void interface_init(int *argc, char ***argv)
 	g_print("Interface initialisieren\n");
 	gtk_init(argc, argv);
 	glade_init();
+	
+	module.music = NULL;
+	module.radio = NULL;
+	module.import = NULL;
+	module.settings = NULL;
+	module.fullscreen = NULL;
+	module.disc = NULL;
 
 	slidermove = FALSE;
 	playing = FALSE;
@@ -49,18 +51,8 @@ void interface_init(int *argc, char ***argv)
 void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 {
 	g_print("Button Internetradio wurde gedrückt!\n");
-	
-	// Modul holen
-	GtkWidget *radio_modul = NULL;
 
-	//radio_modul = glade_xml_get_widget(xml, "radio_modul");
-	radio_modul = glade_xml_get_widget(xml, "table_radio");
-	if (radio_modul == NULL) {
-		g_print("Fehler: Konnte radio_modul nicht holen!\n");
-	}
-
-	interface_clean();
-	interface_add_modul(radio_modul);
+	interface_show_module(module.radio);
 	
 	//init_radio_modul(); 
 }
@@ -82,19 +74,6 @@ void interface_clean(){
 	}
 }
 
-
-// Zeige ein Modul im Platzhalter an
-void interface_add_modul(GtkWidget *widget)
-{
-	gtk_widget_ref(widget);
-	if (widget->parent) {
-		gtk_container_remove(GTK_CONTAINER(widget->parent), widget);
-	}
-	gtk_container_add(GTK_CONTAINER(vbox_placeholder), widget);
-	gtk_widget_unref(widget);
-
-	gtk_widget_show(widget);
-}
 
 
 
@@ -145,10 +124,11 @@ void interface_load(const gchar *gladefile)
 	}
 
 	// Die einzelnen Windows laden und referenzieren
-	window_music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
-	window_disc = g_object_ref(glade_xml_get_widget(xml, "notebook_cd"));
-	window_settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
-	//window_fullscreen = g_object_ref(glade_xml_get_widget(xml, ""));
+	module.music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
+	module.disc = g_object_ref(glade_xml_get_widget(xml, "notebook_cd"));
+	module.settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
+	module.radio = g_object_ref(glade_xml_get_widget(xml, "table_radio"));
+	module.fullscreen = g_object_ref(glade_xml_get_widget(xml, "vbox_fullscreen"));
 
 	// Keyboard laden
 	GtkWidget *vbox_placeholder_keyboard = NULL;
@@ -248,6 +228,82 @@ gboolean interface_get_playing()
 }
 
 
+// Räume alle Fenster auf
+void interface_clean_all()
+{
+	GtkContainer *root = NULL;
+	GList* children = NULL;
+
+	root = GTK_CONTAINER(vbox_tractasono);
+	children = gtk_container_get_children(root);
+
+	for (children = g_list_first(children); children; children = g_list_next(children)) {
+		gtk_container_remove(root, children->data);
+	}
+}
+
+
+// Zeige ein Widget im Platzhalter an
+void interface_show_module(GtkWidget *widget)
+{
+	if (widget == NULL) {
+		g_print("Fehler: Konnte ein Modul nicht anzeigen!\n");
+	}
+	
+	interface_clean();
+	
+	gtk_widget_ref(widget);
+	if (widget->parent) {
+		gtk_container_remove(GTK_CONTAINER(widget->parent), widget);
+	}
+	gtk_container_add(GTK_CONTAINER(vbox_placeholder), widget);
+	gtk_widget_unref(widget);
+
+	gtk_widget_show(widget);
+}
+
+
+
+// Event-Handler für den Musik Button
+void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("Musik gedrückt!\n");
+
+	interface_show_module(module.music);
+}
+
+
+// Event-Handler für den Einstellungen Button
+void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("Einstellungen gedrückt!\n");
+
+	interface_show_module(module.settings);
+}
+
+
+// Event-Handler für den CD Button
+void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("CD gedrückt!\n");
+
+	interface_show_module(module.disc);
+
+	// Database Testfunktion
+	//database_test();
+}
+
+
+// Event-Handler für den Vollbild Button
+void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
+{
+	g_print("Vollbild gedrückt!\n");
+
+	//interface_clean_all();
+	//root = GTK_CONTAINER(vbox_tractasono);
+	
+	interface_show_module(module.fullscreen);
+}
 
 
 
