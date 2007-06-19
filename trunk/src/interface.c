@@ -2,6 +2,7 @@
 #include "player.h"
 //#include "radio.h"
 #include "tractasono.h"
+#include "fullscreen.h"
 
 GladeXML  *xml;
 GtkWidget *mainwindow;
@@ -41,6 +42,34 @@ void interface_init(int *argc, char ***argv)
 	adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.00, 100.0,
 												   0.1, 1.0, 1.0));
 }
+
+
+// Allgemeiner Destroy-Event
+void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
+{
+	// Programm beenden
+	g_print("Programm wird beendet!\n");
+	gtk_main_quit();
+}
+
+// Delete-Event vom Windowmanager
+gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+	/* If you return FALSE in the "delete_event" signal handler,
+	* GTK will emit the "destroy" signal. Returning TRUE means
+	* you don't want the window to be destroyed.
+	* This is useful for popping up 'are you sure you want to quit?'
+	* type dialogs. */
+	g_print ("Das Programm wird durch den Windowmanager geschlossen!\n");
+
+	/* Change TRUE to FALSE and the main window will be destroyed with
+	* a "delete_event". */
+	return FALSE;
+}
+
+
+
+
 
 
 
@@ -303,6 +332,7 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 	//root = GTK_CONTAINER(vbox_tractasono);
 	
 	interface_show_module(module.fullscreen);
+	fullscreen_init();
 }
 
 

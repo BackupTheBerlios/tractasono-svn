@@ -484,3 +484,65 @@ void player_handle_tag_message(GstMessage *message)
 	gst_tag_list_free(tag_list);
 	
 }
+
+
+
+// Song Slider Event Handler
+gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
+{
+	gdouble pos = 0;
+
+	pos = gtk_range_get_value (range);
+
+	g_print("Song Slider Value: %.0f\n", pos);
+
+	return FALSE;
+}
+
+
+void on_trackplay_clicked(GtkButton *button, gpointer user_data)
+{	
+	if (interface_get_playing()) {
+		g_print("Pause wurde gedrückt\n");
+		player_set_stop();
+	} else {
+		g_print("Play wurde gedrückt\n");
+		player_set_play();
+	}
+}
+
+void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
+{
+	g_print("Stop wurde gedrückt\n");
+	player_set_stop();
+}
+
+
+gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	g_print("Slider Button pressed!\n");
+
+	interface_set_slidermove(TRUE);
+	player_start_seek(widget, event, user_data);
+
+	return FALSE;
+}
+
+// Handler für seeking
+gboolean on_hscale_song_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	g_print("Slider Button released!\n");
+
+	GtkRange *range = GTK_RANGE(widget);
+
+	player_stop_seek(GTK_WIDGET(range), user_data);
+
+	/*gdouble pos = gtk_range_get_value(range);
+	player_seek_to_position(pos);*/
+
+	interface_set_slidermove(FALSE);
+
+	return FALSE;
+}
+
+

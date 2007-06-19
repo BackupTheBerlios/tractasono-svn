@@ -1,4 +1,6 @@
 #include "settings.h"
+#include "interface.h"
+#include "keyboard.h"
 
 GConfClient *client;
 
@@ -63,3 +65,19 @@ GnomeVFSDrive* settings_get_burner()
 {
 	return burner;
 }
+
+
+
+
+// Handler für Fukuswechler auf dem Settings-Reiter
+void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
+{
+	gchararray name;
+	g_object_get(notebook, "name", &name, NULL);
+	g_print("Page name: %s\n", name);
+
+	g_print("Reiter gewechselt, schliesse Tastatur\n");
+	keyboard_show(FALSE);
+}
+
+

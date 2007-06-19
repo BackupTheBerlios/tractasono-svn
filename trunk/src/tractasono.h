@@ -11,6 +11,7 @@ GtkWidget *vbox_tractasono;
 
 GtkEntry *actual_entry;
 
+
 typedef struct {
 	GtkWidget *music;
 	GtkWidget *radio;
