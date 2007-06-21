@@ -2232,7 +2232,11 @@ Touch the screen to go back!</property>
 
 http://24.207.26.60:8888
 file:///usr/share/example-content/ubuntu Sax.ogg
-http://mp3-vr-128.smgradio.com:80/</property>
+http://mp3-vr-128.smgradio.com:80/
+
+smb://STAFF%3Bobrip0@147.86.125.193/music/Nine%20Inch%20Nails/Year%20Zero/Nine Inch Nails - Hyperpower!.ogg
+
+smb://STAFF%3Bobrip0@147.86.125.193/music/Ramones/Loud%2C%20Fast%20Ramones/Ramones - Do You Remember Rock 'N' Roll Radio.ogg</property>
           </widget>
           <packing>
             <property name="left_attach">1</property>
