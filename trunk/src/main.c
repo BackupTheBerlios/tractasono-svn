@@ -13,8 +13,7 @@
 #include "interface.h"
 #include "disc.h"
 
-
-
+// He Mann, do hets vell zwenig Code!!
 
 // Programmeinstieg
 int main(int argc, char *argv[])
