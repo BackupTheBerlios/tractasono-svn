@@ -6,7 +6,7 @@ AM_CPPFLAGS = -DDATADIR\="\"$(datadir)"\"
 
 bin_PROGRAMS = tractasono
 
-tractasono_SOURCES = drives.h interface.c player.c interface.h settings.c tractasono.h main.c player.h settings.h drives.c radio.c radio.h fullscreen.c fullscreen.h music.c music.h keyboard.c keyboard.h
+tractasono_SOURCES = drives.h interface.c player.c interface.h settings.c tractasono.h main.c player.h settings.h drives.c radio.c radio.h fullscreen.c fullscreen.h music.c music.h keyboard.c keyboard.h disc.c disc.h
 	
 tractasono_LDFLAGS = -export-dynamic
 

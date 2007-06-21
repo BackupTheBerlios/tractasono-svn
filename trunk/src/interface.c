@@ -3,6 +3,7 @@
 //#include "radio.h"
 #include "tractasono.h"
 #include "fullscreen.h"
+#include "disc.h"
 
 GladeXML  *xml;
 GtkWidget *mainwindow;
@@ -116,7 +117,11 @@ void interface_set_song_position(gdouble position)
 void interface_set_song_duration(gdouble duration)
 {		
 	//g_print("interface_set_song_duration: %.0f\n", duration);
-	gtk_range_set_range(range, 0, duration);
+	if (duration > 0) {
+		gtk_range_set_range(range, 0, duration);	
+	} else {
+		g_print("Dräcksbalke usblände!\n");
+	}
 }
 
 
@@ -154,7 +159,7 @@ void interface_load(const gchar *gladefile)
 
 	// Die einzelnen Windows laden und referenzieren
 	module.music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
-	module.disc = g_object_ref(glade_xml_get_widget(xml, "notebook_cd"));
+	module.disc = g_object_ref(glade_xml_get_widget(xml, "vbox_disc"));
 	module.settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
 	module.radio = g_object_ref(glade_xml_get_widget(xml, "table_radio"));
 	module.fullscreen = g_object_ref(glade_xml_get_widget(xml, "vbox_fullscreen"));
@@ -318,8 +323,7 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 
 	interface_show_module(module.disc);
 
-	// Database Testfunktion
-	//database_test();
+	disc_init();
 }
 
 
