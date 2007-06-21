@@ -17,8 +17,8 @@ void interface_set_songinfo(const gchar *artist,
 							const gchar *title,
 							gdouble seconds);
 
-void interface_set_song_position(gdouble position);
-void interface_set_song_duration(gdouble duration);
+void interface_set_song_position(gint64 position);
+void interface_set_song_duration(gint64 duration);
 
 void interface_set_slidermove(gboolean move);
 gboolean interface_get_slidermove();
@@ -28,3 +28,5 @@ gboolean interface_get_playing();
 
 void interface_set_playimage(const gchar *stock_id);
 
+
+gdouble gint64_to_double(gint64 value);

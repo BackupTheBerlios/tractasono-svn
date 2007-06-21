@@ -11,7 +11,7 @@ GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
 GtkWidget *vbox_tractasono;
 
-GtkRange *range = NULL;
+GtkRange *range;
 GtkAdjustment *adjustment;
 
 GtkEntry *actual_entry;
@@ -108,17 +108,48 @@ void interface_clean(){
 
 
 
-void interface_set_song_position(gdouble position)
-{	
-	//g_print("interface_set_song_position: %.0f\n", position);
-	gtk_range_set_value(range, position);
+void interface_set_song_position(gint64 position)
+{
+	g_print("interface_set_song_position()\n");
+	g_print("\tposition is %s (minutes:seconds)\n", ns_formatted(position));
+	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (position));*/
+
+	gdouble rangepos;
+	
+	rangepos = gint64_to_double(position);
+	g_print("\tsetting range position to %0.f (nanoseconds)\n", rangepos);
+	
+	//FIXME Hier sollte noch der obere Bereich des Ranges geprüft werden
+	if (rangepos > 0) {
+		gtk_range_set_value(range, rangepos);
+	} else {
+		g_print("\tIllegale Position!");
+	}
 }
 
-void interface_set_song_duration(gdouble duration)
-{		
-	//g_print("interface_set_song_duration: %.0f\n", duration);
-	if (duration > 0) {
-		gtk_range_set_range(range, 0, duration);	
+
+gdouble gint64_to_double(gint64 value)
+{
+	gdouble ret;
+	
+	ret = value / GST_NSECOND;
+	
+	return ret;
+}
+
+
+void interface_set_song_duration(gint64 duration)
+{
+	g_print("interface_set_song_duration()\n");
+	g_print("\tduration is %s (minutes:seconds)\n", ns_formatted(duration));
+
+	gdouble rangevalue;
+	
+	rangevalue = gint64_to_double(duration);
+	g_print("\tsetting range to %0.f (nanoseconds)\n", rangevalue);
+	
+	if (rangevalue > 0) {
+		gtk_range_set_range(range, 0, rangevalue);
 	} else {
 		g_print("Dräcksbalke usblände!\n");
 	}
@@ -161,7 +192,7 @@ void interface_load(const gchar *gladefile)
 	module.music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
 	module.disc = g_object_ref(glade_xml_get_widget(xml, "vbox_disc"));
 	module.settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
-	module.radio = g_object_ref(glade_xml_get_widget(xml, "table_radio"));
+	module.radio = g_object_ref(glade_xml_get_widget(xml, "radiomodul"));
 	module.fullscreen = g_object_ref(glade_xml_get_widget(xml, "vbox_fullscreen"));
 
 	// Keyboard laden
@@ -178,10 +209,9 @@ void interface_load(const gchar *gladefile)
 	gtk_widget_hide(vbox_keyboard);
 	
 	// Range laden
-	range = (GtkRange *)glade_xml_get_widget(xml, "hscale_song");
-	
+	range = GTK_RANGE(glade_xml_get_widget(xml, "range_song"));
 	if (range == NULL) {
-		g_print("Fehler: Konnte hscale_song nicht holen!\n");
+		g_print("Fehler: Konnte range_song nicht holen!\n");
 	}
 }
 
@@ -215,9 +245,6 @@ void interface_set_songinfo(const gchar *artist,
 	g_string_append(newsong, "</span>");
 
 	gtk_label_set_label(song, newsong->str);
-	
-	interface_set_song_duration(0);
-	interface_set_song_position(0);
 }
 
 void interface_set_slidermove(gboolean move)
@@ -230,20 +257,19 @@ gboolean interface_get_slidermove()
 	return slidermove;
 }
 
+// Setzt auf dem Play Button auf Play oder Pause
 void interface_set_playimage(const gchar *stock_id)
 {
 	GtkImage *playimage = NULL;
 	
 	playimage = GTK_IMAGE(glade_xml_get_widget(xml, "image_play"));
-	
 	if (playimage == NULL) {
 		g_print("Fehler beim play Bild holen!\n");
 	} else {
-		gtk_image_set_from_stock(playimage,
-								 stock_id,
-								 GTK_ICON_SIZE_BUTTON);
+		gtk_image_set_from_stock(playimage, stock_id, GTK_ICON_SIZE_BUTTON);
 	}
 }
+
 
 void interface_set_playing(gboolean isplaying)
 {

@@ -1,9 +1,9 @@
-#include <gtk/gtk.h>
-#include <gst/gst.h>
- 
 #include "player.h"
 #include "interface.h"
 
+
+// GStreamer Zeit Format
+GstFormat format = GST_FORMAT_TIME;
 
 GstElement *pipeline;
 GstElement *src;
@@ -16,8 +16,7 @@ typedef struct
 {
   const gchar *name;
   const GstFormat format;
-}
-seek_format;
+} seek_format;
 
 
 /* seek timeout */
@@ -44,6 +43,7 @@ GstElement* player_make_flac_pipeline(const gchar * location);
 GstElement* player_make_stream_pipeline(const gchar *url);
 static gboolean player_send_event(GstEvent *event);
 void player_handle_tag_message(GstMessage *message);
+static gboolean player_timer_event(GstElement *pipeline);
 
 
 
@@ -66,47 +66,36 @@ static GstElement* gst_element_factory_make_or_warn(gchar * type,
   return element;
 }
 
-/*
-	Gibt die Länge des Songs in Sekunden zurück
-*/
-gint64 player_get_song_duration()
-{
-	gint64 duration;
-	GstFormat fmt = GST_FORMAT_TIME;
-
-	gst_element_query_duration (pipeline, &fmt, &duration);
-	
-	duration = duration / 1000000000;
-
-	return duration;
-}
 
 /*
 	Gibt die Länge des Songs in Nanosekunden zurück
 */
 gint64 player_get_song_duration_ns()
 {
+	//g_print("player_get_song_duration_ns()\n");
+	
 	gint64 duration;
-	GstFormat fmt = GST_FORMAT_TIME;
-
-	gst_element_query_duration (pipeline, &fmt, &duration);
+	
+	if (!gst_element_query_duration(pipeline, &format, &duration)) {
+		g_print("Konnte duration nicht herausfinden!\n");
+	}
 
 	return duration;
 }
 
-/*
-	Gibt die Position des Songs in Sekunden zurück
-*/
-gint64 player_get_song_position()
-{
-	gint64 position, duration;
-	GstFormat fmt = GST_FORMAT_TIME;
 
-	duration = player_get_song_duration_ns();
-	gst_element_query_position (pipeline, &fmt, &position);
+/*
+	Gibt die Position des Songs in Nanosekunden zurück
+*/
+gint64 player_get_song_position_ns()
+{
+	//g_print("player_get_song_position_ns()\n");
 	
-	position = position * 100.0 / duration;
-	//position = position / 1000000000;
+	gint64 position;
+	
+	if (!gst_element_query_position(pipeline, &format, &position)) {
+		g_print("Konnte position nicht herausfinden!\n");
+	}
 
 	return position;
 }
@@ -114,12 +103,7 @@ gint64 player_get_song_position()
 // Callback Behandlung
 static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
-		/* Musik Tags */
-		player_handle_tag_message(message);
-	}
-	
-	//g_print ("GStreamer: Got %s message | %d | %d\n", GST_MESSAGE_TYPE_NAME (message), GST_MESSAGE_SRC(message), pipeline);
+	//g_print ("GStreamer: Got %s message | %d | %d\n", GST_MESSAGE_TYPE_NAME(message), GST_MESSAGE_SRC(message), pipeline);
 	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
 		return TRUE;
 	}
@@ -142,28 +126,33 @@ static gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer 
 			g_print("\tStates: (old=%i, new=%i, pending=%i)\n", oldstate, newstate, pending);
 
 			if (newstate == 4) {
-				//gint64 dur = player_get_song_duration();
-				interface_set_playing(TRUE);
-				//interface_set_song_duration(dur);
-				//g_print("Song duration: %lli\n", dur);
 				g_print("GStreamer is now playing!\n");
+				
+				// Watch hinzufügen
+				g_timeout_add (1000, (GSourceFunc)player_timer_event, pipeline);
+				
+				interface_set_playing(TRUE);
+				interface_set_song_duration(player_get_song_duration_ns());
 			}
 			
 			if ((newstate == 3) && (oldstate == 4)) {
-				interface_set_playing(FALSE);
 				g_print("GStreamer is now paused!\n");
+				interface_set_playing(FALSE);
 			}
 			
 		}
 		case GST_MESSAGE_EOS: {
-			/* end-of-stream */
-			g_print ("\tEnd Of Stream\n");
-			//interface_set_playimage("gtk-media-play");
+			//g_print ("\tEnd Of Stream\n");
+			break;
+		}
+		case GST_MESSAGE_TAG: {
+			/* Musik Tags */
+			player_handle_tag_message(message);
 			break;
 		}
 		default: {
 			/* unhandled message */
-			g_print ("\tUnhandled Message %i\n", GST_MESSAGE_TYPE (message));
+			//g_print ("\tUnhandled Message %i\n", GST_MESSAGE_TYPE (message));
 			break;
 		}
 	}
@@ -182,6 +171,19 @@ void player_set_play()
 	state = GST_STATE_PLAYING;
 }
 
+// Gibt den aktuellen Player Status zurück
+gboolean player_get_playing(void)
+{
+	GstState state;
+	
+	gst_element_get_state(GST_ELEMENT(pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
+	
+	if (state != GST_STATE_PLAYING) {
+		return FALSE;
+	}
+	return TRUE;
+}
+
 // Stop
 void player_set_stop()
 {
@@ -190,19 +192,18 @@ void player_set_stop()
 	state = GST_STATE_READY;
 }
 
-static gboolean
-cb_print_position (GstElement *pipeline)
-{
+// Timer Funktion
+static gboolean player_timer_event(GstElement *pipeline)
+{	
+	if (!player_get_playing()) {
+		return FALSE;
+	}
+	
 	if (interface_get_slidermove()) {
 		return TRUE;
 	}
 
-	gint64 pos;
-	
-	pos = player_get_song_position();
-	
-	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (pos));*/
-	interface_set_song_position(pos);
+	interface_set_song_position(player_get_song_position_ns());
 	
 	/* call me again */
 	return TRUE;
@@ -221,9 +222,6 @@ void player_play_testfile()
 	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
 	gst_bus_add_watch (bus, player_bus_callback, NULL);
 	gst_object_unref (bus);
-	
-	// Watch hinzufügen
-	g_timeout_add (1000, (GSourceFunc) cb_print_position, pipeline);
 }
 
 
@@ -240,11 +238,6 @@ void player_play_stream(const gchar *url)
 	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
 	gst_bus_add_watch (bus, player_bus_callback, NULL);
 	gst_object_unref (bus);
-	
-	// Watch hinzufügen
-	g_timeout_add (1000, (GSourceFunc) cb_print_position, pipeline);
-
-
 }
 
 // Seeking
@@ -304,18 +297,16 @@ GstElement* player_make_flac_pipeline(const gchar *location)
 	return pipeline;
 }
 
+// Setze eine Pipeline für einen Stream auf
 GstElement* player_make_stream_pipeline(const gchar *url)
 {
 	GstElement *play;
 	
-	/* set up */
-  play = gst_element_factory_make ("playbin", "play");
-  g_object_set (G_OBJECT (play), "uri", url, NULL);
-  
-  
-  gst_element_set_state (play, GST_STATE_PLAYING);
-  
-  return play;
+	play = gst_element_factory_make ("playbin", "play");
+	g_object_set (G_OBJECT (play), "uri", url, NULL);
+	gst_element_set_state (play, GST_STATE_PLAYING);
+	
+	return play;
 }
 
 
@@ -402,26 +393,13 @@ gboolean player_start_seek(GtkWidget *widget, GdkEventButton *event, gpointer us
 		gst_element_set_state(pipeline, GST_STATE_PAUSED);
 	}
 	
-	//set_update_scale(FALSE);
-	
-	/*if (flush_seek) {
-		gtk_signal_connect(GTK_OBJECT (hscale),
-						   "value_changed",
-						   G_CALLBACK (seek_cb),
-						   pipeline);
-	}*/
-	
 	return FALSE;
 }
 
 gboolean player_stop_seek (GtkWidget * widget, gpointer user_data)
-{
-	/*if (changed_id) {
-		g_signal_handler_disconnect (GTK_OBJECT (hscale), changed_id);
-		changed_id = 0;
-	}*/
-	
+{	
 	g_print("do final seek\n");
+	
 	player_do_seek(widget);
 	
 	if (state == GST_STATE_PLAYING) {
@@ -432,21 +410,40 @@ gboolean player_stop_seek (GtkWidget * widget, gpointer user_data)
 	return FALSE;
 }
 
-// Formatiert die Scrollbalken Anzeige auf Minuten:Sekunden (00:00)
-gchar* on_hscale_song_format_value (GtkScale * scale, gdouble value)
-{
-	gint64 duration = 0;
-	gint64 real;
+
+// Konvertiert Nanosekunden in Sekunden
+gint64 ns_to_seconds(gint64 ns)
+{	
 	gint64 seconds;
+	
+	seconds = ns / GST_SECOND;
+	
+	return seconds;
+}
+
+
+// Nanosekunden schön formatiert in Sekunden und Millisekunden aus
+gchar* ns_formatted(gint64 ns)
+{	
+	gint64 seconds;
+	
+	seconds = ns_to_seconds(ns);
+	
+	return g_strdup_printf("%02lli:%02lli", seconds/60, seconds%60);
+}
+
+// Formatiert die Scrollbalken Anzeige auf Minuten:Sekunden (00:00)
+gchar* on_range_song_format_value(GtkScale * scale, gdouble value)
+{
+	g_print("on_range_song_format_value()\n");
+	
+	gint64 duration;
 	
 	if (pipeline) {
 		duration = player_get_song_duration_ns();
 	}
 	
-	real = value * duration / 100;
-	seconds = (gint64) real / GST_SECOND;
-
-	return g_strdup_printf("%02lli:%02lli", seconds/60, seconds%60);
+	return ns_formatted(duration);
 }
 
 
@@ -518,7 +515,7 @@ void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
 }
 
 
-gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+gboolean on_progress_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	g_print("Slider Button pressed!\n");
 
@@ -529,17 +526,14 @@ gboolean on_hscale_song_button_press_event(GtkWidget *widget, GdkEventButton *ev
 }
 
 // Handler für seeking
-gboolean on_hscale_song_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+gboolean on_progress_song_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
 	g_print("Slider Button released!\n");
 
-	GtkRange *range = GTK_RANGE(widget);
-
-	player_stop_seek(GTK_WIDGET(range), user_data);
-
-	/*gdouble pos = gtk_range_get_value(range);
-	player_seek_to_position(pos);*/
-
+	GtkProgressBar *progress;
+	
+	progress = GTK_PROGRESS_BAR(widget);
+	player_stop_seek(GTK_WIDGET(progress), user_data);
 	interface_set_slidermove(FALSE);
 
 	return FALSE;
