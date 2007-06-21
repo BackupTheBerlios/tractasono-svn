@@ -1,5 +1,6 @@
 #include "player.h"
 #include "interface.h"
+#include "tractasono.h"
 
 
 // GStreamer Zeit Format
@@ -498,7 +499,20 @@ gboolean on_hscale_song_value_changed(GtkRange *range, gpointer user_data)
 
 
 void on_trackplay_clicked(GtkButton *button, gpointer user_data)
-{	
+{
+	if (pipeline == NULL) {
+		GtkWidget *msgbox;
+		
+		msgbox = gtk_message_dialog_new(GTK_WINDOW(mainwindow), GTK_DIALOG_MODAL,
+										GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
+										"Zuerst muss ein Stream erstellt werden!");
+		gtk_window_set_title(GTK_WINDOW(msgbox), "Information");
+		gtk_dialog_run(GTK_DIALOG(msgbox));
+		gtk_widget_destroy(msgbox);
+		
+		return;
+	}
+	
 	if (interface_get_playing()) {
 		g_print("Pause wurde gedrückt\n");
 		player_set_stop();
@@ -510,6 +524,19 @@ void on_trackplay_clicked(GtkButton *button, gpointer user_data)
 
 void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
 {
+	if (pipeline == NULL) {
+		GtkWidget *msgbox;
+		
+		msgbox = gtk_message_dialog_new(GTK_WINDOW(mainwindow), GTK_DIALOG_MODAL,
+										GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
+										"Zuerst muss ein Stream erstellt werden!");
+		gtk_window_set_title(GTK_WINDOW(msgbox), "Information");
+		gtk_dialog_run(GTK_DIALOG(msgbox));
+		gtk_widget_destroy(msgbox);
+		
+		return;
+	}
+	
 	g_print("Stop wurde gedrückt\n");
 	player_set_stop();
 }
