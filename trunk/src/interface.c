@@ -1,11 +1,30 @@
+/*
+ *      interface.c
+ *      
+ *      Copyright 2007 Patrik Obrist <padx@gmx.net>
+ *      
+ *      This program is free software; you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation; either version 2 of the License, or
+ *      (at your option) any later version.
+ *      
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *      
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program; if not, write to the Free Software
+ *      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ *      MA 02110-1301, USA.
+ */
+
 #include "interface.h"
 #include "player.h"
-//#include "radio.h"
-#include "tractasono.h"
 #include "fullscreen.h"
 #include "disc.h"
 
-GladeXML  *xml;
+
 GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
@@ -165,43 +184,47 @@ void interface_load(const gchar *gladefile)
 	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
 		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
 	}
-	xml = glade_xml_new(buildfile->str, NULL, NULL);
+	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
+		g_error("Die Glade Datei konnte nicht geladen werden!\n");
+		exit(0);
+	}
+	glade = glade_xml_new(buildfile->str, NULL, NULL);
 	
 	// Verbinde die Signale automatisch mit dem Interface
-	glade_xml_signal_autoconnect(xml);
+	glade_xml_signal_autoconnect(glade);
 	
 	// Hauptfenster holen
-	mainwindow = glade_xml_get_widget(xml, "window_main");
+	mainwindow = glade_xml_get_widget(glade, "window_main");
 	if (mainwindow == NULL) {
 		g_print("Fehler: Konnte window_main nicht holen!\n");
 	}
 
 	// Placeholder holen
-	vbox_placeholder = glade_xml_get_widget(xml, "vbox_placeholder");
+	vbox_placeholder = glade_xml_get_widget(glade, "vbox_placeholder");
 	if (vbox_placeholder == NULL) {
 		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
 	}
 	
 	// Tractasono Root holen
-	vbox_tractasono = glade_xml_get_widget(xml, "vbox_tractasono");
+	vbox_tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
 	if (vbox_tractasono == NULL) {
 		g_print("Fehler: Konnte vbox_tractasono nicht holen!\n");
 	}
 
 	// Die einzelnen Windows laden und referenzieren
-	module.music = g_object_ref(glade_xml_get_widget(xml, "notebook_music"));
-	module.disc = g_object_ref(glade_xml_get_widget(xml, "vbox_disc"));
-	module.settings = g_object_ref(glade_xml_get_widget(xml, "vbox_settings"));
-	module.radio = g_object_ref(glade_xml_get_widget(xml, "radiomodul"));
-	module.fullscreen = g_object_ref(glade_xml_get_widget(xml, "vbox_fullscreen"));
+	module.music = g_object_ref(glade_xml_get_widget(glade, "notebook_music"));
+	module.disc = g_object_ref(glade_xml_get_widget(glade, "vbox_disc"));
+	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
+	module.radio = g_object_ref(glade_xml_get_widget(glade, "radiomodul"));
+	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "vbox_fullscreen"));
 
 	// Keyboard laden
 	GtkWidget *vbox_placeholder_keyboard = NULL;
-	vbox_placeholder_keyboard = glade_xml_get_widget(xml, "vbox_placeholder_keyboard");
+	vbox_placeholder_keyboard = glade_xml_get_widget(glade, "vbox_placeholder_keyboard");
 	if (vbox_placeholder_keyboard == NULL) {
 		g_print("Fehler: Konnte vbox_placeholder_keyboard nicht holen!\n");
 	}
-	vbox_keyboard = glade_xml_get_widget(xml, "vbox_keyboard");
+	vbox_keyboard = glade_xml_get_widget(glade, "vbox_keyboard");
 	if (vbox_keyboard == NULL) {
 		g_print("Fehler: Konnte vbox_keyboard nicht holen!\n");
 	}
@@ -209,7 +232,7 @@ void interface_load(const gchar *gladefile)
 	gtk_widget_hide(vbox_keyboard);
 	
 	// Range laden
-	range = GTK_RANGE(glade_xml_get_widget(xml, "range_song"));
+	range = GTK_RANGE(glade_xml_get_widget(glade, "range_song"));
 	if (range == NULL) {
 		g_print("Fehler: Konnte range_song nicht holen!\n");
 	}
@@ -222,7 +245,7 @@ void interface_set_songinfo(const gchar *artist,
 {
 	GtkLabel *song = NULL;
 	
-	song = GTK_LABEL(glade_xml_get_widget(xml, "label_song"));
+	song = GTK_LABEL(glade_xml_get_widget(glade, "label_song"));
 
 	if (song == NULL) {
 		g_print("Fehler: Konnte label_song nicht holen!\n");
@@ -262,7 +285,7 @@ void interface_set_playimage(const gchar *stock_id)
 {
 	GtkImage *playimage = NULL;
 	
-	playimage = GTK_IMAGE(glade_xml_get_widget(xml, "image_play"));
+	playimage = GTK_IMAGE(glade_xml_get_widget(glade, "image_play"));
 	if (playimage == NULL) {
 		g_print("Fehler beim play Bild holen!\n");
 	} else {
