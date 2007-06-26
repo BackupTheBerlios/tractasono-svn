@@ -33,6 +33,7 @@ GtkWidget *vbox_keyboard;
 GtkWidget *vbox_tractasono;
 
 GtkEntry *actual_entry;
+GtkProgressBar *progress;
 
 
 typedef struct {

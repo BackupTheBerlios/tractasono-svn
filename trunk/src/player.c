@@ -344,10 +344,15 @@ static void player_do_seek(GtkWidget *widget)
 	
 	g_print("Duration: %lli \n", duration);
 	
-	gint64 pos = gtk_range_get_value(GTK_RANGE (widget));
-	g_print("Position: %lli \n", pos);
+	gdouble pos = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(widget));
 	
-	real = gtk_range_get_value(GTK_RANGE (widget)) * duration / 100;
+	// neu song pos berechnen
+	real = duration * pos;
+	
+	//gint64 pos = gtk_range_get_value(GTK_RANGE (widget));
+	//g_print("Position: %lli \n", pos);
+	
+	//real = gtk_range_get_value(GTK_RANGE (widget)) * duration / 100;
 	
 	g_print("Real range: %lli \n", real);
 	
@@ -364,8 +369,6 @@ static void player_do_seek(GtkWidget *widget)
 	if (loop_seek) {
 		flags |= GST_SEEK_FLAG_SEGMENT;
 	}
-	
-	//real = 30000000000;
 
 	if (real >= duration) {
 		real = 0;

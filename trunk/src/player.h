@@ -37,5 +37,7 @@ gboolean player_stop_seek (GtkWidget *widget, gpointer user_data);
 
 gboolean player_get_playing(void);
 
+gint64 player_get_song_duration_ns();
+
 gint64 ns_to_seconds(gint64 ns);
 gchar* ns_formatted(gint64 ns);

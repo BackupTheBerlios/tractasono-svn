@@ -30,8 +30,7 @@ GtkWidget *vbox_placeholder;
 GtkWidget *vbox_keyboard;
 GtkWidget *vbox_tractasono;
 
-GtkRange *range;
-GtkAdjustment *adjustment;
+//GtkAdjustment *adjustment;
 
 GtkEntry *actual_entry;
 
@@ -59,8 +58,7 @@ void interface_init(int *argc, char ***argv)
 
 	slidermove = FALSE;
 	playing = FALSE;
-	adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.00, 100.0,
-												   0.1, 1.0, 1.0));
+	//adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.00, 100.0, 0.1, 1.0, 1.0));
 }
 
 
@@ -134,16 +132,19 @@ void interface_set_song_position(gint64 position)
 	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (position));*/
 
 	gdouble rangepos;
+	gint64 duration;
 	
-	rangepos = gint64_to_double(position);
+	duration = player_get_song_duration_ns();
+
+	// Position berechnen
+	rangepos = (gdouble) position / duration;
+	
+	//rangepos = gint64_to_double(position);
 	g_print("\tsetting range position to %0.f (nanoseconds)\n", rangepos);
 	
-	//FIXME Hier sollte noch der obere Bereich des Ranges geprüft werden
-	if (rangepos > 0) {
-		gtk_range_set_value(range, rangepos);
-	} else {
-		g_print("\tIllegale Position!");
-	}
+	//gtk_range_set_value(range, rangepos);
+	g_print("Hier Progressbar Songposition setzen!\n");
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), rangepos);
 }
 
 
@@ -162,16 +163,6 @@ void interface_set_song_duration(gint64 duration)
 	g_print("interface_set_song_duration()\n");
 	g_print("\tduration is %s (minutes:seconds)\n", ns_formatted(duration));
 
-	gdouble rangevalue;
-	
-	rangevalue = gint64_to_double(duration);
-	g_print("\tsetting range to %0.f (nanoseconds)\n", rangevalue);
-	
-	if (rangevalue > 0) {
-		gtk_range_set_range(range, 0, rangevalue);
-	} else {
-		g_print("Dräcksbalke usblände!\n");
-	}
 }
 
 
@@ -232,8 +223,9 @@ void interface_load(const gchar *gladefile)
 	gtk_widget_hide(vbox_keyboard);
 	
 	// Range laden
-	range = GTK_RANGE(glade_xml_get_widget(glade, "range_song"));
-	if (range == NULL) {
+	//range = GTK_RANGE(glade_xml_get_widget(glade, "range_song"));
+	progress = GTK_PROGRESS_BAR(glade_xml_get_widget(glade, "range_song"));
+	if (progress == NULL) {
 		g_print("Fehler: Konnte range_song nicht holen!\n");
 	}
 }
@@ -389,6 +381,27 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 }
 
 
+// Handler für seeking
+gboolean on_range_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	g_print("Progress Button pressed!\n");
+
+	interface_set_slidermove(TRUE);
+	player_start_seek(widget, event, user_data);
+
+	return FALSE;
+}
+
+// Handler für seeking
+gboolean on_range_song_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+	g_print("Progress Button released!\n");
+
+	player_stop_seek(widget, user_data);
+	interface_set_slidermove(FALSE);
+
+	return FALSE;
+}
 
 
 
