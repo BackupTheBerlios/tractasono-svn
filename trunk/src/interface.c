@@ -347,19 +347,35 @@ gboolean on_range_song_button_press_event(GtkWidget *widget, GdkEventButton *eve
 {
 	g_debug("Progress Button pressed!");
 	
+	gint x, y, breite, hoehe, tiefe;
 	gint64 position;
 	gint64 duration;
-	gdouble fraction;
+	gdouble barpos;
+	
+	gdk_window_get_geometry(GDK_WINDOW(event->window), &x, &y, &breite, &hoehe, &tiefe);                   
+    barpos = (gdouble) event->x / breite;
+    
+    g_debug("\tbreite=%i, position=%f, barpos=%f", breite, event->x, barpos);
 	
 	duration = player_get_duration();
-	fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(widget));
 	
 	// seekposition berechnen
-	position = duration * (gdouble)position;
+	position = duration * barpos;
 	
-	player_seek_to_position(3*GST_SECOND);
+	g_debug("\tduration=%"G_GINT64_FORMAT", position=%"G_GINT64_FORMAT"", duration, position);
+	
+	player_seek_to_position(position);
 
 	return FALSE;
+}
+
+
+gboolean on_range_song_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
+{
+	//g_debug("on_range_song_motion_notify_event()\n\tx=%f", event->x);
+	
+	
+	return TRUE;
 }
 
 
