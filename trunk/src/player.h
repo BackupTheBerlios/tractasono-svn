@@ -24,20 +24,21 @@
 
 void player_init(int *argc, char **argv[]);
 
-void player_set_play();
-void player_set_stop();
+void player_set_play(void);
+void player_set_pause(void);
+void player_set_stop(void);
 
-void player_play_testfile();
-void player_play_stream(const gchar *url);
+void player_knight_rider_start(void);
+gboolean player_knight_rider(gpointer data);
 
-void player_seek_to_position(gint seconds);
+void player_play_uri(const gchar *uri);
 
-gboolean player_start_seek(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
-gboolean player_stop_seek (GtkWidget *widget, gpointer user_data);
+gboolean player_seek_to_position(gint64 position);
 
 gboolean player_get_playing(void);
 
-gint64 player_get_song_duration_ns();
+gint64 player_get_duration(void);
+gint64 player_get_position(void);
 
 gint64 ns_to_seconds(gint64 ns);
 gchar* ns_formatted(gint64 ns);

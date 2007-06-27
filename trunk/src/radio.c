@@ -31,9 +31,7 @@ void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
 	g_print("Radio Stream...\n");
 	
 	GtkWidget *urlinput;
-	
 	urlinput = glade_xml_get_widget(glade, "entry_radio_url");
 	
-	player_play_stream(gtk_entry_get_text(GTK_ENTRY(urlinput)));
-	
+	player_play_uri(gtk_entry_get_text(GTK_ENTRY(urlinput)));
 }

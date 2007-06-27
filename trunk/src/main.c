@@ -23,38 +23,15 @@
 	#include <config.h>
 #endif
 
-// Globale Includes
-#include <getopt.h>
-
 // Lokale Includes
 #include "settings.h"
 #include "drives.h"
 #include "player.h"
 #include "interface.h"
-#include "disc.h"
-
-// He Mann, do hets vell zwenig Code!!
 
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
-	#ifdef ENABLE_NLS
-		bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-		textdomain (PACKAGE);
-	#endif
-	
-	// Variablen initialisieren
-	glade = NULL;
-	mainwindow = NULL;
-	vbox_placeholder = NULL;
-	vbox_keyboard = NULL;
-	vbox_tractasono = NULL;
-
-	actual_entry = NULL;
-
-	// Interface initialisieren
-	interface_init(&argc, &argv);
-
 	// Player initialisieren
 	player_init(&argc, &argv);
 	
@@ -63,6 +40,9 @@ int main(int argc, char *argv[])
 
 	// Drives initialisieren
 	drives_init();
+	
+	// Interface initialisieren
+	interface_init(&argc, &argv);
 
 	// Das Interface laden
 	interface_load("tractasono.glade");

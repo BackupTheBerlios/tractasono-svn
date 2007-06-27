@@ -25,19 +25,6 @@
 #include "disc.h"
 
 
-GtkWidget *mainwindow;
-GtkWidget *vbox_placeholder;
-GtkWidget *vbox_keyboard;
-GtkWidget *vbox_tractasono;
-
-//GtkAdjustment *adjustment;
-
-GtkEntry *actual_entry;
-
-gboolean slidermove;
-gboolean playing;
-
-
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
 #define INSTALLED_GLADE DATADIR"/tractasono/tractasono.glade"
 
@@ -49,16 +36,19 @@ void interface_init(int *argc, char ***argv)
 	gtk_init(argc, argv);
 	glade_init();
 	
+	glade = NULL;
+	mainwindow = NULL;
+	vbox_placeholder = NULL;
+	vbox_keyboard = NULL;
+	vbox_tractasono = NULL;
+	actual_entry = NULL;
+	
 	module.music = NULL;
 	module.radio = NULL;
 	module.import = NULL;
 	module.settings = NULL;
 	module.fullscreen = NULL;
 	module.disc = NULL;
-
-	slidermove = FALSE;
-	playing = FALSE;
-	//adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.00, 100.0, 0.1, 1.0, 1.0));
 }
 
 
@@ -127,42 +117,25 @@ void interface_clean(){
 
 void interface_set_song_position(gint64 position)
 {
-	g_print("interface_set_song_position()\n");
-	g_print("\tposition is %s (minutes:seconds)\n", ns_formatted(position));
-	/*g_print ("Pos: %" GST_TIME_FORMAT "\r", GST_TIME_ARGS (position));*/
+	g_debug("interface_set_song_position()");
+	g_debug("\tposition is %s (minutes:seconds)", ns_formatted(position));
 
-	gdouble rangepos;
+	gdouble fraction;
 	gint64 duration;
 	
-	duration = player_get_song_duration_ns();
+	duration = player_get_duration();
 
 	// Position berechnen
-	rangepos = (gdouble) position / duration;
-	
-	//rangepos = gint64_to_double(position);
-	g_print("\tsetting range position to %0.f (nanoseconds)\n", rangepos);
-	
-	//gtk_range_set_value(range, rangepos);
-	g_print("Hier Progressbar Songposition setzen!\n");
-	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), rangepos);
-}
-
-
-gdouble gint64_to_double(gint64 value)
-{
-	gdouble ret;
-	
-	ret = value / GST_NSECOND;
-	
-	return ret;
-}
-
-
-void interface_set_song_duration(gint64 duration)
-{
-	g_print("interface_set_song_duration()\n");
-	g_print("\tduration is %s (minutes:seconds)\n", ns_formatted(duration));
-
+	if (duration > 0) {
+		// fraction mode
+		g_debug("\tfraction mode");
+		fraction = (gdouble) position / duration;
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);
+	} else {
+		// pulse mode
+		g_debug("\tpulse mode");
+		gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress));
+	}
 }
 
 
@@ -170,7 +143,7 @@ void interface_load(const gchar *gladefile)
 {
 	// Das Interface laden
 	// HACK (sollte mal angeschaut werden)
-	GString* buildfile = g_string_new(g_get_current_dir());;
+	GString* buildfile = g_string_new(g_get_current_dir());
 	buildfile = g_string_append(buildfile, "/data/tractasono.glade");
 	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
 		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
@@ -231,46 +204,41 @@ void interface_load(const gchar *gladefile)
 }
 
 // Setze die Song Informationen
-void interface_set_songinfo(const gchar *artist,
-							const gchar *title,
-							gdouble seconds)
+void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
 {
-	GtkLabel *song = NULL;
+	GtkLabel *label;
 	
-	song = GTK_LABEL(glade_xml_get_widget(glade, "label_song"));
-
-	if (song == NULL) {
-		g_print("Fehler: Konnte label_song nicht holen!\n");
+	label = GTK_LABEL(glade_xml_get_widget(glade, "label_song"));
+	if (label == NULL) {
+		g_error("Konnte label_song nicht holen!\n");
 	}
 
-	GString *newsong = NULL;
+	GString *info = NULL;
 
-	newsong = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
-	if (g_ascii_strcasecmp(artist, "") == 0 && g_ascii_strcasecmp(title, "") == 0) {
-		g_string_append(newsong, "Keine Song Informationen vorhanden!");
-	} else if(g_ascii_strcasecmp(artist, "") != 0 && g_ascii_strcasecmp(title, "") == 0) {
-		g_string_append(newsong, artist);
-	} else if(g_ascii_strcasecmp(artist, "") == 0 && g_ascii_strcasecmp(title, "") != 0) {
-		g_string_append(newsong, title);
-	} else if(g_ascii_strcasecmp(artist, "") != 0 && g_ascii_strcasecmp(title, "") != 0) {
-		g_string_append(newsong, artist);
-		g_string_append(newsong, " - ");
-		g_string_append(newsong, title);
+	info = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
+
+	if (!artist && !title) {
+		if (uri) {
+			g_string_append(info, uri);	
+		} else {
+			g_string_append(info, "tractasono");
+		}
+	} else if (!artist) {
+		g_string_append(info, title);
+	} else if (!title) {
+		g_string_append(info, artist);
+	} else {
+		g_string_append(info, artist);
+		g_string_append(info, " - ");
+		g_string_append(info, title);
 	}
-	g_string_append(newsong, "</span>");
+	
+	g_string_append(info, "</span>");
 
-	gtk_label_set_label(song, newsong->str);
+	gtk_label_set_label(label, info->str);
+	g_string_free(info, TRUE);
 }
 
-void interface_set_slidermove(gboolean move)
-{
-	slidermove = move;
-}
-
-gboolean interface_get_slidermove()
-{
-	return slidermove;
-}
 
 // Setzt auf dem Play Button auf Play oder Pause
 void interface_set_playimage(const gchar *stock_id)
@@ -287,19 +255,12 @@ void interface_set_playimage(const gchar *stock_id)
 
 
 void interface_set_playing(gboolean isplaying)
-{
-	playing = isplaying;
-	
-	if (playing) {
+{	
+	if (isplaying) {
 		interface_set_playimage("gtk-media-pause");
 	} else {
 		interface_set_playimage("gtk-media-play");
 	}
-}
-
-gboolean interface_get_playing()
-{
-	return playing;
 }
 
 
@@ -384,24 +345,38 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 // Handler für seeking
 gboolean on_range_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-	g_print("Progress Button pressed!\n");
-
-	interface_set_slidermove(TRUE);
-	player_start_seek(widget, event, user_data);
-
-	return FALSE;
-}
-
-// Handler für seeking
-gboolean on_range_song_button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{
-	g_print("Progress Button released!\n");
-
-	player_stop_seek(widget, user_data);
-	interface_set_slidermove(FALSE);
+	g_debug("Progress Button pressed!");
+	
+	gint64 position;
+	gint64 duration;
+	gdouble fraction;
+	
+	duration = player_get_duration();
+	fraction = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(widget));
+	
+	// seekposition berechnen
+	position = duration * (gdouble)position;
+	
+	player_seek_to_position(3*GST_SECOND);
 
 	return FALSE;
 }
 
 
+void on_trackplay_clicked(GtkButton *button, gpointer user_data)
+{	
+	if (player_get_playing()) {
+		g_print("Pause wurde gedrückt\n");
+		player_set_pause();
+	} else {
+		g_print("Play wurde gedrückt\n");
+		player_set_play();
+	}
+}
+
+void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
+{	
+	g_print("Stop wurde gedrückt\n");
+	player_set_stop();
+}
 

@@ -24,7 +24,7 @@
                 <child>
                   <widget class="GtkLabel" id="label_song">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">&lt;span size="xx-large" weight="heavy"&gt;Blue Boy - Remember Me  2:48&lt;/span&gt;</property>
+                    <property name="label" translatable="yes">&lt;span size="xx-large" weight="heavy"&gt;tractasono&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </widget>
                 </child>
@@ -38,10 +38,9 @@
                       <widget class="GtkProgressBar" id="range_song">
                         <property name="visible">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="pulse_step">0</property>
+                        <property name="pulse_step">0.10000000149011612</property>
                         <property name="text" translatable="yes"></property>
                         <signal name="button_press_event" handler="on_range_song_button_press_event"/>
-                        <signal name="button_release_event" handler="on_range_song_button_release_event"/>
                       </widget>
                     </child>
                   </widget>
@@ -2113,62 +2112,76 @@ Touch the screen to go back!</property>
     <property name="height_request">400</property>
     <property name="title" translatable="yes">radio</property>
     <child>
-      <widget class="GtkVBox" id="radiomodul">
+      <widget class="GtkFrame" id="radiomodul">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <property name="border_width">20</property>
+        <property name="label_xalign">0</property>
+        <property name="shadow_type">GTK_SHADOW_OUT</property>
         <child>
-          <widget class="GtkHBox" id="hbox1">
+          <widget class="GtkAlignment" id="alignment1">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="spacing">10</property>
+            <property name="bottom_padding">10</property>
+            <property name="left_padding">10</property>
+            <property name="right_padding">10</property>
             <child>
-              <widget class="GtkLabel" id="label3">
+              <widget class="GtkVBox" id="vbox_radio">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">URL:</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="entry_radio_url">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="text" translatable="yes">file:///usr/share/example-content/ubuntu Sax.ogg</property>
-              </widget>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="button_radio_stream">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="label" translatable="yes">Stream</property>
-                <property name="use_underline">True</property>
-                <property name="response_id">0</property>
-                <signal name="clicked" handler="on_button_radio_stream_clicked"/>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </widget>
-          <packing>
-            <property name="expand">False</property>
-            <property name="padding">10</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="GtkTextView" id="textview1">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="wrap_mode">GTK_WRAP_WORD</property>
-            <property name="text" translatable="yes">Beispiele:
+                <child>
+                  <widget class="GtkHBox" id="hbox1">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="spacing">10</property>
+                    <child>
+                      <widget class="GtkLabel" id="label3">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">URL:</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="entry_radio_url">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="text" translatable="yes">file:///usr/share/example-content/ubuntu Sax.ogg</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="button_radio_stream">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Stream</property>
+                        <property name="use_underline">True</property>
+                        <property name="response_id">0</property>
+                        <signal name="clicked" handler="on_button_radio_stream_clicked"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">10</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkTextView" id="textview1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="wrap_mode">GTK_WRAP_WORD</property>
+                    <property name="text" translatable="yes">Beispiele:
 
 http://24.207.26.60:8888
 file:///usr/share/example-content/ubuntu Sax.ogg
@@ -2177,9 +2190,24 @@ http://mp3-vr-128.smgradio.com:80/
 smb://STAFF%3Bobrip0@147.86.125.193/music/Nine%20Inch%20Nails/Year%20Zero/Nine Inch Nails - Hyperpower!.ogg
 
 smb://STAFF%3Bobrip0@147.86.125.193/music/Ramones/Loud%2C%20Fast%20Ramones/Ramones - Do You Remember Rock 'N' Roll Radio.ogg</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label" translatable="yes">&lt;b&gt;Radio Modul&lt;/b&gt;</property>
+            <property name="use_markup">True</property>
           </widget>
           <packing>
-            <property name="position">1</property>
+            <property name="type">label_item</property>
           </packing>
         </child>
       </widget>
