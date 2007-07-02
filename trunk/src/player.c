@@ -297,7 +297,7 @@ void player_knight_rider_start(void)
 
 gboolean player_knight_rider(gpointer data)
 {
-	if (KRstopp) {
+	if (player_get_playing() || KRstopp) {
 		return FALSE;
 	}
 	

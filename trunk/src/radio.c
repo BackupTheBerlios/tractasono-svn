@@ -26,6 +26,12 @@
 #include "player.h"
 #include "interface.h"
 
+
+void radio_init(void)
+{
+	g_debug("Radio Modul initialisieren!");
+}
+
 void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
 {
 	g_print("Radio Stream...\n");

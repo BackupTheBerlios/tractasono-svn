@@ -91,7 +91,7 @@ void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 
 	interface_show_module(module.radio);
 	
-	//init_radio_modul(); 
+	radio_init(); 
 }
 
 
