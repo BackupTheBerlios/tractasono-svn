@@ -19,6 +19,10 @@
  *      MA 02110-1301, USA.
  */
 
+#include <gtk/gtk.h>
+
 
 void radio_init(void);
+
+
 
