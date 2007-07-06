@@ -1,5 +1,5 @@
 /*
- *      fullscreen.c
+ *      database.c
  *      
  *      Copyright 2007 Patrik Obrist <padx@gmx.net>
  *      
@@ -19,27 +19,34 @@
  *      MA 02110-1301, USA.
  */
 
-#include "fullscreen.h"
+#include <libgda/libgda.h>
+
 #include "database.h"
 
 
-void fullscreen_init()
+
+void database_list_sources (void)
 {
-	g_print("Fullscreen Modul wird initialisiert...\n");
-	
+    GList *ds_list;
+    GList *node;
+    GdaDataSourceInfo *info;
+
+    ds_list = gda_config_get_data_source_list ();
+    g_print ("\n");
+    for (node = g_list_first (ds_list); node != NULL; node = g_list_next (node)) {
+        info = (GdaDataSourceInfo *) node->data;
+
+        g_print ("NAME: %s PROVIDER: %s CNC: %s DESC: %s USER: %s PASSWORD: %s\n",
+                 info->name, info->provider, info->cnc_string, info->description,
+                 info->username, info->password);
+    }
+    g_print ("\n");
+
+    gda_config_free_data_source_list (ds_list);
 }
 
-void on_fullscreen_button_close_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Test\n");
-	
-	database_list_sources();
-	
-}
 
-void on_window_fullscreen_button_press_event(GtkWidget *widget, gpointer user_data)
-{
-	// Hier sollte noch etwas Code rein
-	g_print("Fullscreen back gedrückt!\n");
-	
-}
+
+
+
+

@@ -23,6 +23,7 @@
 #include "player.h"
 #include "fullscreen.h"
 #include "disc.h"
+#include "radio.h"
 
 
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"

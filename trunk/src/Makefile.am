@@ -24,7 +24,9 @@ tractasono_SOURCES =	main.c \
 			keyboard.c \
 			keyboard.h \
 			disc.c \
-			disc.h
+			disc.h \
+			database.c \
+			database.h
 	
 tractasono_LDFLAGS = -export-dynamic
 
