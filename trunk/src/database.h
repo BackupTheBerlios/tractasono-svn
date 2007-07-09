@@ -19,4 +19,7 @@
  *      MA 02110-1301, USA.
  */
 
+void database_init (int argc, char *argv[]);
+void database_list_providers (void);
 void database_list_sources (void);
+void database_testfunc (void);

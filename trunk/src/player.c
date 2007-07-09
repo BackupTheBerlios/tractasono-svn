@@ -41,10 +41,10 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 
 
 // Player initialisieren
-void player_init(int *argc, char **argv[])
+void player_init(int argc, char *argv[])
 {
 	g_print("Player initialisieren\n");
-	gst_init (argc, argv);
+	gst_init (&argc, &argv);
 	
 	// GStreamer Zeitformat einstellen
 	format = GST_FORMAT_TIME;
@@ -60,9 +60,6 @@ void player_init(int *argc, char **argv[])
 	
 	// Watch hinzufügen welcher jede Sekunde auftritt
 	g_timeout_add(1000, (GSourceFunc)player_timer_event, pipeline);
-	
-	// Knight Rider
-	player_knight_rider_start();
 }
 
 
@@ -140,7 +137,6 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			if ((newstate == 3) && (oldstate == 4)) {
 				g_print("GStreamer is now paused!\n");
 				interface_set_playing(FALSE);
-				player_knight_rider_start();
 			}
 			
 		}
@@ -148,7 +144,6 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
 				g_debug("End Of Stream");
 				interface_set_playing(FALSE);
-				player_knight_rider_start();
 			}
 			break;
 		}
@@ -284,35 +279,3 @@ void player_handle_tag_message(GstMessage *message)
 	gst_tag_list_free(tag_list);
 }
 
-
-// Knight Rider Special Feature
-void player_knight_rider_start(void)
-{
-	KRstopp = FALSE;
-	g_timeout_add(30000, (GSourceFunc)player_knight_rider, NULL);
-	
-	g_debug("Knight Rider action started! (wait 30 seconds)");
-}
-
-
-gboolean player_knight_rider(gpointer data)
-{
-	if (player_get_playing() || KRstopp) {
-		return FALSE;
-	}
-	
-	GstElement *play;
-	play = gst_element_factory_make("playbin", "knight-rider");
-	
-	GString* uri = g_string_new("file://");
-	uri = g_string_append(uri, g_get_current_dir());
-	uri = g_string_append(uri, "/data/music/KR/KR-Scanner.wav");
-	
-	g_object_set(G_OBJECT(play), "uri", uri->str, NULL);
-	gst_element_set_state (GST_ELEMENT(play), GST_STATE_PLAYING);
-	
-	gst_object_unref(play);
-	g_string_free(uri, TRUE);
-
-	return TRUE;
-}

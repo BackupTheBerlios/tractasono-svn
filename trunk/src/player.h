@@ -22,14 +22,11 @@
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 
-void player_init(int *argc, char **argv[]);
+void player_init(int argc, char *argv[]);
 
 void player_set_play(void);
 void player_set_pause(void);
 void player_set_stop(void);
-
-void player_knight_rider_start(void);
-gboolean player_knight_rider(gpointer data);
 
 void player_play_uri(const gchar *uri);
 

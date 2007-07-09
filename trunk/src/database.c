@@ -19,10 +19,40 @@
  *      MA 02110-1301, USA.
  */
 
+#ifdef HAVE_CONFIG_H
+	#include <config.h>
+#endif
+
 #include <libgda/libgda.h>
 
 #include "database.h"
 
+
+void database_init (int argc, char *argv[])
+{
+	gda_init (PACKAGE, VERSION, argc, argv);
+	
+	database_list_providers();
+	database_list_sources();
+	database_testfunc();
+}
+
+
+void database_list_providers (void)
+{
+    GList *prov_list;
+    GList *node;
+    GdaProviderInfo *info;
+
+    prov_list = gda_config_get_provider_list ();
+
+    for (node = g_list_first (prov_list); node != NULL; node = node->next) {
+        info = (GdaProviderInfo *) node->data;
+        g_print ("ID: %s\n", info->id);
+    }
+
+    gda_config_free_provider_list (prov_list);
+}
 
 
 void database_list_sources (void)
@@ -45,6 +75,29 @@ void database_list_sources (void)
     gda_config_free_data_source_list (ds_list);
 }
 
+
+void database_testfunc (void)
+{
+	GError *error;
+	GdaClient *client;
+	GdaConnection *connection;
+      
+	client = gda_client_new ();
+      
+	g_print ("CONNECTING\n");
+	connection = gda_client_open_connection (client, "tractasono", NULL, NULL,
+						 GDA_CONNECTION_OPTIONS_READ_ONLY, &error);
+
+	g_print ("CONNECTED\n");
+      
+	//execute_some_queries (connection);
+
+	g_print ("ERRORS PROVED!\n");
+      
+	//process_accounts (connection);
+      
+	g_object_unref (G_OBJECT (client));
+}
 
 
 

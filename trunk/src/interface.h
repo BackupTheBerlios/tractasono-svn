@@ -49,26 +49,14 @@ WindowModule module;
 
 
 
-
-
-
 // Public Functions
-void interface_init(int *argc, char ***argv);
-
-void interface_load(const gchar *gladefile);
-
-void interface_clean();
-
-void interface_clean_all();
-
-void interface_show_module(GtkWidget *widget);
-
-void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri);
-
-void interface_set_song_position(gint64 position);
-
-void interface_set_song_duration(gint64 duration);
-
-void interface_set_playing(gboolean isplaying);
-
-void interface_set_playimage(const gchar *stock_id);
+void interface_init (int argc, char *argv[]);
+void interface_load (const gchar *gladefile);
+void interface_clean ();
+void interface_clean_all ();
+void interface_show_module (GtkWidget *widget);
+void interface_set_songinfo (const gchar *artist, const gchar *title, const gchar *uri);
+void interface_set_song_position (gint64 position);
+void interface_set_song_duration (gint64 duration);
+void interface_set_playing (gboolean isplaying);
+void interface_set_playimage (const gchar *stock_id);

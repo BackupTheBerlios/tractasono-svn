@@ -28,12 +28,16 @@
 #include "drives.h"
 #include "player.h"
 #include "interface.h"
+#include "database.h"
 
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
+	// Databenbank initialisieren
+	database_init (argc, argv);
+	
 	// Player initialisieren
-	player_init(&argc, &argv);
+	player_init(argc, argv);
 	
 	// Settings initialisieren
 	settings_init();
@@ -42,7 +46,7 @@ int main(int argc, char *argv[])
 	drives_init();
 	
 	// Interface initialisieren
-	interface_init(&argc, &argv);
+	interface_init(argc, argv);
 
 	// Das Interface laden
 	interface_load("tractasono.glade");

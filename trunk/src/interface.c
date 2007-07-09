@@ -31,10 +31,10 @@
 
 
 
-void interface_init(int *argc, char ***argv)
+void interface_init (int argc, char *argv[])
 {
 	g_print("Interface initialisieren\n");
-	gtk_init(argc, argv);
+	gtk_init(&argc, &argv);
 	glade_init();
 	
 	glade = NULL;
