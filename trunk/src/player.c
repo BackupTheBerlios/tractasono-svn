@@ -43,7 +43,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 // Player initialisieren
 void player_init(int argc, char *argv[])
 {
-	g_print("Player initialisieren\n");
+	g_message ("Player init");
 	gst_init (&argc, &argv);
 	
 	// GStreamer Zeitformat einstellen

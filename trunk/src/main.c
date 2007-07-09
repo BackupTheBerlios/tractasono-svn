@@ -29,6 +29,7 @@
 #include "player.h"
 #include "interface.h"
 #include "database.h"
+#include "music.h"
 
 // Programmeinstieg
 int main(int argc, char *argv[])
@@ -36,11 +37,11 @@ int main(int argc, char *argv[])
 	// Databenbank initialisieren
 	database_init (argc, argv);
 	
-	// Player initialisieren
-	player_init(argc, argv);
-	
 	// Settings initialisieren
 	settings_init();
+	
+	// Player initialisieren
+	player_init(argc, argv);
 
 	// Drives initialisieren
 	drives_init();
@@ -50,6 +51,9 @@ int main(int argc, char *argv[])
 
 	// Das Interface laden
 	interface_load("tractasono.glade");
+	
+	// Music init
+	music_init();
 
 	// Programmloop starten
 	gtk_main();

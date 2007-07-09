@@ -3,7 +3,8 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(LIBGLADE_CFLAGS) \
 		   $(GCONF_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
-		   $(LIBGDA_CFLAGS)
+		   $(LIBGDA_CFLAGS) \
+		   $(LIBGNOMEDB_CFLAGS)
 
 AM_CFLAGS = -Wall -g
 
@@ -41,4 +42,5 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(LIBGLADE_LIBS) \
 				   $(GCONF_LIBS) \
 				   $(GSTREAMER_LIBS) \
-				   $(LIBGDA_LIBS)
+				   $(LIBGDA_LIBS) \
+				   $(LIBGNOMEDB_LIBS)

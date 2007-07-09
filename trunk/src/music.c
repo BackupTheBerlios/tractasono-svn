@@ -20,6 +20,39 @@
  */
 
 #include "music.h"
+#include "database.h"
+#include "interface.h"
 
+void music_init (void)
+{
+	g_message ("Music init");
+	
+	GtkWidget *container, *grid;
+	
 
-
+	// Genre
+	container = glade_xml_get_widget(glade, "vbox_genre");
+	grid = gnome_db_grid_new(database_get_genre_model ());
+	gtk_container_add(GTK_CONTAINER(container), grid);
+	gtk_widget_show(grid);
+	
+	// Artist
+	container = glade_xml_get_widget(glade, "vbox_interpret");
+	grid = gnome_db_grid_new(database_get_artist_model ());
+	gtk_container_add(GTK_CONTAINER(container), grid);
+	gtk_widget_show(grid);
+	
+	// Albums
+	container = glade_xml_get_widget(glade, "vbox_album");
+	grid = gnome_db_grid_new(database_get_album_model ());
+	gtk_container_add(GTK_CONTAINER(container), grid);
+	gtk_widget_show(grid);
+	
+	// Song
+	container = glade_xml_get_widget(glade, "vbox_track");
+	grid = gnome_db_grid_new(database_get_song_model ());
+	gtk_container_add(GTK_CONTAINER(container), grid);
+	gtk_widget_show(grid);
+	
+	
+}

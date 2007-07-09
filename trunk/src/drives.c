@@ -48,6 +48,8 @@ void drive_disconnected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gp
 
 int drives_init()
 {
+	g_message ("Drives init");
+	
 	if (!gnome_vfs_init ()) {
 		printf ("Could not initialize GnomeVFS\n");
 		return DRIVES_FAIL;
@@ -58,8 +60,7 @@ int drives_init()
 
 	g_signal_connect(monitor, "drive-connected", G_CALLBACK(drive_connected), NULL);
 	g_signal_connect(monitor, "drive-disconnected", G_CALLBACK(drive_disconnected), NULL);
-
-	printf ("Initialize GnomeVFS\n");
+	
 	return DRIVES_SUCCESS;
 }
 

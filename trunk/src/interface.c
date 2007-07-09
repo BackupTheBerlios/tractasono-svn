@@ -24,6 +24,7 @@
 #include "fullscreen.h"
 #include "disc.h"
 #include "radio.h"
+#include "music.h"
 
 
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
@@ -33,7 +34,8 @@
 
 void interface_init (int argc, char *argv[])
 {
-	g_print("Interface initialisieren\n");
+	g_message ("Interface init");
+	
 	gtk_init(&argc, &argv);
 	glade_init();
 	
@@ -57,7 +59,7 @@ void interface_init (int argc, char *argv[])
 void on_main_window_destroy(GtkWidget *widget, gpointer user_data)
 {
 	// Programm beenden
-	g_print("Programm wird beendet!\n");
+	g_message ("Program shutdown!");
 	gtk_main_quit();
 }
 
@@ -69,7 +71,6 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 	* you don't want the window to be destroyed.
 	* This is useful for popping up 'are you sure you want to quit?'
 	* type dialogs. */
-	g_print ("Das Programm wird durch den Windowmanager geschlossen!\n");
 
 	/* Change TRUE to FALSE and the main window will be destroyed with
 	* a "delete_event". */

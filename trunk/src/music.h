@@ -19,5 +19,6 @@
  *      MA 02110-1301, USA.
  */
 
-#include "interface.h"
+
+void music_init (void);
 

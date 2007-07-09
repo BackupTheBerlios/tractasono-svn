@@ -19,7 +19,21 @@
  *      MA 02110-1301, USA.
  */
 
+
+#include <libgda/libgda.h>
+#include <libgnomedb/libgnomedb.h>
+
+
 void database_init (int argc, char *argv[]);
 void database_list_providers (void);
 void database_list_sources (void);
-void database_testfunc (void);
+void database_connect (void);
+gint database_execute_sql_non_query (const gchar * buffer);
+
+GdaDataModel* database_get_model_from_sql (const gchar * sql);
+GdaDataModel* database_get_album_model (void);
+GdaDataModel* database_get_artist_model (void);
+GdaDataModel* database_get_genre_model (void);
+GdaDataModel* database_get_song_model (void);
+
+

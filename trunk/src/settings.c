@@ -43,6 +43,8 @@ static void gconf_notify_burner(GConfClient *client, guint cnxn_id, GConfEntry  
 
 void settings_init()
 {
+	g_message ("Settings init");
+	
 	client = gconf_client_get_default ();
 
 	/* Add our directory to the list of directories the GConfClient will
@@ -53,8 +55,6 @@ void settings_init()
 	/* Listen to changes to our key. */
 	gconf_client_notify_add (client, CDROMKEY, gconf_notify_cdrom, NULL, NULL, NULL);
 	gconf_client_notify_add (client, BURNERKEY, gconf_notify_burner, NULL, NULL, NULL);
-
-	g_print("GConf initialized!\n");
 }
 
 void settings_set_cdrom(GnomeVFSDrive *drive)

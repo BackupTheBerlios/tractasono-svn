@@ -25,7 +25,7 @@
 
 void fullscreen_init()
 {
-	g_print("Fullscreen Modul wird initialisiert...\n");
+	g_message ("Fullscreen init");
 	
 }
 
