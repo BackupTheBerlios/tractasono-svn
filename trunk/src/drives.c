@@ -22,6 +22,8 @@
 #include "drives.h"
 #include "settings.h"
 
+extern Settings *settings;
+
 
 // Drive-Connected Signal
 void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
@@ -30,8 +32,7 @@ void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpoin
 		char *drivename;
 		drivename = gnome_vfs_drive_get_display_name(drive);
 		g_print("Drive \"%s\" connected!\n", drivename);
-		//print_drive(drive);
-		settings_set_cdrom(drive);
+		settings->drives_cdrom = gnome_vfs_drive_get_device_path (drive);
 	}
 }
 
@@ -42,7 +43,6 @@ void drive_disconnected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gp
 		char *drivename;
 		drivename = gnome_vfs_drive_get_display_name(drive);
 		g_print("Drive \"%s\" disconnected!\n", drivename);
-		//print_drive(drive);
 	}
 }
 

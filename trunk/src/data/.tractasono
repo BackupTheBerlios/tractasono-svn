@@ -1,0 +1,9 @@
+# tractasono config file
+# place it in your home directory
+
+[general]
+log=false
+
+[database]
+name=tractasono
+

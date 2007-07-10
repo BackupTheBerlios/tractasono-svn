@@ -19,18 +19,25 @@
  *      MA 02110-1301, USA.
  */
 
-#include <libgnomevfs/gnome-vfs.h>
-#include <gconf/gconf-client.h>
+#include <glib.h>
 
-GnomeVFSDrive *cdrom;
-GnomeVFSDrive *burner;
 
-#define DRIVEPATH "/apps/tractasono/drives"
-#define CDROMKEY "/apps/tractasono/drives/cdrom"
-#define BURNERKEY "/apps/tractasono/drives/burner"
+typedef struct
+{
+	GKeyFile *keyfile;
+	gboolean general_log;
+	gchar *database_name;
+	gchar *drives_cdrom;
+	gchar *drives_burner;
+} Settings;
 
-void settings_init();
-void settings_set_cdrom(GnomeVFSDrive *drive);
-void settings_set_burner(GnomeVFSDrive *drive);
-GnomeVFSDrive* settings_get_cdrom();
-GnomeVFSDrive* settings_get_burner();
+Settings *settings;
+
+
+
+void settings_init ();
+
+void settings_read (void);
+
+gchar* settings_get_configfile (void);
+

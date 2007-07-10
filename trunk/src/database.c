@@ -24,11 +24,14 @@
 #endif
 
 #include "database.h"
+#include "settings.h"
 
 
 #define DATABASE "tractasono"
 
+
 GdaConnection *connection;
+extern Settings *settings;
 
 
 void database_init (int argc, char *argv[])
@@ -85,17 +88,17 @@ void database_connect (void)
       
 	client = gda_client_new ();
  
-	info = gda_config_find_data_source (DATABASE);
+	info = gda_config_find_data_source (settings->database_name);
 	if (!info)
-		g_error ("DSN '%s' is not declared", DATABASE);
+		g_error ("DSN '%s' is not declared", settings->database_name);
 	else {
 		connection = gda_client_open_connection (client, info->name, 
 												 info->username, info->password,
 												 0, &error);							 								 
 		if (!connection) {
 			g_warning ("Can't open connection to DSN %s: %s\n", info->name,
-			   error && error->message ? error->message : "???");
-			   return;
+					   error && error->message ? error->message : "???");
+			return;
 		}
 		gda_data_source_info_free (info);
 		g_object_unref (G_OBJECT (client));

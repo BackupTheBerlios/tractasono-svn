@@ -34,11 +34,11 @@
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
-	// Databenbank initialisieren
-	database_init (argc, argv);
-	
 	// Settings initialisieren
 	settings_init();
+	
+	// Databenbank initialisieren
+	database_init (argc, argv);
 	
 	// Player initialisieren
 	player_init(argc, argv);
