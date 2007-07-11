@@ -371,6 +371,33 @@ UNLOCK TABLES;
 
 
 --
+-- Definition of table `tractasono`.`tbl_settings`
+--
+
+DROP TABLE IF EXISTS `tractasono`.`tbl_settings`;
+CREATE TABLE  `tractasono`.`tbl_settings` (
+  `IDsettings` int(11) NOT NULL auto_increment,
+  `settingsgroup` varchar(20) NOT NULL,
+  `settingskey` varchar(20) NOT NULL,
+  `settingstext` varchar(200) default NULL,
+  `settingsinteger` int(11) default NULL,
+  `settingsfloat` float default NULL,
+  `settingsboolean` tinyint(1) default NULL,
+  PRIMARY KEY  (`IDsettings`)
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1 COMMENT='Wird verwendet um Einstellungen zu speichern';
+
+--
+-- Dumping data for table `tractasono`.`tbl_settings`
+--
+
+/*!40000 ALTER TABLE `tbl_settings` DISABLE KEYS */;
+LOCK TABLES `tbl_settings` WRITE;
+INSERT INTO `tractasono`.`tbl_settings` VALUES  (28,'module','show_fullscreen',NULL,NULL,NULL,1);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `tbl_settings` ENABLE KEYS */;
+
+
+--
 -- Definition of table `tractasono`.`tbl_track`
 --
 
