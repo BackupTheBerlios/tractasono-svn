@@ -21,6 +21,7 @@
 
 #include "drives.h"
 #include "settings.h"
+#include "musicbrainz.h"
 
 extern Settings *settings;
 
@@ -33,6 +34,7 @@ void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpoin
 		drivename = gnome_vfs_drive_get_display_name(drive);
 		g_print("Drive \"%s\" connected!\n", drivename);
 		settings->drives_cdrom = gnome_vfs_drive_get_device_path (drive);
+		musicbrainz_read_disc (settings->drives_cdrom);
 	}
 }
 

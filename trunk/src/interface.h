@@ -51,7 +51,6 @@ WindowModule module;
 
 // Public Functions
 void interface_init (int argc, char *argv[]);
-void interface_load (const gchar *gladefile);
 void interface_clean ();
 void interface_clean_all ();
 void interface_show_module (GtkWidget *widget);

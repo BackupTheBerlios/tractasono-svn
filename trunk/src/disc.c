@@ -32,7 +32,7 @@
 void disc_init()
 {
 	
-	g_print("Disc init...\n");
+	g_message ("\tDisc Modul init");
 	
 	
 	

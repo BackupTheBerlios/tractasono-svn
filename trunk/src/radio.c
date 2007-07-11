@@ -29,7 +29,8 @@
 
 void radio_init(void)
 {
-	g_debug("Radio Modul initialisieren!");
+	g_message ("\tRadio Modul init");
+	
 }
 
 void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)

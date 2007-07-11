@@ -1,7 +1,7 @@
 /*
- *      main.c
+ *      musicbrainz.h
  *      
- *      Copyright 2007 Patrik Obrist <padx@gmx.net>
+ *      Copyright 2007 Patrik Obrist <patrik@valhalla>
  *      
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,37 +19,6 @@
  *      MA 02110-1301, USA.
  */
 
-#ifdef HAVE_CONFIG_H
-	#include <config.h>
-#endif
+#include <gtk/gtk.h>
 
-// Lokale Includes
-#include "settings.h"
-#include "drives.h"
-#include "player.h"
-#include "interface.h"
-#include "database.h"
-
-// Programmeinstieg
-int main(int argc, char *argv[])
-{
-	// Settings initialisieren
-	settings_init();
-	
-	// Databenbank initialisieren
-	database_init (argc, argv);
-	
-	// Player initialisieren
-	player_init(argc, argv);
-
-	// Drives initialisieren
-	drives_init();
-	
-	// Interface initialisieren
-	interface_init(argc, argv);
-
-	// Programmloop starten
-	gtk_main();
-
-	return 0;
-}
+void musicbrainz_read_disc (gchar *drive);

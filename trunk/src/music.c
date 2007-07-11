@@ -25,7 +25,7 @@
 
 void music_init (void)
 {
-	g_message ("Music init");
+	g_message ("\tMusic Modul init");
 	
 	GtkWidget *container, *grid;
 	

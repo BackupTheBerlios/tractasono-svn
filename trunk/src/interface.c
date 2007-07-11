@@ -52,6 +52,75 @@ void interface_init (int argc, char *argv[])
 	module.settings = NULL;
 	module.fullscreen = NULL;
 	module.disc = NULL;
+	
+	
+	// Das Interface laden
+	GString* buildfile = g_string_new(g_get_current_dir());
+	buildfile = g_string_append(buildfile, "/data/tractasono.glade");
+	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
+		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
+	}
+	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
+		g_error("Die Glade Datei konnte nicht geladen werden!\n");
+		exit(0);
+	}
+	glade = glade_xml_new(buildfile->str, NULL, NULL);
+	
+	// Verbinde die Signale automatisch mit dem Interface
+	glade_xml_signal_autoconnect(glade);
+	
+	// Hauptfenster holen
+	mainwindow = glade_xml_get_widget(glade, "window_main");
+	if (mainwindow == NULL) {
+		g_print("Fehler: Konnte window_main nicht holen!\n");
+	}
+
+	// Placeholder holen
+	vbox_placeholder = glade_xml_get_widget(glade, "vbox_placeholder");
+	if (vbox_placeholder == NULL) {
+		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
+	}
+	
+	// Tractasono Root holen
+	vbox_tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
+	if (vbox_tractasono == NULL) {
+		g_print("Fehler: Konnte vbox_tractasono nicht holen!\n");
+	}
+
+	// Die einzelnen Windows laden und referenzieren
+	module.music = g_object_ref(glade_xml_get_widget(glade, "notebook_music"));
+	module.disc = g_object_ref(glade_xml_get_widget(glade, "vbox_disc"));
+	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
+	module.radio = g_object_ref(glade_xml_get_widget(glade, "radiomodul"));
+	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "vbox_fullscreen"));
+
+	// Keyboard laden
+	GtkWidget *vbox_placeholder_keyboard = NULL;
+	vbox_placeholder_keyboard = glade_xml_get_widget(glade, "vbox_placeholder_keyboard");
+	if (vbox_placeholder_keyboard == NULL) {
+		g_print("Fehler: Konnte vbox_placeholder_keyboard nicht holen!\n");
+	}
+	vbox_keyboard = glade_xml_get_widget(glade, "vbox_keyboard");
+	if (vbox_keyboard == NULL) {
+		g_print("Fehler: Konnte vbox_keyboard nicht holen!\n");
+	}
+	gtk_widget_reparent(vbox_keyboard, vbox_placeholder_keyboard);
+	gtk_widget_hide(vbox_keyboard);
+	
+	// Progressbar laden
+	progress = GTK_PROGRESS_BAR(glade_xml_get_widget(glade, "range_song"));
+	if (progress == NULL) {
+		g_print("Fehler: Konnte range_song nicht holen!\n");
+	}
+	
+	// Disc Modul init
+	disc_init ();
+	
+	// Radio Modul init
+	radio_init ();
+	
+	// Music Modul init
+	music_init ();
 }
 
 
@@ -140,70 +209,6 @@ void interface_set_song_position(gint64 position)
 	}
 }
 
-
-void interface_load(const gchar *gladefile)
-{
-	// Das Interface laden
-	// HACK (sollte mal angeschaut werden)
-	GString* buildfile = g_string_new(g_get_current_dir());
-	buildfile = g_string_append(buildfile, "/data/tractasono.glade");
-	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
-		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
-	}
-	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
-		g_error("Die Glade Datei konnte nicht geladen werden!\n");
-		exit(0);
-	}
-	glade = glade_xml_new(buildfile->str, NULL, NULL);
-	
-	// Verbinde die Signale automatisch mit dem Interface
-	glade_xml_signal_autoconnect(glade);
-	
-	// Hauptfenster holen
-	mainwindow = glade_xml_get_widget(glade, "window_main");
-	if (mainwindow == NULL) {
-		g_print("Fehler: Konnte window_main nicht holen!\n");
-	}
-
-	// Placeholder holen
-	vbox_placeholder = glade_xml_get_widget(glade, "vbox_placeholder");
-	if (vbox_placeholder == NULL) {
-		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
-	}
-	
-	// Tractasono Root holen
-	vbox_tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
-	if (vbox_tractasono == NULL) {
-		g_print("Fehler: Konnte vbox_tractasono nicht holen!\n");
-	}
-
-	// Die einzelnen Windows laden und referenzieren
-	module.music = g_object_ref(glade_xml_get_widget(glade, "notebook_music"));
-	module.disc = g_object_ref(glade_xml_get_widget(glade, "vbox_disc"));
-	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
-	module.radio = g_object_ref(glade_xml_get_widget(glade, "radiomodul"));
-	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "vbox_fullscreen"));
-
-	// Keyboard laden
-	GtkWidget *vbox_placeholder_keyboard = NULL;
-	vbox_placeholder_keyboard = glade_xml_get_widget(glade, "vbox_placeholder_keyboard");
-	if (vbox_placeholder_keyboard == NULL) {
-		g_print("Fehler: Konnte vbox_placeholder_keyboard nicht holen!\n");
-	}
-	vbox_keyboard = glade_xml_get_widget(glade, "vbox_keyboard");
-	if (vbox_keyboard == NULL) {
-		g_print("Fehler: Konnte vbox_keyboard nicht holen!\n");
-	}
-	gtk_widget_reparent(vbox_keyboard, vbox_placeholder_keyboard);
-	gtk_widget_hide(vbox_keyboard);
-	
-	// Range laden
-	//range = GTK_RANGE(glade_xml_get_widget(glade, "range_song"));
-	progress = GTK_PROGRESS_BAR(glade_xml_get_widget(glade, "range_song"));
-	if (progress == NULL) {
-		g_print("Fehler: Konnte range_song nicht holen!\n");
-	}
-}
 
 // Setze die Song Informationen
 void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
@@ -326,8 +331,6 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 	g_print("CD gedrückt!\n");
 
 	interface_show_module(module.disc);
-
-	disc_init();
 }
 
 

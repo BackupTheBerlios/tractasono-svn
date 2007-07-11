@@ -23,6 +23,7 @@
 	#include <config.h>
 #endif
 
+#include <string.h>
 
 #include "database.h"
 #include "settings.h"
@@ -45,8 +46,6 @@ void database_init (int argc, char *argv[])
 	//database_list_providers ();
 	//database_list_sources ();
 	database_connect ();
-	
-	database_settings_set_boolean ("module", "show_fullscreen", TRUE);
 }
 
 
@@ -162,6 +161,8 @@ GdaDataModel* database_execute_sql_command (const gchar *sql)
 	}
 	gda_command_free (command);
 	
+	//database_dump_dm (dm);
+	
 	return dm;
 }
 
@@ -200,27 +201,9 @@ gint database_execute_sql_non_query (const gchar *sql)
 }
 
 
-void database_show_table (GdaDataModel *dm)
-{
-	gint row_id;
-	gint column_id;
-	GValue *value;
-	gchar *string;
-
-	for (column_id = 0; column_id < gda_data_model_get_n_columns (dm); column_id++) {
-		g_print ("%s\t", gda_data_model_get_column_title (dm, column_id));
-	}
-	g_print ("\n");
-
-	for (row_id = 0; row_id < gda_data_model_get_n_rows (dm); row_id++) {
-		for (column_id = 0; column_id < gda_data_model_get_n_columns (dm); column_id++) {
-			value = (GValue *) gda_data_model_get_value_at (dm, column_id, row_id);
-			string = gda_value_stringify (value);
-			g_print ("%s\t", string);
-			g_free (string);
-		}
-		g_print ("\n");
-	}
+void database_dump_dm (GdaDataModel *dm)
+{	
+	g_print ("\n%s\n", gda_data_model_dump_as_string (dm));
 }
 
 
@@ -235,7 +218,7 @@ void database_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
 	dm = database_execute_sql_command (sql->str);
-	val = gda_data_model_get_value_at (dm, 0, 0);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
 		// Datensatz mutieren
@@ -249,6 +232,28 @@ void database_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 	}
 	
 	database_execute_sql (sql->str);
+}
+
+
+gboolean database_settings_get_boolean (gchar *group, gchar *key)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	gboolean value = FALSE;
+	
+	sql = g_string_new ("SELECT settingsboolean FROM tbl_settings");
+	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
+	dm = database_execute_sql_command (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		if (strcmp(gda_value_stringify (val), "1") == 0) {
+			value = TRUE;
+		}
+	}
+	
+	return value;
 }
 
 
