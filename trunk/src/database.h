@@ -28,7 +28,12 @@ void database_init (int argc, char *argv[]);
 void database_list_providers (void);
 void database_list_sources (void);
 void database_connect (void);
-gint database_execute_sql_non_query (const gchar * buffer);
+
+void database_execute_sql (const gchar *sql);
+gint database_execute_sql_non_query (const gchar *sql);
+GdaDataModel* database_execute_sql_command (const gchar *sql);
+
+void database_show_table (GdaDataModel *dm);
 
 GdaDataModel* database_get_model_from_sql (const gchar * sql);
 GdaDataModel* database_get_album_model (void);
@@ -36,4 +41,5 @@ GdaDataModel* database_get_artist_model (void);
 GdaDataModel* database_get_genre_model (void);
 GdaDataModel* database_get_song_model (void);
 
+void database_settings_set_boolean (gchar *group, gchar *key, gboolean value);
 

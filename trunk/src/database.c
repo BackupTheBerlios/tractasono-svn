@@ -23,6 +23,7 @@
 	#include <config.h>
 #endif
 
+
 #include "database.h"
 #include "settings.h"
 
@@ -44,6 +45,8 @@ void database_init (int argc, char *argv[])
 	//database_list_providers ();
 	//database_list_sources ();
 	database_connect ();
+	
+	database_settings_set_boolean ("module", "show_fullscreen", TRUE);
 }
 
 
@@ -107,23 +110,6 @@ void database_connect (void)
 }
 
 
-gint database_execute_sql_non_query (const gchar * buffer)
-{
-	GError *error = NULL;
-	GdaCommand *command;
-	gint number;
-	
-	command = gda_command_new (buffer, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	number = gda_connection_execute_non_select_command (connection, command, NULL, &error);
-	if (error) {
-		g_print ("Error: %s", error->message);
-	}
-	gda_command_free (command);
-	
-	return number;
-}
-
-
 GdaDataModel* database_get_model_from_sql (const gchar * sql)
 {
 	GError *error = NULL;
@@ -161,5 +147,108 @@ GdaDataModel* database_get_song_model (void)
 	return database_get_model_from_sql("SELECT * FROM view_song_short");
 }
 
+
+
+GdaDataModel* database_execute_sql_command (const gchar *sql)
+{
+	GdaCommand *command;
+	GError *error = NULL;
+	GdaDataModel *dm;
+
+	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
+	dm = gda_connection_execute_select_command (connection, command, NULL, &error);
+	if (error) {
+		g_message (error->message);
+	}
+	gda_command_free (command);
+	
+	return dm;
+}
+
+
+void database_execute_sql (const gchar *sql)
+{
+	GdaCommand *command;
+	GError *error = NULL;
+
+	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL,
+				   GDA_COMMAND_OPTION_STOP_ON_ERRORS);
+	gda_connection_execute_select_command (connection, command, NULL, &error);
+	if (error) {
+		g_message (error->message);
+	}
+
+	gda_command_free (command);
+}
+
+
+gint database_execute_sql_non_query (const gchar *sql)
+{
+	GdaCommand *command;
+	GError *error = NULL;
+	gint count;
+
+	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
+	count  = gda_connection_execute_non_select_command (connection, command, NULL, &error);
+	if (error) {
+		g_message (error->message);
+	}
+
+	gda_command_free (command);
+
+	return count;
+}
+
+
+void database_show_table (GdaDataModel *dm)
+{
+	gint row_id;
+	gint column_id;
+	GValue *value;
+	gchar *string;
+
+	for (column_id = 0; column_id < gda_data_model_get_n_columns (dm); column_id++) {
+		g_print ("%s\t", gda_data_model_get_column_title (dm, column_id));
+	}
+	g_print ("\n");
+
+	for (row_id = 0; row_id < gda_data_model_get_n_rows (dm); row_id++) {
+		for (column_id = 0; column_id < gda_data_model_get_n_columns (dm); column_id++) {
+			value = (GValue *) gda_data_model_get_value_at (dm, column_id, row_id);
+			string = gda_value_stringify (value);
+			g_print ("%s\t", string);
+			g_free (string);
+		}
+		g_print ("\n");
+	}
+}
+
+
+void database_settings_set_boolean (gchar *group, gchar *key, gboolean value)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	gint id = 0;
+	GValue *val;
+	
+	// Schaue ob Eintrag schon existiert
+	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
+	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
+	dm = database_execute_sql_command (sql->str);
+	val = gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		// Datensatz mutieren
+		id = g_value_get_int (val);
+		sql = g_string_new ("UPDATE tbl_settings SET");
+		g_string_append_printf (sql, " settingsboolean = '%i' WHERE IDsettings = '%i'", value, id);
+	} else {
+		// Datensatz neu erstellen
+		sql = g_string_new ("INSERT INTO tbl_settings(settingsgroup, settingskey, settingsboolean)");
+		g_string_append_printf (sql, " VALUES ('%s', '%s', '%i')", group, key, value);
+	}
+	
+	database_execute_sql (sql->str);
+}
 
 
