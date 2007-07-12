@@ -19,6 +19,19 @@
  *      MA 02110-1301, USA.
  */
 
+#include <musicbrainz3/mb_c.h>
 #include <gtk/gtk.h>
 
+
+typedef struct {
+    gchar discid[100];
+    gchar disctitle[256];
+    MbDisc disc;
+} MBDisc;
+
+MBDisc *mb_disc;
+
+void musicbrainz_init (void);
+
 void musicbrainz_read_disc (gchar *drive);
+gchar* musicbrainz_get_disctitle (void);

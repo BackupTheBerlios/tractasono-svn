@@ -22,6 +22,7 @@
 #include "drives.h"
 #include "settings.h"
 #include "musicbrainz.h"
+#include "disc.h"
 
 extern Settings *settings;
 
@@ -35,6 +36,7 @@ void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpoin
 		g_print("Drive \"%s\" connected!\n", drivename);
 		settings->drives_cdrom = gnome_vfs_drive_get_device_path (drive);
 		musicbrainz_read_disc (settings->drives_cdrom);
+		disc_set_disctitle (musicbrainz_get_disctitle ());
 	}
 }
 
@@ -56,6 +58,9 @@ int drives_init()
 		printf ("Could not initialize GnomeVFS\n");
 		return DRIVES_FAIL;
 	}
+
+	// Musicbrainz init
+	musicbrainz_init ();
 
 	GnomeVFSVolumeMonitor* monitor = NULL;
 	monitor = gnome_vfs_get_volume_monitor();

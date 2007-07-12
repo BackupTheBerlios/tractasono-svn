@@ -212,3 +212,14 @@ void duration_cell_data_cb (GtkTreeViewColumn *tree_column,
 }
 
 
+void disc_set_disctitle (gchar *title)
+{
+	GtkWidget *label;
+	
+	label = glade_xml_get_widget (glade, "label_disctitle");
+	if (!label) {
+		g_error ("Konnte label_disctitle nicht holen!");
+	}
+	
+	gtk_label_set_text (GTK_LABEL (label), title);
+}

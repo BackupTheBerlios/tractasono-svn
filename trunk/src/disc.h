@@ -121,4 +121,5 @@ void duration_cell_data_cb (GtkTreeViewColumn *tree_column,
                                 GtkTreeIter *iter,
                                 gpointer data);
 
+void disc_set_disctitle (gchar *title);
 
