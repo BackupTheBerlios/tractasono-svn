@@ -31,6 +31,8 @@
 #define INSTALLED_GLADE DATADIR"/tractasono/tractasono.glade"
 
 
+static gfloat style_color_mods[5]={0.0,-0.1,0.2,-0.2};
+
 
 void interface_init (int argc, char *argv[])
 {
@@ -112,6 +114,24 @@ void interface_init (int argc, char *argv[])
 	if (progress == NULL) {
 		g_print("Fehler: Konnte range_song nicht holen!\n");
 	}
+	
+	// LCD
+	/*GtkWidget *lcd;
+	lcd = glade_xml_get_widget(glade, "label_song");
+	if (lcd == NULL) {
+		g_error("Konnte label_song nicht holen!\n");
+	}
+	GtkStyle * style_LCD;
+	GdkColor *color_LCD;
+	color_LCD = interface_create_color (33686,38273,29557);
+	style_LCD = interface_create_style (color_LCD, color_LCD, FALSE);
+	gtk_widget_set_style (GTK_WIDGET(lcd), style_LCD);
+	
+	// Dieser Code noch umwandeln
+	lcdbox = gtk_event_box_new ();
+	gtk_widget_set_style (lcdbox, style_LCD);
+	gtk_container_add (GTK_CONTAINER(frame), lcdbox);
+	gtk_widget_show (lcdbox);*/
 	
 	// Disc Modul init
 	disc_init ();
@@ -400,4 +420,54 @@ void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
 	g_print("Stop wurde gedrückt\n");
 	player_set_stop();
 }
+
+/*
+ * create_style()
+ *
+ * Ripped from grip, Copyright (c) 1998-2002 Mike Oliphant
+ */
+GtkStyle* interface_create_style (GdkColor *fg, GdkColor *bg, gboolean do_grade)
+{
+  GtkStyle *def;
+  GtkStyle *sty;
+  int state;
+
+  def=gtk_widget_get_default_style();
+  sty=gtk_style_copy(def);
+
+  for(state=0;state<5;state++) {
+    if(fg) sty->fg[state]=*fg;
+
+    if(bg) sty->bg[state]=*bg;
+
+    if(bg && do_grade) {
+      sty->bg[state].red+=sty->bg[state].red*style_color_mods[state];
+      sty->bg[state].green+=sty->bg[state].green*style_color_mods[state];
+      sty->bg[state].blue+=sty->bg[state].blue*style_color_mods[state];
+    }
+  }
+
+  return sty;
+}
+
+
+/*
+ * create_color (r, g, b)
+ *
+ * Ripped from grip, Copyright (c) 1998-2002 Mike Oliphant
+ */
+GdkColor* interface_create_color (int red, int green, int blue)
+{
+  GdkColor *c;
+
+  c=(GdkColor *)g_malloc(sizeof(GdkColor));
+  c->red=red;
+  c->green=green;
+  c->blue=blue;
+
+  gdk_color_alloc(gdk_colormap_get_system(),c);
+
+  return c;
+}
+
 
