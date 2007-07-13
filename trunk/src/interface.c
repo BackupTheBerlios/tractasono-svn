@@ -25,6 +25,7 @@
 #include "disc.h"
 #include "radio.h"
 #include "music.h"
+#include "lcd.h"
 
 
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
@@ -116,16 +117,21 @@ void interface_init (int argc, char *argv[])
 	}
 	
 	// LCD
-	GtkWidget *eventbox;
-	eventbox = glade_xml_get_widget(glade, "eventbox_lcd");
-	if (eventbox == NULL) {
-		g_error("Konnte eventbox_lcd nicht holen!\n");
+	/*GtkWidget *lcdspace, *lcd;
+	lcdspace = glade_xml_get_widget(glade, "hbox_head");
+	if (lcdspace == NULL) {
+		g_error("Konnte hbox_head nicht holen!\n");
 	}
-	GtkStyle * style_LCD;
+	
+	lcd = egg_clock_face_new ();
+	gtk_container_add (GTK_CONTAINER (lcdspace), GTK_WIDGET (lcd));
+	gtk_widget_show (GTK_WIDGET (lcd));*/
+	
+	/*GtkStyle * style_LCD;
 	GdkColor *color_LCD;
 	color_LCD = interface_create_color (33686,38273,29557);
 	style_LCD = interface_create_style (color_LCD, color_LCD, FALSE);
-	gtk_widget_set_style (GTK_WIDGET(eventbox), style_LCD);
+	gtk_widget_set_style (GTK_WIDGET(eventbox), style_LCD);*/
 	
 	
 	// Disc Modul init

@@ -10,7 +10,8 @@ INCLUDES = $(GTK_CFLAGS) \
 AM_CFLAGS = -Wall -g
 
 AM_CPPFLAGS = -DINSTALL_PREFIX=\"$(prefix)\" \
-			  -DDATADIR\="\"$(datadir)"\"
+			  -DDATADIR\="\"$(datadir)"\" \
+			  -DGNOME_ICONDIR=\""$(datadir)/pixmaps"\"
 
 bin_PROGRAMS = tractasono
 
@@ -36,7 +37,9 @@ tractasono_SOURCES = main.c \
 					 database.c \
 					 database.h \
 					 musicbrainz.c \
-					 musicbrainz.h
+					 musicbrainz.h \
+					 lcd.c \
+					 lcd.h
 	
 tractasono_LDFLAGS = -export-dynamic
 

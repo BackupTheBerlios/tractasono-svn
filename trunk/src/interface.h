@@ -24,6 +24,17 @@
 #include <glade/glade.h>
 
 
+// Strukturen
+
+typedef struct {
+	GtkWidget *music;
+	GtkWidget *radio;
+	GtkWidget *import;
+	GtkWidget *settings;
+	GtkWidget *fullscreen;
+	GtkWidget *disc;
+} WindowModule;
+
 
 // Globale Variablen
 GladeXML *glade;
@@ -35,18 +46,7 @@ GtkWidget *vbox_tractasono;
 GtkEntry *actual_entry;
 GtkProgressBar *progress;
 
-
-typedef struct {
-	GtkWidget *music;
-	GtkWidget *radio;
-	GtkWidget *import;
-	GtkWidget *settings;
-	GtkWidget *fullscreen;
-	GtkWidget *disc;
-} WindowModule;
-
 WindowModule module;
-
 
 
 // Public Functions
