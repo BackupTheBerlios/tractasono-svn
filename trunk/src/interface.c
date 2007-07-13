@@ -116,22 +116,17 @@ void interface_init (int argc, char *argv[])
 	}
 	
 	// LCD
-	/*GtkWidget *lcd;
-	lcd = glade_xml_get_widget(glade, "label_song");
-	if (lcd == NULL) {
-		g_error("Konnte label_song nicht holen!\n");
+	GtkWidget *eventbox;
+	eventbox = glade_xml_get_widget(glade, "eventbox_lcd");
+	if (eventbox == NULL) {
+		g_error("Konnte eventbox_lcd nicht holen!\n");
 	}
 	GtkStyle * style_LCD;
 	GdkColor *color_LCD;
 	color_LCD = interface_create_color (33686,38273,29557);
 	style_LCD = interface_create_style (color_LCD, color_LCD, FALSE);
-	gtk_widget_set_style (GTK_WIDGET(lcd), style_LCD);
+	gtk_widget_set_style (GTK_WIDGET(eventbox), style_LCD);
 	
-	// Dieser Code noch umwandeln
-	lcdbox = gtk_event_box_new ();
-	gtk_widget_set_style (lcdbox, style_LCD);
-	gtk_container_add (GTK_CONTAINER(frame), lcdbox);
-	gtk_widget_show (lcdbox);*/
 	
 	// Disc Modul init
 	disc_init ();
@@ -242,7 +237,7 @@ void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar
 
 	GString *info = NULL;
 
-	info = g_string_new("<span size=\"xx-large\" weight=\"heavy\">");
+	info = g_string_new("<span font_desc='Dot Matrix 20'>");
 
 	if (!artist && !title) {
 		if (uri) {

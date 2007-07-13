@@ -131,6 +131,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 				g_print("GStreamer is now playing!\n");
 				
 				interface_set_playing(TRUE);
+				player_set_play ();
 				KRstopp = TRUE;
 			}
 			
