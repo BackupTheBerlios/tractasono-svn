@@ -32,15 +32,15 @@ void keyboard_show(gboolean show)
 		g_print("Keyboard wird angezeigt!\n");
 
 		gboolean visible;
-		g_object_get(vbox_keyboard, "visible", &visible, NULL);
+		g_object_get(keyboard, "visible", &visible, NULL);
 		if (!visible) {	
-			gtk_widget_show(vbox_keyboard);
+			gtk_widget_show(keyboard);
 		}
 		
 	} else {
 		// Keyboard ausblenden
 		g_print("Keyboard wird ausgeblendet!\n");
-		gtk_widget_hide(vbox_keyboard);
+		gtk_widget_hide(keyboard);
 	}
 }
 

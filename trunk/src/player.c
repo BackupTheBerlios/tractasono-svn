@@ -96,9 +96,9 @@ gint64 player_get_position(void)
 // Callback Behandlung
 gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	/*g_debug("message from \"%s\" (%s): ",
+	g_debug("message from \"%s\" (%s): ",
 			GST_STR_NULL (GST_ELEMENT_NAME (GST_MESSAGE_SRC (message))),
-			gst_message_type_get_name (GST_MESSAGE_TYPE (message)));*/
+			gst_message_type_get_name (GST_MESSAGE_TYPE (message)));
 	
 	if (GST_MESSAGE_TYPE(message) == GST_MESSAGE_TAG) {
 		/* Musik Tags */
@@ -113,12 +113,9 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 	switch (GST_MESSAGE_TYPE (message)) {
 		case GST_MESSAGE_ERROR: {
 			GError *err;
-			gchar *debug;
-
-			gst_message_parse_error (message, &err, &debug);
-			g_print ("\tError: %s\n", err->message);
+			gst_message_parse_error (message, &err, NULL);
+			g_error (err->message);
 			g_error_free (err);
-			g_free (debug);
 			break;
 		}
 		case GST_MESSAGE_STATE_CHANGED: {

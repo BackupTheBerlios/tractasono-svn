@@ -23,35 +23,36 @@
 #include <gtk/gtk.h>
 
 
-#define EGG_TYPE_CLOCK_FACE				(egg_clock_face_get_type ())
-#define EGG_CLOCK_FACE(obj)				(G_TYPE_CHECK_INSTANCE_CAST ((obj), EGG_TYPE_CLOCK_FACE, EggClockFace))
-#define EGG_CLOCK_FACE_CLASS(obj)		(G_TYPE_CHECK_CLASS_CAST ((obj), EGG_CLOCK_FACE,  EggClockFaceClass))
-#define EGG_IS_CLOCK_FACE(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), EGG_TYPE_CLOCK_FACE))
-#define EGG_IS_CLOCK_FACE_CLASS(obj)	(G_TYPE_CHECK_CLASS_TYPE ((obj), EGG_TYPE_CLOCK_FACE))
-#define EGG_CLOCK_FACE_GET_CLASS		(G_TYPE_INSTANCE_GET_CLASS ((obj), EGG_TYPE_CLOCK_FACE, EggClockFaceClass))
+#define LCD_TYPE					(lcd_get_type ())
+#define LCD(obj)					(G_TYPE_CHECK_INSTANCE_CAST ((obj), LCD_TYPE, Lcd))
+#define LCD_CLASS(obj)				(G_TYPE_CHECK_CLASS_CAST ((obj), LCD_TYPE,  LcdClass))
+#define IS_LCD(obj)					(G_TYPE_CHECK_INSTANCE_TYPE ((obj), LCD_TYPE))
+#define IS_LCD_CLASS(obj)			(G_TYPE_CHECK_CLASS_TYPE ((obj), LCD_TYPE))
+#define LCD_GET_CLASS				(G_TYPE_INSTANCE_GET_CLASS ((obj), LCD_TYPE, LcdClass))
 
 
 
-typedef struct _EggClockFace		EggClockFace;
-typedef struct _EggClockFaceClass	EggClockFaceClass;
+typedef struct _Lcd			Lcd;
+typedef struct _LcdClass	LcdClass;
 
-struct _EggClockFace
+struct _Lcd
 {
 	GtkDrawingArea parent;
 
 	/* private */
+	gchar *text;
 };
 
-struct _EggClockFaceClass
+struct _LcdClass
 {
 	GtkDrawingAreaClass parent_class;
 };
 
 
 
-GtkWidget* egg_clock_face_new (void);
+GtkWidget* lcd_new (void);
 
-
+void lcd_set_text (const gchar *text);
 
 
 

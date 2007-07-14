@@ -40,7 +40,7 @@ typedef struct {
 GladeXML *glade;
 GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
-GtkWidget *vbox_keyboard;
+GtkWidget *keyboard;
 GtkWidget *vbox_tractasono;
 
 GtkEntry *actual_entry;

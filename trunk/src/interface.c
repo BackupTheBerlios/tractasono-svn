@@ -45,7 +45,7 @@ void interface_init (int argc, char *argv[])
 	glade = NULL;
 	mainwindow = NULL;
 	vbox_placeholder = NULL;
-	vbox_keyboard = NULL;
+	keyboard = NULL;
 	vbox_tractasono = NULL;
 	actual_entry = NULL;
 	
@@ -103,12 +103,12 @@ void interface_init (int argc, char *argv[])
 	if (vbox_placeholder_keyboard == NULL) {
 		g_print("Fehler: Konnte vbox_placeholder_keyboard nicht holen!\n");
 	}
-	vbox_keyboard = glade_xml_get_widget(glade, "vbox_keyboard");
-	if (vbox_keyboard == NULL) {
-		g_print("Fehler: Konnte vbox_keyboard nicht holen!\n");
+	keyboard = glade_xml_get_widget(glade, "alignment_keyboard");
+	if (keyboard == NULL) {
+		g_print("Fehler: Konnte alignment_keyboard nicht holen!\n");
 	}
-	gtk_widget_reparent(vbox_keyboard, vbox_placeholder_keyboard);
-	gtk_widget_hide(vbox_keyboard);
+	gtk_widget_reparent(keyboard, vbox_placeholder_keyboard);
+	gtk_widget_hide(keyboard);
 	
 	// Progressbar laden
 	progress = GTK_PROGRESS_BAR(glade_xml_get_widget(glade, "range_song"));
@@ -117,15 +117,15 @@ void interface_init (int argc, char *argv[])
 	}
 	
 	// LCD
-	/*GtkWidget *lcdspace, *lcd;
-	lcdspace = glade_xml_get_widget(glade, "hbox_head");
+	GtkWidget *lcdspace, *lcd;
+	lcdspace = glade_xml_get_widget(glade, "lcdbox");
 	if (lcdspace == NULL) {
-		g_error("Konnte hbox_head nicht holen!\n");
+		g_error("Konnte lcdbox nicht holen!\n");
 	}
 	
-	lcd = egg_clock_face_new ();
+	lcd = lcd_new ();
 	gtk_container_add (GTK_CONTAINER (lcdspace), GTK_WIDGET (lcd));
-	gtk_widget_show (GTK_WIDGET (lcd));*/
+	gtk_widget_show (GTK_WIDGET (lcd));
 	
 	/*GtkStyle * style_LCD;
 	GdkColor *color_LCD;
@@ -197,7 +197,7 @@ void interface_clean(){
 	container = GTK_CONTAINER(vbox_placeholder);
 	children = gtk_container_get_children(container);
 
-	gtk_widget_hide(vbox_keyboard);
+	gtk_widget_hide(keyboard);
 	for (children = g_list_first(children); children; children = g_list_next(children)) {
 		gtk_container_remove(container, children->data);
 	}
@@ -234,37 +234,30 @@ void interface_set_song_position(gint64 position)
 // Setze die Song Informationen
 void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
 {
-	GtkLabel *label;
-	
-	label = GTK_LABEL(glade_xml_get_widget(glade, "label_song"));
-	if (label == NULL) {
-		g_error("Konnte label_song nicht holen!\n");
-	}
-
 	GString *info = NULL;
 
-	info = g_string_new("<span font_desc='Dot Matrix 20'>");
+	info = g_string_new ("<span font_desc='Dot Matrix 20'>");
 
 	if (!artist && !title) {
 		if (uri) {
-			g_string_append(info, uri);	
+			g_string_append (info, uri);	
 		} else {
-			g_string_append(info, "tractasono");
+			g_string_append (info, "tractasono");
 		}
 	} else if (!artist) {
-		g_string_append(info, title);
+		g_string_append (info, title);
 	} else if (!title) {
-		g_string_append(info, artist);
+		g_string_append (info, artist);
 	} else {
-		g_string_append(info, artist);
-		g_string_append(info, " - ");
-		g_string_append(info, title);
+		g_string_append (info, artist);
+		g_string_append (info, " - ");
+		g_string_append (info, title);
 	}
 	
-	g_string_append(info, "</span>");
+	g_string_append (info, "</span>");
 
-	gtk_label_set_label(label, info->str);
-	g_string_free(info, TRUE);
+	lcd_set_text (info->str);
+	g_string_free (info, TRUE);
 }
 
 
@@ -405,21 +398,21 @@ gboolean on_range_song_motion_notify_event(GtkWidget *widget, GdkEventMotion *ev
 }
 
 
-void on_trackplay_clicked(GtkButton *button, gpointer user_data)
+void on_trackplay_clicked (GtkButton *button, gpointer user_data)
 {	
 	if (player_get_playing()) {
-		g_print("Pause wurde gedrückt\n");
-		player_set_pause();
+		g_debug ("Pause wurde gedrückt");
+		player_set_pause ();
 	} else {
-		g_print("Play wurde gedrückt\n");
-		player_set_play();
+		g_debug ("Play wurde gedrückt");
+		player_set_play ();
 	}
 }
 
-void on_trackstopp_clicked(GtkButton *button, gpointer user_data)
+void on_trackstopp_clicked (GtkButton *button, gpointer user_data)
 {	
-	g_print("Stop wurde gedrückt\n");
-	player_set_stop();
+	g_debug ("Stop wurde gedrückt");
+	player_set_stop ();
 }
 
 /*
