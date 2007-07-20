@@ -225,6 +225,7 @@ gboolean player_seek_to_position(gint64 position)
 void player_play_uri(const gchar *uri)
 {
 	if (pipeline && uri) {
+		g_debug (uri);
 		player_set_stop();
 		g_object_set(G_OBJECT(pipeline), "uri", uri, NULL);
 		player_set_play();

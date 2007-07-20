@@ -1,0 +1,108 @@
+SETUP
+=====
+
+-------------------------------------------------------------------------------
+Hier wird Punkt für Punkt beschrieben, wie man den tractasono aufsetzt, damit
+er richtig läuft. Diese Anleitung wurde für ein Ubuntu Linux erstellt. Das
+Projekt wird mit Sicherheit auch auf anderen Distributionen laufen, allerdings
+können wir dazu keine Unterstützung bieten. Die folgende Anleitung bezeiht
+sich also auf eine Ubuntu Linux "Feisty" Installation.
+-------------------------------------------------------------------------------
+
+1.
+--
+Alle Ubuntu Updates einspielen. Dies kann man entweder mit einem grafischen
+Tool oder in der Konsole mit "sudo apt-get update" und einem "sudo apt-get
+upgrade" erledigen.
+
+-------------------------------------------------------------------------------
+
+2.
+--
+Folgende Pakete installieren:
+sudo apt-get install subversion automake cmake g++ gettext libgladeui-1-dev
+sudo apt-get install libneon26-dev libdiscid0-dev libssl-dev mysql-server
+sudo apt-get install mysql-admin mysql-query-browser libmysqlclient15-dev
+sudo apt-get install libgtk2.0-dev libgnomevfs2-dev libglade2-dev
+sudo apt-get install libgstreamer0.10-dev
+
+-------------------------------------------------------------------------------
+
+3.
+--
+Es fehlen noch zwei Bibliotheken, nämlich libgda und libgnomedb. Die Versionen
+die in Ubuntu enthalten sind, sind ziemlich alt, darum verwenden wir die
+Version aus dem Internet. Zu finden sind die zwei Pakete unter der URL
+"http://www.gnome-db.org". Die genauen Pakete welche momentan verwendet werden:
+
+http://ftp.acc.umu.se/pub/GNOME/sources/libgda/3.0/libgda-3.0.1.tar.bz2
+http://ftp.acc.umu.se/pub/GNOME/sources/libgnomedb/3.0/libgnomedb-3.0.0.tar.bz2
+
+Die beiden Archive entpacken und mit "./configure --prefix=/usr", "make" und
+"make install" installieren. Zuerst libgda und dann libgnomedb. Wichtig ist,
+dass bei der configure Ausgabe von libgda MySQL auf "yes" steht, da sonst die
+Bibliothek mit unserer MySQL Datenbank keinen Kontakt aufnehmen kann.
+
+-------------------------------------------------------------------------------
+
+4.
+--
+Die Bibliothek libmusicbrainz muss ebenfalls aus dem Internet aus installiert
+werden. Die URL von Musicbrainz lautet: "http://musicbrainz.org/". Das aktuelle
+Paket, dass wir verwenden findet man unter:
+http://musicbrainz.org/ftpmirror/pub/musicbrainz/libmusicbrainz-3.0.1.tar.gz
+
+Das Archiv entpacken und in dem libmusicbrainz Ordner folgenden Befehl:
+"cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ." ausführen. Danach ein "make" und
+"make install" wie gehabt um die Bibliothek zu installieren.
+
+-------------------------------------------------------------------------------
+
+5.
+--
+In der Konsole das Programm "gnome-database-properties-3.0" ausführen. Dort
+eine neue Datenquelle anlegen mit dem Namen "tractasono". Die Quelle soll vom
+Typ "MySQL" sein. Server ist "localhost". Benutzername und Passwort sind beide
+"tractasono". Das Häckchen bei SSL kann man entfernen.
+
+-------------------------------------------------------------------------------
+
+6.
+---
+Da wir nun einen lokalen MySQL Server installiert haben, müssen wir in diesem
+dem root Benutzer noch ein Passwort geben. In der Konsole den folgenden Befehl:
+"sudo mysqladmin -u root password PASSWORT" eigeben, wobei PASSWORT natürlich
+irgendein Wort sein kann.
+
+Nun erstellen wir die tractasono Tabellen in der Datenbank. Zuerst wecheslt man
+in der Konsole in den Ordner "PROJEKTORDNER/tractasono/src/data/sql". Danach
+werden mit dem Befehl: "sudo mysql < ./tractasono.sql" alle nötigen Datenbanken
+und Tabellen erstellt. 
+
+Mit dem "mysql-admin" kann man sich nun an dem lokalen Server "localhost" mit
+dem Benutzernamen "root" und dem Passwort "PASSWORT" anmelden. Dann sollte ein
+neuer Benutzer mit dem Namen "tractasono" und dem Passwort "tractasono"
+erstellt werden. Der Benutzer sollte nur Zugriff auf die "tractasono"
+Datenbank haben. Auf dieser sollte er nur die Rechte "SELECT INSERT UPDATE
+DELETE EXECUTE" bekommen.
+
+-------------------------------------------------------------------------------
+
+7.
+--
+Subversion Checkout: Am besten erstellt man sich in seinem Home Verzeichnis
+einen Ordner mit dem Namen "Projekte". Dann wechselt man in diesen Ordner und
+gibt in der Konsole ein:
+
+svn co svn+ssh://NAME@svn.berlios.de/svnroot/repos/tractasono/trunk tractasono
+
+wobei NAME für den Berlios Usernamen steht, also momentan entweder wtf oder
+patrik. Nun haben wir das Projekt für die weitere Entwicklung ausgecheckt.
+
+Nun kann das Programm mit "./autogen.sh", "./configure" und "make" erstellt
+werden. Ein "make install" braucht es momentan noch nicht. Wichtig ist, dass
+das Programm aus dem "src" Ordner heraus gestartet wird.
+
+Finito!
+
+-------------------------------------------------------------------------------

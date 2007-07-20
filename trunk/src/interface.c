@@ -256,7 +256,7 @@ void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar
 	
 	g_string_append (info, "</span>");
 
-	lcd_set_text (info->str);
+	//lcd_set_text (lcd, info->str);
 	g_string_free (info, TRUE);
 }
 

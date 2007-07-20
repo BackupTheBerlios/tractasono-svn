@@ -19,46 +19,43 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef __LCD_H__
+#define __LCD_H__
+
 
 #include <gtk/gtk.h>
 
 
+G_BEGIN_DECLS
+
+
 #define LCD_TYPE					(lcd_get_type ())
 #define LCD(obj)					(G_TYPE_CHECK_INSTANCE_CAST ((obj), LCD_TYPE, Lcd))
-#define LCD_CLASS(obj)				(G_TYPE_CHECK_CLASS_CAST ((obj), LCD_TYPE,  LcdClass))
+#define LCD_CLASS(klass)			(G_TYPE_CHECK_CLASS_CAST ((klass), LCD_TYPE,  LcdClass))
 #define IS_LCD(obj)					(G_TYPE_CHECK_INSTANCE_TYPE ((obj), LCD_TYPE))
-#define IS_LCD_CLASS(obj)			(G_TYPE_CHECK_CLASS_TYPE ((obj), LCD_TYPE))
-#define LCD_GET_CLASS				(G_TYPE_INSTANCE_GET_CLASS ((obj), LCD_TYPE, LcdClass))
-
+#define IS_LCD_CLASS(klass)			(G_TYPE_CHECK_CLASS_TYPE ((klass), LCD_TYPE))
 
 
 typedef struct _Lcd			Lcd;
 typedef struct _LcdClass	LcdClass;
 
-struct _Lcd
-{
+struct _Lcd {
 	GtkDrawingArea parent;
-
-	/* private */
-	gchar *text;
 };
 
-struct _LcdClass
-{
+struct _LcdClass {
 	GtkDrawingAreaClass parent_class;
 };
 
 
-
+GType lcd_get_type (void) G_GNUC_CONST;
 GtkWidget* lcd_new (void);
 
-void lcd_set_text (const gchar *text);
+void lcd_set_text (Lcd *lcd, const gchar *text);
+gchar* lcd_get_text (Lcd *lcd);
 
 
+G_END_DECLS
 
 
-
-
-
-
-
+#endif

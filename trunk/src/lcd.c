@@ -19,13 +19,13 @@
  *      MA 02110-1301, USA.
  */
 
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <math.h>
-
 #include "lcd.h"
 
 
-
-G_DEFINE_TYPE (Lcd, lcd, GTK_TYPE_DRAWING_AREA);
+#define LCD_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), LCD_TYPE, LcdPrivate))
 
 
 #define OFFSETX 2
@@ -34,13 +34,122 @@ G_DEFINE_TYPE (Lcd, lcd, GTK_TYPE_DRAWING_AREA);
 #define OFFSETH 2 * OFFSETY
 
 
+typedef struct _LcdPrivate LcdPrivate;
+
+struct _LcdPrivate {
+	gchar *text;
+};
+
+enum {
+	PROP_0,
+	PROP_TEXT
+};
+
+
+// Prototypen
+static void lcd_class_init (LcdClass *klass);
+static void lcd_init (Lcd *lcd);
+static void lcd_set_property (GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
+static void lcd_get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
+static gboolean lcd_expose (GtkWidget *lcd, GdkEventExpose *event);
+
+GType lcd_get_type (void)
+{
+	static GType lcd_type = 0;
+	
+	if (!lcd_type) {
+		static const GTypeInfo lcd_info =
+		{
+			sizeof (LcdClass),
+			NULL,
+			NULL,
+			(GClassInitFunc) lcd_class_init,
+			NULL,
+			NULL,
+			sizeof (Lcd),
+			0,
+			(GInstanceInitFunc) lcd_init,
+		};
+		
+		lcd_type = g_type_register_static (GTK_TYPE_DRAWING_AREA, "Lcd", &lcd_info, 0);
+	}
+	
+	return lcd_type;
+}
+
+
+static void lcd_class_init (LcdClass *klass)
+{
+	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+	
+	/* Override the standard functions for setting and retrieving properties. */
+	gobject_class->set_property = lcd_set_property;
+	gobject_class->get_property = lcd_get_property;
+	
+	/* Override the standard functions for drawing the widget. */
+	widget_class->expose_event = lcd_expose;
+
+	/* Add LcdPrivate as a private data class of LcdClass. */
+	g_type_class_add_private (klass, sizeof (LcdPrivate));
+
+	/* Register one GObject property for the text */
+	g_object_class_install_property (gobject_class, PROP_TEXT,
+									 g_param_spec_pointer ("text", "The text",
+									 					   "The text to show in the lcd",
+									 					   G_PARAM_READWRITE));	
+}
+
+
+/* This function is called when the programmer gives a new value for a widget
+ * property with g_object_set(). */
+static void lcd_set_property (GObject *object,
+                              guint prop_id,
+                              const GValue *value,
+                              GParamSpec *pspec)
+{
+	Lcd *lcd = LCD(object);
+
+	switch (prop_id) {
+		case PROP_TEXT:
+			lcd_set_text (lcd, g_value_get_string (value));
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+
+/* This function is called when the programmer requests the value of a widget
+ * property with g_object_get(). */
+static void lcd_get_property (GObject *object,
+                         	  guint prop_id,
+                         	  GValue *value,
+                      		  GParamSpec *pspec)
+{
+  Lcd *lcd = LCD (object);
+  LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+
+  switch (prop_id)
+  {
+    case PROP_TEXT:
+      g_value_set_string (value, priv->text);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+
 GtkWidget* lcd_new (void)
 {
 	return g_object_new (LCD_TYPE, NULL);
 }
 
 
-static void roundrect (cairo_t *cr, double x, double y, double w, double h, double r)
+static void rectangle_round (cairo_t *cr, double x, double y, double w, double h, double r)
 {
 	cairo_move_to (cr, x + r, y);				
 	cairo_line_to (cr, x + w - r, y);
@@ -91,11 +200,11 @@ static void draw (GtkWidget *lcd, cairo_t *cr)
 	//cairo_set_antialias (cr, CAIRO_ANTIALIAS_SUBPIXEL);
 	
 	// Liniendicke setzen
-	//cairo_set_line_width (cr, 0.04);
+	cairo_set_line_width (cr, 2);
 	
 	// Rahmen zeichnen
 	//cairo_rectangle (cr, x, y, w, h);
-	roundrect (cr, x, y, w, h, 12);
+	rectangle_round (cr, x, y, w, h, 12);
 	
 	// Farben setzen
 	cairo_set_source_rgb (cr, 0.7, 0.8, 0.8);
@@ -130,25 +239,23 @@ static gboolean lcd_expose (GtkWidget *lcd, GdkEventExpose *event)
 }
 
 
-static void lcd_class_init (LcdClass *class)
-{
-	GtkWidgetClass *widget_class;
-
-	widget_class = GTK_WIDGET_CLASS (class);
-
-	widget_class->expose_event = lcd_expose;
-}
-
-
 static void lcd_init (Lcd *lcd)
 {
 	g_debug ("lcd_init");
 }
 
 
-void lcd_set_text (const gchar *text)
+void lcd_set_text (Lcd *lcd, const gchar *text)
 {
 	g_message ("Die Funktion lcd_set_text ist noch nicht implementiert!");
+}
+
+
+gchar* lcd_get_text (Lcd *lcd)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	
+	return priv->text;
 }
 
 

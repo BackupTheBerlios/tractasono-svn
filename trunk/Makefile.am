@@ -1,4 +1,5 @@
-SUBDIRS =	src \
+SUBDIRS =	doc \
+			src \
 			src/data
 
 docdir = $(prefix)/share/doc/tractasono
