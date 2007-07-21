@@ -24,7 +24,7 @@ sudo apt-get install subversion automake cmake g++ gettext libgladeui-1-dev
 sudo apt-get install libneon26-dev libdiscid0-dev libssl-dev mysql-server
 sudo apt-get install mysql-admin mysql-query-browser libmysqlclient15-dev
 sudo apt-get install libgtk2.0-dev libgnomevfs2-dev libglade2-dev
-sudo apt-get install libgstreamer0.10-dev
+sudo apt-get install libgstreamer0.10-dev libgpod-dev
 
 -------------------------------------------------------------------------------
 

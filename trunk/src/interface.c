@@ -26,6 +26,7 @@
 #include "radio.h"
 #include "music.h"
 #include "lcd.h"
+#include "ipod.h"
 
 
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
@@ -51,6 +52,7 @@ void interface_init (int argc, char *argv[])
 	
 	module.music = NULL;
 	module.radio = NULL;
+	module.ipod = NULL;
 	module.import = NULL;
 	module.settings = NULL;
 	module.fullscreen = NULL;
@@ -93,6 +95,7 @@ void interface_init (int argc, char *argv[])
 	// Die einzelnen Windows laden und referenzieren
 	module.music = g_object_ref(glade_xml_get_widget(glade, "notebook_music"));
 	module.disc = g_object_ref(glade_xml_get_widget(glade, "vbox_disc"));
+	module.ipod = g_object_ref(glade_xml_get_widget(glade, "ipodmodul"));
 	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
 	module.radio = g_object_ref(glade_xml_get_widget(glade, "radiomodul"));
 	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "vbox_fullscreen"));
@@ -142,6 +145,9 @@ void interface_init (int argc, char *argv[])
 	
 	// Music Modul init
 	music_init ();
+	
+	// iPod Modul init
+	ipod_init ();
 }
 
 
@@ -176,6 +182,16 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 // Alle Button Switches hier
 
 
+// Event-Handler für den iPod Button
+void on_button_ipod_clicked (GtkWidget *widget, gpointer user_data)
+{
+	g_print("Button iPod wurde gedrückt!\n");
+
+	interface_show_module(module.ipod);
+	
+	ipod_load (); 
+}
+
 // Event-Handler für den Internetradio Button
 void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 {
@@ -183,7 +199,7 @@ void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 
 	interface_show_module(module.radio);
 	
-	radio_init(); 
+	// Todo: Load Funktion
 }
 
 

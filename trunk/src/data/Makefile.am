@@ -1,6 +1,13 @@
 sharedir = $(prefix)/share/tractasono
 
-share_DATA = tractasono.glade fullscreen.png music.png disc.png settings.png tractasono.png internetradio.png
+share_DATA = tractasono.glade \
+			 fullscreen.png \
+			 music.png \
+			 disc.png \
+			 settings.png \
+			 tractasono.png \
+			 internetradio.png \
+			 ipod.png
 
 EXTRA_DIST = $(share_DATA)
 

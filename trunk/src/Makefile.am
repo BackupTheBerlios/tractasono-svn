@@ -5,7 +5,8 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
 		   $(LIBGDA_CFLAGS) \
 		   $(LIBGNOMEDB_CFLAGS) \
-		   $(LIBMUSICBRAINZ_CFLAGS)
+		   $(LIBMUSICBRAINZ_CFLAGS) \
+		   $(LIBGPOD_CFLAGS)
 
 AM_CFLAGS = -Wall -g
 
@@ -39,7 +40,9 @@ tractasono_SOURCES = main.c \
 					 musicbrainz.c \
 					 musicbrainz.h \
 					 lcd.c \
-					 lcd.h
+					 lcd.h \
+					 ipod.c \
+					 ipod.h
 	
 tractasono_LDFLAGS = -export-dynamic
 
@@ -50,4 +53,5 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(GSTREAMER_LIBS) \
 				   $(LIBGDA_LIBS) \
 				   $(LIBGNOMEDB_LIBS) \
-				   $(LIBMUSICBRAINZ_LIBS)
+				   $(LIBMUSICBRAINZ_LIBS) \
+				   $(LIBGPOD_LIBS)
