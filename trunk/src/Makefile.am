@@ -6,7 +6,8 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(LIBGDA_CFLAGS) \
 		   $(LIBGNOMEDB_CFLAGS) \
 		   $(LIBMUSICBRAINZ_CFLAGS) \
-		   $(LIBGPOD_CFLAGS)
+		   $(LIBGPOD_CFLAGS) \
+		   $(LIBIPODDEVICE_CFLAGS)
 
 AM_CFLAGS = -Wall -g
 
@@ -54,4 +55,5 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(LIBGDA_LIBS) \
 				   $(LIBGNOMEDB_LIBS) \
 				   $(LIBMUSICBRAINZ_LIBS) \
-				   $(LIBGPOD_LIBS)
+				   $(LIBGPOD_LIBS) \
+				   $(LIBIPODDEVICE_LIBS)

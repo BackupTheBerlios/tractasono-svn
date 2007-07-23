@@ -33,7 +33,6 @@
 
 
 GdaConnection *connection;
-extern Settings *settings;
 
 
 void database_init (int argc, char *argv[])
@@ -90,9 +89,9 @@ void database_connect (void)
       
 	client = gda_client_new ();
  
-	info = gda_config_find_data_source (settings->database_name);
+	info = gda_config_find_data_source (DATABASE);
 	if (!info)
-		g_error ("DSN '%s' is not declared", settings->database_name);
+		g_error ("DSN '%s' is not declared", DATABASE);
 	else {
 		connection = gda_client_open_connection (client, info->name, 
 												 info->username, info->password,

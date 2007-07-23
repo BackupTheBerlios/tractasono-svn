@@ -20,26 +20,25 @@
  */
 
 #include "fullscreen.h"
-#include "database.h"
+#include "interface.h"
 
 
-void fullscreen_init()
+void fullscreen_init (void)
 {
 	g_message ("Fullscreen init");
 	
 }
 
-void on_fullscreen_button_close_clicked(GtkWidget *widget, gpointer user_data)
+void fullscreen_load (void)
 {
-	g_print("Test\n");
 	
-	database_list_sources();
 	
 }
 
-void on_window_fullscreen_button_press_event(GtkWidget *widget, gpointer user_data)
+void on_fullscreen_button_close_clicked (GtkWidget *widget, gpointer user_data)
 {
-	// Hier sollte noch etwas Code rein
-	g_print("Fullscreen back gedrückt!\n");
+	g_message ("Vollbild Modus verlassen");
 	
+	interface_show_previous_module ();
 }
+

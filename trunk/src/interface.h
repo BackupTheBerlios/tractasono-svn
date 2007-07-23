@@ -34,6 +34,7 @@ typedef struct {
 	GtkWidget *settings;
 	GtkWidget *fullscreen;
 	GtkWidget *disc;
+	GtkWidget *previous;
 } WindowModule;
 
 
@@ -55,6 +56,7 @@ void interface_init (int argc, char *argv[]);
 void interface_clean ();
 void interface_clean_all ();
 void interface_show_module (GtkWidget *widget);
+void interface_show_previous_module ();
 void interface_set_songinfo (const gchar *artist, const gchar *title, const gchar *uri);
 void interface_set_song_position (gint64 position);
 void interface_set_song_duration (gint64 duration);

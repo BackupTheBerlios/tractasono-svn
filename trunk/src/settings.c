@@ -28,49 +28,14 @@
 #include "settings.h"
 #include "interface.h"
 #include "keyboard.h"
+#include "database.h"
 
- 
+
 
 void settings_init()
 {
 	g_message ("Settings init");
-	
-	settings = g_slice_new (Settings);
-	settings_read ();
 }
-
-
-
-
-
-void settings_read (void)
-{
-	GKeyFileFlags flags;
-	GError *error = NULL;
-	
-	settings->keyfile = g_key_file_new ();
-	flags = G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS;
-	g_key_file_load_from_file (settings->keyfile, settings_get_configfile (), flags, &error);
-	if (error) {
-		g_warning ("config file konnte nicht gelesen werden! -> %s", error->message);
-	}
-	
-	settings->general_log = g_key_file_get_boolean (settings->keyfile, "general", "log", NULL);
-	settings->database_name = g_key_file_get_string (settings->keyfile, "database", "name", NULL);
-}
-
-
-gchar* settings_get_configfile ()
-{
-	GString *configfile;
-	
-	configfile = g_string_new (NULL);
-	g_string_printf (configfile, "%s/.%s", g_get_home_dir (), PACKAGE);
-	
-	return configfile->str;
-}
-
-
 
 
 // Handler für Fukuswechler auf dem Settings-Reiter

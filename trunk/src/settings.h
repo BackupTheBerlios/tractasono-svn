@@ -19,25 +19,6 @@
  *      MA 02110-1301, USA.
  */
 
-#include <glib.h>
-
-
-typedef struct
-{
-	GKeyFile *keyfile;
-	gboolean general_log;
-	gchar *database_name;
-	gchar *drives_cdrom;
-	gchar *drives_burner;
-} Settings;
-
-Settings *settings;
-
-
 
 void settings_init ();
-
-void settings_read (void);
-
-gchar* settings_get_configfile (void);
 

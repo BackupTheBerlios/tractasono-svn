@@ -33,17 +33,17 @@
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
-	// Settings initialisieren
-	settings_init();
-	
 	// Databenbank initialisieren
 	database_init (argc, argv);
 	
-	// Player initialisieren
-	player_init(argc, argv);
-
+	// Settings initialisieren
+	settings_init();
+	
 	// Drives initialisieren
 	drives_init();
+	
+	// Player initialisieren
+	player_init(argc, argv);
 	
 	// Interface initialisieren
 	interface_init(argc, argv);

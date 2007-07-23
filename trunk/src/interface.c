@@ -57,6 +57,7 @@ void interface_init (int argc, char *argv[])
 	module.settings = NULL;
 	module.fullscreen = NULL;
 	module.disc = NULL;
+	module.previous = NULL;
 	
 	
 	// Das Interface laden
@@ -148,6 +149,12 @@ void interface_init (int argc, char *argv[])
 	
 	// iPod Modul init
 	ipod_init ();
+	
+	// Vollbild Modus init
+	fullscreen_init ();
+	
+	// Musik von Anfang an anzeigen
+	interface_show_module(module.music);
 }
 
 
@@ -323,6 +330,13 @@ void interface_show_module(GtkWidget *widget)
 		g_print("Fehler: Konnte ein Modul nicht anzeigen!\n");
 	}
 	
+	// Modul speichern für interface_show_previous_module
+	GList *list = gtk_container_get_children (GTK_CONTAINER(vbox_placeholder));    
+	if (list) {
+		module.previous = (GtkWidget*) list->data;
+		g_list_free (list);
+	}
+	
 	interface_clean();
 	
 	gtk_widget_ref(widget);
@@ -335,6 +349,39 @@ void interface_show_module(GtkWidget *widget)
 	gtk_widget_show(widget);
 }
 
+
+// Zeige ein Widget im Vollbild Modus an
+void interface_show_module_fullscreen (GtkWidget *widget)
+{
+	if (widget == NULL) {
+		g_print("Fehler: Konnte ein Modul nicht anzeigen!\n");
+	}
+	
+	// Modul speichern für interface_show_previous_module
+	GList *list = gtk_container_get_children (GTK_CONTAINER(vbox_placeholder));    
+	if (list) {
+		module.previous = (GtkWidget*) list->data;
+		g_list_free (list);
+	}
+	
+	interface_clean();
+	
+	gtk_widget_ref(widget);
+	if (widget->parent) {
+		gtk_container_remove(GTK_CONTAINER(widget->parent), widget);
+	}
+	gtk_container_add(GTK_CONTAINER(vbox_placeholder), widget);
+	gtk_widget_unref(widget);
+
+	gtk_widget_show(widget);
+}
+
+
+// Zeige das vorherige Widget im Platzhalter an (für Fullscreen Modus)
+void interface_show_previous_module (void)
+{
+	interface_show_module(module.previous);
+}
 
 
 // Event-Handler für den Musik Button
@@ -373,7 +420,6 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 	//root = GTK_CONTAINER(vbox_tractasono);
 	
 	interface_show_module(module.fullscreen);
-	fullscreen_init();
 }
 
 

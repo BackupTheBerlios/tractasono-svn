@@ -20,22 +20,19 @@
  */
 
 #include "drives.h"
-#include "settings.h"
 #include "musicbrainz.h"
 #include "disc.h"
-
-extern Settings *settings;
 
 
 // Drive-Connected Signal
 void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
 {
 	if (gnome_vfs_drive_is_user_visible (drive)) {
-		char *drivename;
+		gchar *drivename;
 		drivename = gnome_vfs_drive_get_display_name(drive);
 		g_print("Drive \"%s\" connected!\n", drivename);
-		settings->drives_cdrom = gnome_vfs_drive_get_device_path (drive);
-		musicbrainz_read_disc (settings->drives_cdrom);
+		
+		musicbrainz_read_disc (drivename);
 		disc_set_disctitle (musicbrainz_get_disctitle ());
 	}
 }
@@ -44,7 +41,7 @@ void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpoin
 void drive_disconnected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
 {
 	if (gnome_vfs_drive_is_user_visible (drive)) {
-		char *drivename;
+		gchar *drivename;
 		drivename = gnome_vfs_drive_get_display_name(drive);
 		g_print("Drive \"%s\" disconnected!\n", drivename);
 	}

@@ -24,4 +24,5 @@
 #include <glade/glade.h>
 
 
-void fullscreen_init();
+void fullscreen_init (void);
+void fullscreen_load (void);
