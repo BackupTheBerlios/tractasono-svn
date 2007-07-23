@@ -23,24 +23,14 @@
 #include "interface.h"
 
 
-/**
- * The GtkTreeModel which all of the tracks are stored in
- */
-//GtkWidget *track_store;
-
-
 void disc_init()
 {
-	
 	g_message ("\tDisc Modul init");
-	
-	
-	
+		
 	treeview = glade_xml_get_widget(glade, "treeview_disc");
 	if (treeview == NULL) {
 		g_print("Fehler: Konnte treeview_disc nicht holen!\n");
 	}
-	
 	
 	track_store = gtk_list_store_new (COLUMN_TOTAL, G_TYPE_INT, G_TYPE_BOOLEAN, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_POINTER);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (track_store));
