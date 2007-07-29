@@ -165,7 +165,7 @@ void ipod_fill_combo (void)
     
     // Wenn kein iPod vorhanden ist
     if (n == 0) {
-        g_warning ("No iPod devices present");
+        //g_warning ("No iPod devices present");
         gtk_combo_box_append_text (GTK_COMBO_BOX(combo), "Kein iPod vorhanden");
     }
 
@@ -220,7 +220,7 @@ void ipod_list_devices (void)
     n = g_list_length (devices);
     
     if (n == 0) {
-        g_warning ("No iPod devices present");
+        //g_warning ("No iPod devices present");
         return;
     }
 
@@ -255,7 +255,7 @@ void ipod_list_device_udis (void)
     n = g_list_length (devices);
     
     if (n == 0) {
-        g_warning ("No iPod devices present");
+        //g_warning ("No iPod devices present");
         return;
     }
 

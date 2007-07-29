@@ -1094,7 +1094,7 @@
                           <widget class="GtkLabel" id="label23">
                             <property name="visible">True</property>
                             <property name="ypad">15</property>
-                            <property name="label" translatable="yes">&lt;span face="mono" size="small"&gt;Copyright (c) 2006 Robin Ratcliff, Patrik Obrist&lt;/span&gt;</property>
+                            <property name="label" translatable="yes">&lt;span face="mono" size="small"&gt;Copyright (c) 2006 - 2007 Robin Ratcliff, Patrik Obrist&lt;/span&gt;</property>
                             <property name="use_markup">True</property>
                             <property name="justify">GTK_JUSTIFY_CENTER</property>
                             <property name="wrap">True</property>
@@ -2188,113 +2188,146 @@ Touch the screen to go back!</property>
         <property name="label_yalign">0</property>
         <property name="shadow_type">GTK_SHADOW_OUT</property>
         <child>
-          <widget class="GtkAlignment" id="alignment1">
+          <widget class="GtkVBox" id="vbox_radio">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="bottom_padding">10</property>
-            <property name="left_padding">10</property>
-            <property name="right_padding">10</property>
+            <property name="border_width">5</property>
+            <property name="spacing">5</property>
             <child>
-              <widget class="GtkVBox" id="vbox_radio">
+              <widget class="GtkHBox" id="hbox_url">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="spacing">5</property>
                 <child>
-                  <widget class="GtkHBox" id="hbox1">
+                  <widget class="GtkLabel" id="label3">
                     <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="spacing">10</property>
-                    <child>
-                      <widget class="GtkLabel" id="label3">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">URL:</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkEntry" id="entry_radio_url">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="text" translatable="yes">file:///usr/share/example-content/ubuntu Sax.ogg</property>
-                      </widget>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkButton" id="button_radio_stream">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Stream</property>
-                        <property name="use_underline">True</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="on_button_radio_stream_clicked"/>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
+                    <property name="label" translatable="yes">URL:</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="padding">10</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkTextView" id="textview1">
+                  <widget class="GtkEntry" id="entry_radio_url">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="wrap_mode">GTK_WRAP_WORD</property>
-                    <property name="text" translatable="yes">Beispiele:
-
-http://24.207.26.60:8888
-file:///usr/share/example-content/ubuntu Sax.ogg
-http://mp3-vr-128.smgradio.com:80/
-
-smb://STAFF%3Bobrip0@147.86.125.193/music/Nine%20Inch%20Nails/Year%20Zero/Nine Inch Nails - Hyperpower!.ogg
-
-smb://STAFF%3Bobrip0@147.86.125.193/music/Ramones/Loud%2C%20Fast%20Ramones/Ramones - Do You Remember Rock 'N' Roll Radio.ogg</property>
+                    <property name="text" translatable="yes">file:///usr/share/example-content/ubuntu Sax.ogg</property>
                   </widget>
                   <packing>
                     <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkHButtonBox" id="hbuttonbox3">
+                  <widget class="GtkButton" id="button_radio_stream">
                     <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Stream</property>
+                    <property name="use_underline">True</property>
+                    <property name="response_id">0</property>
+                    <signal name="clicked" handler="on_button_radio_stream_clicked"/>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="hbox_listen">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="spacing">10</property>
+                <child>
+                  <widget class="GtkScrolledWindow" id="scrolledwindow_genre">
+                    <property name="width_request">160</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="layout_style">GTK_BUTTONBOX_END</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="shadow_type">GTK_SHADOW_ETCHED_IN</property>
                     <child>
-                      <widget class="GtkButton" id="button_radio_fetch_station">
+                      <widget class="GtkTreeView" id="treeview_radio_genre">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Hole Radio Stationen</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="on_button_radio_fetch_station_clicked"/>
+                        <property name="headers_clickable">True</property>
+                        <signal name="row_activated" handler="on_treeview_radio_genre_row_activated"/>
                       </widget>
                     </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkScrolledWindow" id="scrolledwindow_station">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="shadow_type">GTK_SHADOW_ETCHED_IN</property>
+                    <child>
+                      <widget class="GtkTreeView" id="treeview_radio_station">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="headers_clickable">True</property>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHButtonBox" id="hbuttonbox_radio">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
+                <child>
+                  <widget class="GtkButton" id="button_radio_fetch_station">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="label" translatable="yes">Hole Radio Stationen</property>
+                    <property name="response_id">0</property>
+                    <signal name="clicked" handler="on_button_radio_fetch_station_clicked"/>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkButton" id="button5">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="label" translatable="yes">Tune in!</property>
+                    <property name="response_id">0</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">2</property>
+              </packing>
             </child>
           </widget>
-        </child>
-        <child>
-          <placeholder/>
-          <packing>
-            <property name="type">label_item</property>
-          </packing>
         </child>
       </widget>
     </child>

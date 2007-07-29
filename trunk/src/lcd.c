@@ -194,7 +194,7 @@ static void draw (GtkWidget *lcd, cairo_t *cr)
 	w = lcd->allocation.width - OFFSETW;
 	h = lcd->allocation.height - OFFSETH;
 	
-	g_debug ("LCD Widget Koordinaten: x=%.0f y=%.0f w=%.0f h=%.0f", x, y, w, h);
+	//g_debug ("LCD Widget Koordinaten: x=%.0f y=%.0f w=%.0f h=%.0f", x, y, w, h);
 	
 	// Antialias setzen
 	//cairo_set_antialias (cr, CAIRO_ANTIALIAS_SUBPIXEL);
@@ -241,7 +241,7 @@ static gboolean lcd_expose (GtkWidget *lcd, GdkEventExpose *event)
 
 static void lcd_init (Lcd *lcd)
 {
-	g_debug ("lcd_init");
+	g_message ("LCD init");
 }
 
 
