@@ -25,14 +25,16 @@
 
 
 // Drive-Connected Signal
-void drive_connected(GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
+void drive_connected (GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpointer data)
 {
 	if (gnome_vfs_drive_is_user_visible (drive)) {
-		gchar *drivename;
-		drivename = gnome_vfs_drive_get_display_name(drive);
-		g_print("Drive \"%s\" connected!\n", drivename);
+		gchar *name, *path;
 		
-		musicbrainz_read_disc (drivename);
+		name = gnome_vfs_drive_get_display_name(drive);
+		path = gnome_vfs_drive_get_device_path (drive);
+		g_message ("Drive %s, %s connected!", name, path);
+		
+		musicbrainz_read_disc (path);
 		disc_set_disctitle (musicbrainz_get_disctitle ());
 	}
 }
@@ -51,20 +53,20 @@ int drives_init()
 {
 	g_message ("Drives init");
 	
-	if (!gnome_vfs_init ()) {
-		printf ("Could not initialize GnomeVFS\n");
+	/*if (!gnome_vfs_init ()) {
+		g_warning ("Could not initialize GnomeVFS!");
 		return DRIVES_FAIL;
-	}
+	}*/
 
 	// Musicbrainz init
 	musicbrainz_init ();
 
-	GnomeVFSVolumeMonitor* monitor = NULL;
+	/*GnomeVFSVolumeMonitor* monitor = NULL;
 	monitor = gnome_vfs_get_volume_monitor();
 
 	g_signal_connect(monitor, "drive-connected", G_CALLBACK(drive_connected), NULL);
 	g_signal_connect(monitor, "drive-disconnected", G_CALLBACK(drive_disconnected), NULL);
-	
+	*/
 	return DRIVES_SUCCESS;
 }
 

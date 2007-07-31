@@ -23,8 +23,6 @@
 #include "interface.h"
 
 
-gboolean KRstopp;
-
 // GStreamer Variablen
 GstFormat format;
 GstElement *pipeline;
@@ -34,14 +32,14 @@ GstElement *audiosink;
 
 
 // Prototypen
-void player_handle_tag_message(GstMessage *message);
-static gboolean player_timer_event(GstElement *pipeline);
+void player_handle_tag_message (GstMessage *message);
+static gboolean player_timer_event (GstElement *pipeline);
 gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 
 
 
 // Player initialisieren
-void player_init(int argc, char *argv[])
+void player_init (int argc, char *argv[])
 {
 	g_message ("Player init");
 	gst_init (&argc, &argv);
@@ -50,16 +48,16 @@ void player_init(int argc, char *argv[])
 	format = GST_FORMAT_TIME;
 	
 	// Pipeline erstellen
-	pipeline = gst_element_factory_make("playbin", "tracta-playbin");
+	pipeline = gst_element_factory_make ("playbin", "tracta-playbin");
 	
 	// Bus Callback anbinden
 	GstBus *bus;
-	bus = gst_pipeline_get_bus(GST_PIPELINE (pipeline));
-	gst_bus_add_watch(bus, player_bus_callback, NULL);
-	gst_object_unref(bus);
+	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
+	gst_bus_add_watch (bus, player_bus_callback, NULL);
+	gst_object_unref (bus);
 	
 	// Watch hinzufügen welcher jede Sekunde auftritt
-	g_timeout_add(1000, (GSourceFunc)player_timer_event, pipeline);
+	g_timeout_add (1000, (GSourceFunc) player_timer_event, pipeline);
 }
 
 
@@ -96,25 +94,22 @@ gint64 player_get_position(void)
 // Callback Behandlung
 gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	g_debug("message from \"%s\" (%s): ",
-			GST_STR_NULL (GST_ELEMENT_NAME (GST_MESSAGE_SRC (message))),
-			gst_message_type_get_name (GST_MESSAGE_TYPE (message)));
+	g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
 	
-	if (GST_MESSAGE_TYPE(message) == GST_MESSAGE_TAG) {
+	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
 		/* Musik Tags */
 		player_handle_tag_message(message);
 	}
-		
-	//g_print ("GStreamer: Got %s message | %d | %d\n", GST_MESSAGE_TYPE_NAME(message), GST_MESSAGE_SRC(message), pipeline);
-	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
+	
+	/*if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
 		return TRUE;
-	}
+	}*/
 
 	switch (GST_MESSAGE_TYPE (message)) {
 		case GST_MESSAGE_ERROR: {
 			GError *err;
 			gst_message_parse_error (message, &err, NULL);
-			g_error (err->message);
+			g_warning (err->message);
 			g_error_free (err);
 			break;
 		}
@@ -122,25 +117,22 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			GstState oldstate, newstate, pending;
 			
 			gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
-			g_print("\tStates: (old=%i, new=%i, pending=%i)\n", oldstate, newstate, pending);
+			//g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
 
 			if (newstate == 4) {
-				g_print("GStreamer is now playing!\n");
-				
+				g_message ("GStreamer is now playing!\n");	
 				interface_set_playing(TRUE);
-				player_set_play ();
-				KRstopp = TRUE;
 			}
 			
 			if ((newstate == 3) && (oldstate == 4)) {
-				g_print("GStreamer is now paused!\n");
+				g_message ("GStreamer is now paused!\n");
 				interface_set_playing(FALSE);
 			}
 			
 		}
 		case GST_MESSAGE_EOS: {
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
-				g_debug("End Of Stream");
+				g_message ("End Of Stream");
 				interface_set_playing(FALSE);
 			}
 			break;
@@ -224,13 +216,14 @@ gboolean player_seek_to_position(gint64 position)
 // Spiele eine Datei oder einen Stream ab
 void player_play_uri(const gchar *uri)
 {
+	g_message ("player_play_uri: uri=%s", uri);
+	
 	if (pipeline && uri) {
-		g_debug (uri);
 		player_set_stop();
 		g_object_set(G_OBJECT(pipeline), "uri", uri, NULL);
 		player_set_play();
 	} else {
-		g_error("pipeline nicht bereit oder uri nicht angegeben!");
+		g_warning ("pipeline nicht bereit oder uri nicht angegeben!");
 	}
 }
 
@@ -264,17 +257,17 @@ void player_handle_tag_message(GstMessage *message)
 	gchar *title = NULL;
 	gchar *uri = NULL;
 	
-	gst_message_parse_tag(message, &tag_list);
+	gst_message_parse_tag (message, &tag_list);
 	
-	gst_tag_list_get_string(tag_list, GST_TAG_ARTIST, &artist);
-	gst_tag_list_get_string(tag_list, GST_TAG_TITLE, &title);
-	gst_tag_list_get_string(tag_list, GST_TAG_LOCATION, &uri);
+	gst_tag_list_get_string (tag_list, GST_TAG_ARTIST, &artist);
+	gst_tag_list_get_string (tag_list, GST_TAG_TITLE, &title);
+	gst_tag_list_get_string (tag_list, GST_TAG_LOCATION, &uri);
 	
-	interface_set_songinfo(artist, title, uri);
+	interface_set_songinfo (artist, title, uri);
 	
-	g_free(artist);
-	g_free(title);
-	g_free(uri);
-	gst_tag_list_free(tag_list);
+	g_free (artist);
+	g_free (title);
+	g_free (uri);
+	gst_tag_list_free (tag_list);
 }
 

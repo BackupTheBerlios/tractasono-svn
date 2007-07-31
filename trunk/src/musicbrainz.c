@@ -27,15 +27,7 @@
 
 
 
-struct _DiscItem {
-    gchar discid[100];
-    gchar disctitle[256];
-    MbDisc *disc;
-};
-
-typedef struct _DiscItem DiscItem;
-
-DiscItem m_disc;
+MbDisc *disc;
 
 
 void musicbrainz_init (void)
@@ -51,24 +43,21 @@ void musicbrainz_read_disc (gchar *drive)
 	MbQuery q;
     MbReleaseFilter f;
     MbResultList results;
+    GString *id;
     
-    MbDisc mydisc;
+    id = g_string_new_len ("", 100);
 
-    g_message ("MB Step 1");
+    disc = mb_read_disc (drive);
+    
+    if (!disc) {
+    	g_warning ("Konnte Disc nicht einlesen!");
+    	return;
+    }
+    
+    mb_disc_get_id (disc, id->str, 100);
+    g_message ("Disc Id: %s", id->str);
 
-    mydisc = mb_read_disc (drive);
-    
-    g_debug ("DiscId: %p /", m_disc.discid);
-    
-    g_message ("MB Step 1");
-    
-    
-    mb_disc_get_id (&mydisc, m_disc.discid, 100);
-    g_print ("Disc Id: %s\n\n", m_disc.discid);
-    
-    g_message ("MB Step 1");
-
-    q = mb_query_new (NULL, NULL);
+    /*q = mb_query_new (NULL, NULL);
     f = mb_release_filter_new ();
     mb_release_filter_disc_id (f, m_disc.discid);
     results = mb_query_get_releases (q, f);
@@ -88,7 +77,7 @@ void musicbrainz_read_disc (gchar *drive)
         g_print ("Title : %s\n\n", m_disc.disctitle);
         mb_release_free (release);
     }
-    mb_result_list_free (results);
+    mb_result_list_free (results);*/
 
     return;
 }
@@ -96,9 +85,11 @@ void musicbrainz_read_disc (gchar *drive)
 
 gchar* musicbrainz_get_disctitle (void)
 {	
-	if (strcmp (m_disc.disctitle, "") == 0) {
+	/*if (strcmp (m_disc.disctitle, "") == 0) {
 		return m_disc.discid;
 	} else {
 		return m_disc.disctitle;
-	}
+	}*/
+	
+	return "";
 }
