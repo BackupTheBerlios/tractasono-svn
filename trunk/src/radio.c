@@ -19,6 +19,8 @@
  *      MA 02110-1301, USA.
  */
 
+#include <stdlib.h>
+
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 
@@ -86,6 +88,11 @@ void radio_station_insert (const gchar *name, const gchar *bitrate, const gchar 
 void radio_genre_parse (void);
 void radio_station_parse (const gchar *genre);
 
+gint sort_iter_compare_func (GtkTreeModel *model,
+							 GtkTreeIter  *a,
+							 GtkTreeIter  *b,
+							 gpointer      userdata);
+
 gchar* xml_load (const gchar *uri);
 
 void cb_parser_start (TotemPlParser *parser, const char *title);
@@ -134,8 +141,7 @@ void cb_parser_end (TotemPlParser *parser, const char *title)
 void cb_parser_entry (TotemPlParser *parser, const char *uri, const char *title,
 				  const char *genre, gpointer data)
 {
-	g_print ("added URI '%s' with title '%s' genre '%s'\n", uri,
-			title ? title : "empty", genre ? genre : "empty");
+	g_debug ("added URI '%s' with title '%s'", uri, title ? title : "empty");
 	
 	// GUI aktualisieren
 	while (gtk_events_pending ()) {
@@ -244,33 +250,46 @@ void radio_station_setup_tree (void)
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
+	GtkTreeSortable *sortable;
 	
 	// TreeView holen
 	station_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_radio_station");
 	if (station_tree == NULL) {
 		g_warning ("Fehler: Konnte treeview_radio_station nicht holen!");
 	}
-	//gtk_tree_view_set_headers_visible (genre_tree, FALSE);
 
 	// Name
 	renderer = gtk_cell_renderer_text_new ();
+	g_object_set (renderer, "ellipsize", PANGO_ELLIPSIZE_END, "ellipsize-set", TRUE, NULL);
 	column = gtk_tree_view_column_new_with_attributes ("Sender", renderer,
 													   "text", COL_R_S_NAME, NULL);
-	//gtk_tree_view_column_set_expand (column, TRUE);
-	gtk_tree_view_column_set_fixed_width (column, 430);
 	gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_FIXED);
+	gtk_tree_view_column_set_fixed_width (column, 420);
+	gtk_tree_view_column_set_sort_column_id (column, COL_R_S_NAME);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (station_tree), column);
 	
 	// Bitrate
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes ("Bitrate", renderer,
 													   "text", COL_R_S_BITRATE, NULL);
+	gtk_tree_view_column_set_sort_column_id (column, COL_R_S_BITRATE);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (station_tree), column);
 											
 	// Store erstellen
-	station_store = gtk_list_store_new (STORE_TOTAL, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-											
-	// Store dem Tree anhängen				
+	station_store = gtk_list_store_new (STORE_TOTAL, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
+	
+	// Sortierung
+	sortable = GTK_TREE_SORTABLE (station_store);
+	
+	gtk_tree_sortable_set_sort_func (sortable, COL_R_S_NAME, sort_iter_compare_func,
+                                     GINT_TO_POINTER(COL_R_S_NAME), NULL);
+
+    gtk_tree_sortable_set_sort_func (sortable, COL_R_S_BITRATE, sort_iter_compare_func,
+                                     GINT_TO_POINTER(COL_R_S_BITRATE), NULL);
+                                    
+    gtk_tree_sortable_set_sort_column_id (sortable, COL_R_S_BITRATE, GTK_SORT_DESCENDING);	
+										
+	// Store dem Tree anhängen
 	gtk_tree_view_set_model (GTK_TREE_VIEW (station_tree),
 							 GTK_TREE_MODEL (station_store));						 
 }
@@ -335,15 +354,16 @@ void radio_station_parse (const gchar *genre)
 void radio_station_insert (const gchar *name, const gchar *bitrate, const gchar *id)
 {
 	GtkTreeIter iter;
+	gint bitr = 0;
 	
-	//g_debug ("radio_station_insert: name=%s, bitrate=%i", name, bitrate);
+	bitr = atoi (bitrate);
 	
 	station_store = (GtkListStore*) gtk_tree_view_get_model (station_tree);
 	
 	gtk_list_store_append (station_store, &iter);
 	gtk_list_store_set (station_store, &iter,
 						STORE_S_NAME, name,
-						STORE_S_BITRATE, bitrate,
+						STORE_S_BITRATE, bitr,
 						STORE_S_ID, id, -1);		
 }
 
@@ -405,6 +425,57 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 		g_debug ("   Parsing war nicht erfolgreich!");
 	}
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+}
+
+
+/* This is not pretty. Of course you can also use a
+*  separate compare function for each sort ID value */
+gint sort_iter_compare_func (GtkTreeModel *model,
+							 GtkTreeIter  *a,
+							 GtkTreeIter  *b,
+							 gpointer      userdata)
+{
+	gint sortcol = GPOINTER_TO_INT(userdata);
+	gint ret = 0;
+
+	switch (sortcol) {
+		case COL_R_S_NAME: {
+			gchar *name1, *name2;
+
+			gtk_tree_model_get (model, a, COL_R_S_NAME, &name1, -1);
+			gtk_tree_model_get (model, b, COL_R_S_NAME, &name2, -1);
+
+			if (name1 == NULL || name2 == NULL) {
+				if (name1 == NULL && name2 == NULL)
+					break; /* both equal => ret = 0 */
+					
+				ret = (name1 == NULL) ? -1 : 1;
+			} else {
+				ret = g_utf8_collate(name1,name2);
+			}
+
+			g_free(name1);
+			g_free(name2);
+		}
+		break;
+
+		case COL_R_S_BITRATE: {
+			gint bitrate1, bitrate2;
+
+			gtk_tree_model_get (model, a, COL_R_S_BITRATE, &bitrate1, -1);
+			gtk_tree_model_get (model, b, COL_R_S_BITRATE, &bitrate2, -1);
+
+			if (bitrate1 != bitrate2) {
+				ret = (bitrate1 > bitrate2) ? 1 : -1;
+			} /* else both equal => ret = 0 */
+		}
+		break;
+		
+		default:
+			g_return_val_if_reached(0);
+	}
+
+	return ret;
 }
 
 

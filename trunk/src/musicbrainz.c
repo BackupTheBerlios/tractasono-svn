@@ -39,7 +39,7 @@ void musicbrainz_init (void)
 
 void musicbrainz_read_disc (gchar *drive)
 {
-	int i, size;
+	/*int i, size;
 	MbQuery q;
     MbReleaseFilter f;
     MbResultList results;
@@ -57,7 +57,7 @@ void musicbrainz_read_disc (gchar *drive)
     mb_disc_get_id (disc, id->str, 100);
     g_message ("Disc Id: %s", id->str);
 
-    /*q = mb_query_new (NULL, NULL);
+    q = mb_query_new (NULL, NULL);
     f = mb_release_filter_new ();
     mb_release_filter_disc_id (f, m_disc.discid);
     results = mb_query_get_releases (q, f);
@@ -77,9 +77,9 @@ void musicbrainz_read_disc (gchar *drive)
         g_print ("Title : %s\n\n", m_disc.disctitle);
         mb_release_free (release);
     }
-    mb_result_list_free (results);*/
+    mb_result_list_free (results);
 
-    return;
+    return;*/
 }
 
 
