@@ -33,8 +33,6 @@
 #define INSTALLED_GLADE DATADIR"/tractasono/tractasono.glade"
 
 
-static gfloat style_color_mods[5]={0.0,-0.1,0.2,-0.2};
-
 
 void interface_init (int argc, char *argv[])
 {
@@ -280,6 +278,7 @@ void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar
 	g_string_append (info, "</span>");
 
 	//lcd_set_text (lcd, info->str);
+	g_debug ("Meta Daten: %s", info->str);
 	g_string_free (info, TRUE);
 }
 
@@ -476,54 +475,4 @@ void on_trackstopp_clicked (GtkButton *button, gpointer user_data)
 	g_debug ("Stop wurde gedrückt");
 	player_set_stop ();
 }
-
-/*
- * create_style()
- *
- * Ripped from grip, Copyright (c) 1998-2002 Mike Oliphant
- */
-GtkStyle* interface_create_style (GdkColor *fg, GdkColor *bg, gboolean do_grade)
-{
-  GtkStyle *def;
-  GtkStyle *sty;
-  int state;
-
-  def=gtk_widget_get_default_style();
-  sty=gtk_style_copy(def);
-
-  for(state=0;state<5;state++) {
-    if(fg) sty->fg[state]=*fg;
-
-    if(bg) sty->bg[state]=*bg;
-
-    if(bg && do_grade) {
-      sty->bg[state].red+=sty->bg[state].red*style_color_mods[state];
-      sty->bg[state].green+=sty->bg[state].green*style_color_mods[state];
-      sty->bg[state].blue+=sty->bg[state].blue*style_color_mods[state];
-    }
-  }
-
-  return sty;
-}
-
-
-/*
- * create_color (r, g, b)
- *
- * Ripped from grip, Copyright (c) 1998-2002 Mike Oliphant
- */
-GdkColor* interface_create_color (int red, int green, int blue)
-{
-  GdkColor *c;
-
-  c=(GdkColor *)g_malloc(sizeof(GdkColor));
-  c->red=red;
-  c->green=green;
-  c->blue=blue;
-
-  gdk_color_alloc(gdk_colormap_get_system(),c);
-
-  return c;
-}
-
 

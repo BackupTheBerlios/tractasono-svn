@@ -22,6 +22,8 @@
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 
+gint player_test (int argc, char *argv[]);
+
 void player_init(int argc, char *argv[]);
 
 void player_set_play(void);

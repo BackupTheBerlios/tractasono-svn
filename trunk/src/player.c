@@ -38,9 +38,60 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 
 
 
+gint player_test (int argc, char *argv[])
+{
+	GstElement *play, *pipeline, *filter, *sink;
+	GstElement *source;
+	GstBus *bus;
+	
+	const gchar uri[] = "http://194.158.114.66:8100";
+
+	/* init GStreamer */
+	gst_init (&argc, &argv);
+	g_debug (gst_version_string ());
+	
+	if (gst_uri_is_valid (uri)) {
+		g_debug ("URI ist gültig -> protocol: %s, location: %s", gst_uri_get_protocol (uri), gst_uri_get_location (uri));
+		
+		source = gst_element_make_from_uri (GST_URI_SRC, uri, "tracta-source");
+		
+	}
+
+
+	/* create pipeline */
+	pipeline = gst_pipeline_new ("my-pipeline");
+
+	/* create elements */
+	filter = gst_element_factory_make ("identity", "filter");
+	sink = gst_element_factory_make ("alsasink", "sink");
+
+	/* must add elements to pipeline before linking them */
+	gst_bin_add_many (GST_BIN (pipeline), source, filter, sink, NULL);
+
+	/* link */
+	if (!gst_element_link_many (source, filter, sink, NULL)) {
+	g_warning ("Failed to link elements!");
+	}
+
+
+
+	/* set up */
+	//play = gst_element_factory_make ("playbin", "play");
+	g_object_set (G_OBJECT (source), "location", uri, NULL);
+
+	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
+	gst_bus_add_watch (bus, player_bus_callback, NULL);
+	gst_object_unref (bus);
+
+	gst_element_set_state (pipeline, GST_STATE_PLAYING);
+
+	return 0;
+}
+
+
 // Player initialisieren
 void player_init (int argc, char *argv[])
-{
+{	
 	g_message ("Player init");
 	gst_init (&argc, &argv);
 	
@@ -48,7 +99,7 @@ void player_init (int argc, char *argv[])
 	format = GST_FORMAT_TIME;
 	
 	// Pipeline erstellen
-	pipeline = gst_element_factory_make ("playbin", "tracta-playbin");
+	pipeline = gst_element_factory_make ("playbin", "tracta-player");
 	
 	// Bus Callback anbinden
 	GstBus *bus;
@@ -139,7 +190,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 		}
 		default: {
 			/* unhandled message */
-			//g_print ("\tUnhandled Message %i\n", GST_MESSAGE_TYPE (message));
+			g_debug ("Unhandled Message %i", GST_MESSAGE_TYPE (message));
 			break;
 		}
 	}
@@ -183,7 +234,7 @@ void player_set_stop(void)
 }
 
 // Timer Funktion
-static gboolean player_timer_event(GstElement *pipeline)
+static gboolean player_timer_event (GstElement *pipeline)
 {
 	if (player_get_playing()) {
 		interface_set_song_position(player_get_position());
@@ -214,13 +265,13 @@ gboolean player_seek_to_position(gint64 position)
 
 
 // Spiele eine Datei oder einen Stream ab
-void player_play_uri(const gchar *uri)
+void player_play_uri (const gchar *uri)
 {
 	g_message ("player_play_uri: uri=%s", uri);
 	
 	if (pipeline && uri) {
 		player_set_stop();
-		g_object_set(G_OBJECT(pipeline), "uri", uri, NULL);
+		g_object_set(G_OBJECT (pipeline), "uri", uri, NULL);
 		player_set_play();
 	} else {
 		g_warning ("pipeline nicht bereit oder uri nicht angegeben!");

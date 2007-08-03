@@ -33,6 +33,8 @@
 // Programmeinstieg
 int main(int argc, char *argv[])
 {
+	//player_test (argc, argv);
+	
 	// Databenbank initialisieren
 	database_init (argc, argv);
 	

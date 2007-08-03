@@ -88,10 +88,15 @@ void radio_station_insert (const gchar *name, const gchar *bitrate, const gchar 
 void radio_genre_parse (void);
 void radio_station_parse (const gchar *genre);
 
-gint sort_iter_compare_func (GtkTreeModel *model,
-							 GtkTreeIter  *a,
-							 GtkTreeIter  *b,
-							 gpointer      userdata);
+gint sort_genre_compare_func (GtkTreeModel *model,
+							  GtkTreeIter  *a,
+							  GtkTreeIter  *b,
+							  gpointer      userdata);
+
+gint sort_station_compare_func (GtkTreeModel *model,
+								GtkTreeIter  *a,
+								GtkTreeIter  *b,
+								gpointer      userdata);
 
 gchar* xml_load (const gchar *uri);
 
@@ -223,6 +228,7 @@ void radio_genre_setup_tree (void)
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
+	GtkTreeSortable *sortable;
 	
 	// TreeView holen
 	genre_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_radio_genre");
@@ -235,10 +241,17 @@ void radio_genre_setup_tree (void)
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes ("Genre", renderer,
 													   "text", COL_R_G_NAME, NULL);
+	gtk_tree_view_column_set_sort_column_id (column, COL_R_G_NAME);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (genre_tree), column);
 											
 	// Store erstellen
 	genre_store = gtk_list_store_new (COLS_R_G, G_TYPE_STRING);
+	
+	// Sortierung
+	sortable = GTK_TREE_SORTABLE (genre_store);
+	gtk_tree_sortable_set_sort_func (sortable, COL_R_G_NAME, sort_genre_compare_func,
+                                     GINT_TO_POINTER(COL_R_G_NAME), NULL);
+    gtk_tree_sortable_set_sort_column_id (sortable, COL_R_G_NAME, GTK_SORT_ASCENDING);
 											
 	// Store dem Tree anhängen				
 	gtk_tree_view_set_model (GTK_TREE_VIEW (genre_tree),
@@ -280,13 +293,10 @@ void radio_station_setup_tree (void)
 	
 	// Sortierung
 	sortable = GTK_TREE_SORTABLE (station_store);
-	
-	gtk_tree_sortable_set_sort_func (sortable, COL_R_S_NAME, sort_iter_compare_func,
+	gtk_tree_sortable_set_sort_func (sortable, COL_R_S_NAME, sort_station_compare_func,
                                      GINT_TO_POINTER(COL_R_S_NAME), NULL);
-
-    gtk_tree_sortable_set_sort_func (sortable, COL_R_S_BITRATE, sort_iter_compare_func,
-                                     GINT_TO_POINTER(COL_R_S_BITRATE), NULL);
-                                    
+    gtk_tree_sortable_set_sort_func (sortable, COL_R_S_BITRATE, sort_station_compare_func,
+                                     GINT_TO_POINTER(COL_R_S_BITRATE), NULL);                            
     gtk_tree_sortable_set_sort_column_id (sortable, COL_R_S_BITRATE, GTK_SORT_DESCENDING);	
 										
 	// Store dem Tree anhängen
@@ -428,12 +438,42 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 }
 
 
-/* This is not pretty. Of course you can also use a
-*  separate compare function for each sort ID value */
-gint sort_iter_compare_func (GtkTreeModel *model,
+// Sortierungsfunktion für Genre
+gint sort_genre_compare_func (GtkTreeModel *model,
 							 GtkTreeIter  *a,
 							 GtkTreeIter  *b,
 							 gpointer      userdata)
+{
+	gint ret = 0;
+	gchar *name1, *name2;
+
+	gtk_tree_model_get (model, a, COL_R_G_NAME, &name1, -1);
+	gtk_tree_model_get (model, b, COL_R_G_NAME, &name2, -1);
+
+	if (name1 == NULL || name2 == NULL) {
+		if (name1 == NULL && name2 == NULL) {
+			ret = 0;
+		} else if (name1 == NULL) {
+			ret = -1;
+		} else {
+			ret = 1;
+		}
+	} else {
+		ret = g_utf8_collate (name1, name2);
+	}
+
+	g_free(name1);
+	g_free(name2);
+	
+	return ret;
+}
+
+
+// Sortierungsfunktion für Station
+gint sort_station_compare_func (GtkTreeModel *model,
+								GtkTreeIter  *a,
+								GtkTreeIter  *b,
+								gpointer      userdata)
 {
 	gint sortcol = GPOINTER_TO_INT(userdata);
 	gint ret = 0;
@@ -472,7 +512,7 @@ gint sort_iter_compare_func (GtkTreeModel *model,
 		break;
 		
 		default:
-			g_return_val_if_reached(0);
+			g_return_val_if_reached (0);
 	}
 
 	return ret;
