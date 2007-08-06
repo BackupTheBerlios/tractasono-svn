@@ -25,7 +25,7 @@
 
 void fullscreen_init (void)
 {
-	g_message ("Fullscreen init");
+	g_message ("\tFullscreen Modul init");
 	
 }
 

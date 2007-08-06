@@ -53,20 +53,20 @@ int drives_init()
 {
 	g_message ("Drives init");
 	
-	/*if (!gnome_vfs_init ()) {
+	if (!gnome_vfs_init ()) {
 		g_warning ("Could not initialize GnomeVFS!");
 		return DRIVES_FAIL;
-	}*/
+	}
 
 	// Musicbrainz init
 	musicbrainz_init ();
 
-	/*GnomeVFSVolumeMonitor* monitor = NULL;
+	GnomeVFSVolumeMonitor* monitor = NULL;
 	monitor = gnome_vfs_get_volume_monitor();
 
 	g_signal_connect(monitor, "drive-connected", G_CALLBACK(drive_connected), NULL);
 	g_signal_connect(monitor, "drive-disconnected", G_CALLBACK(drive_disconnected), NULL);
-	*/
+	
 	return DRIVES_SUCCESS;
 }
 

@@ -47,13 +47,29 @@ struct _LcdClass {
 	GtkDrawingAreaClass parent_class;
 };
 
-
+// Konstruktion
 GType lcd_get_type (void) G_GNUC_CONST;
 GtkWidget* lcd_new (void);
 
-void lcd_set_text (Lcd *lcd, const gchar *text);
-gchar* lcd_get_text (Lcd *lcd);
+// Titel
+void lcd_set_title (Lcd *lcd, const gchar *title);
+gchar* lcd_get_title (Lcd *lcd);
 
+// Artist
+void lcd_set_artist (Lcd *lcd, const gchar *artist);
+gchar* lcd_get_artist (Lcd *lcd);
+
+// Album
+void lcd_set_album (Lcd *lcd, const gchar *album);
+gchar* lcd_get_album (Lcd *lcd);
+
+// URI
+void lcd_set_uri (Lcd *lcd, const gchar *uri);
+gchar* lcd_get_uri (Lcd *lcd);
+
+// Duration
+void lcd_set_duration (Lcd *lcd, const gchar *duration);
+gchar* lcd_get_duration (Lcd *lcd);
 
 G_END_DECLS
 

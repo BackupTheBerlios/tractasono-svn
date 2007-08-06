@@ -26,9 +26,8 @@
 void music_init (void)
 {
 	g_message ("\tMusic Modul init");
-	
+	/*
 	GtkWidget *container, *grid;
-	
 
 	// Genre
 	container = glade_xml_get_widget(glade, "vbox_genre");
@@ -54,5 +53,5 @@ void music_init (void)
 	gtk_container_add(GTK_CONTAINER(container), grid);
 	gtk_widget_show(grid);
 	
-	
+	*/
 }

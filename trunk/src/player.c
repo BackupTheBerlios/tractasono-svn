@@ -40,13 +40,12 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 
 gint player_test (int argc, char *argv[])
 {
-	GstElement *play, *pipeline, *filter, *sink;
+	/*GstElement *play, *pipeline, *filter, *sink;
 	GstElement *source;
 	GstBus *bus;
 	
 	const gchar uri[] = "http://194.158.114.66:8100";
-
-	/* init GStreamer */
+	
 	gst_init (&argc, &argv);
 	g_debug (gst_version_string ());
 	
@@ -57,25 +56,17 @@ gint player_test (int argc, char *argv[])
 		
 	}
 
-
-	/* create pipeline */
 	pipeline = gst_pipeline_new ("my-pipeline");
 
-	/* create elements */
 	filter = gst_element_factory_make ("identity", "filter");
 	sink = gst_element_factory_make ("alsasink", "sink");
 
-	/* must add elements to pipeline before linking them */
 	gst_bin_add_many (GST_BIN (pipeline), source, filter, sink, NULL);
 
-	/* link */
 	if (!gst_element_link_many (source, filter, sink, NULL)) {
 	g_warning ("Failed to link elements!");
 	}
 
-
-
-	/* set up */
 	//play = gst_element_factory_make ("playbin", "play");
 	g_object_set (G_OBJECT (source), "location", uri, NULL);
 
@@ -84,6 +75,8 @@ gint player_test (int argc, char *argv[])
 	gst_object_unref (bus);
 
 	gst_element_set_state (pipeline, GST_STATE_PLAYING);
+	
+	*/
 
 	return 0;
 }

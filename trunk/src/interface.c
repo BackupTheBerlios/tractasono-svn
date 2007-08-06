@@ -25,6 +25,7 @@
 #include "disc.h"
 #include "radio.h"
 #include "music.h"
+#include "settings.h"
 #include "lcd.h"
 #include "ipod.h"
 
@@ -119,22 +120,18 @@ void interface_init (int argc, char *argv[])
 	}
 	
 	// LCD
-	GtkWidget *lcdspace, *lcd;
+	GtkWidget *lcdspace;
 	lcdspace = glade_xml_get_widget(glade, "lcdbox");
 	if (lcdspace == NULL) {
 		g_error("Konnte lcdbox nicht holen!\n");
 	}
-	
 	lcd = lcd_new ();
 	gtk_container_add (GTK_CONTAINER (lcdspace), GTK_WIDGET (lcd));
 	gtk_widget_show (GTK_WIDGET (lcd));
+	// LCD Text initial setzen
+	lcd_set_title (LCD (lcd), "Willkommen beim tractasono!");
 	
-	/*GtkStyle * style_LCD;
-	GdkColor *color_LCD;
-	color_LCD = interface_create_color (33686,38273,29557);
-	style_LCD = interface_create_style (color_LCD, color_LCD, FALSE);
-	gtk_widget_set_style (GTK_WIDGET(eventbox), style_LCD);*/
-	
+	// Einzelne GUI Module initialisieren
 	
 	// Disc Modul init
 	disc_init ();
@@ -147,6 +144,9 @@ void interface_init (int argc, char *argv[])
 	
 	// iPod Modul init
 	ipod_init ();
+	
+	// Settings Modul init
+	settings_init ();
 	
 	// Vollbild Modus init
 	fullscreen_init ();
@@ -255,31 +255,9 @@ void interface_set_song_position(gint64 position)
 // Setze die Song Informationen
 void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
 {
-	GString *info = NULL;
-
-	info = g_string_new ("<span font_desc='Dot Matrix 20'>");
-
-	if (!artist && !title) {
-		if (uri) {
-			g_string_append (info, uri);	
-		} else {
-			g_string_append (info, "tractasono");
-		}
-	} else if (!artist) {
-		g_string_append (info, title);
-	} else if (!title) {
-		g_string_append (info, artist);
-	} else {
-		g_string_append (info, artist);
-		g_string_append (info, " - ");
-		g_string_append (info, title);
-	}
-	
-	g_string_append (info, "</span>");
-
-	//lcd_set_text (lcd, info->str);
-	g_debug ("Meta Daten: %s", info->str);
-	g_string_free (info, TRUE);
+	lcd_set_title (LCD (lcd), title);
+	lcd_set_artist (LCD (lcd), artist);
+	lcd_set_uri (LCD (lcd), uri);
 }
 
 

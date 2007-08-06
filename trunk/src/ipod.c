@@ -108,7 +108,7 @@ void ipod_init (void)
 {
 	IpodDeviceEventListener *listener;
 	
-	g_message ("iPod init");
+	g_message ("\tiPod Modul init");
 	
 	// Widgets holen und ablegen
 	vars.combo = (GtkComboBox*) glade_xml_get_widget (glade, "combobox_ipod_list");
@@ -318,11 +318,11 @@ void on_combobox_ipod_list_changed (GtkWidget *widget, gpointer user_data)
 	
 	mount_point = gtk_combo_box_get_active_text (GTK_COMBO_BOX(widget));
 	
-	g_message ("iPod Liste change -> %s", mount_point);
+	//g_message ("iPod Liste change -> %s", mount_point);
 	
 	vars.device = ipod_device_new(mount_point);
 	if (!vars.device) {
-		g_warning ("Dies ist kein iPod!");
+		//g_warning ("Dies ist kein iPod!");
 		return;
 	}
 	

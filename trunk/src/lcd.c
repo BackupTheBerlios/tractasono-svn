@@ -22,6 +22,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <math.h>
+#include <string.h>
 #include "lcd.h"
 
 
@@ -37,12 +38,20 @@
 typedef struct _LcdPrivate LcdPrivate;
 
 struct _LcdPrivate {
-	gchar *text;
+	gchar *title;
+	gchar *artist;
+	gchar *album;
+	gchar *uri;
+	gchar *duration;
 };
 
 enum {
 	PROP_0,
-	PROP_TEXT
+	PROP_TITLE,
+	PROP_ARTIST,
+	PROP_ALBUM,
+	PROP_URI,
+	PROP_DURATION
 };
 
 
@@ -52,6 +61,8 @@ static void lcd_init (Lcd *lcd);
 static void lcd_set_property (GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void lcd_get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
 static gboolean lcd_expose (GtkWidget *lcd, GdkEventExpose *event);
+static gboolean lcd_redraw_canvas (gpointer data);
+static gchar* construct_message (Lcd *lcd);
 
 GType lcd_get_type (void)
 {
@@ -93,10 +104,30 @@ static void lcd_class_init (LcdClass *klass)
 	/* Add LcdPrivate as a private data class of LcdClass. */
 	g_type_class_add_private (klass, sizeof (LcdPrivate));
 
-	/* Register one GObject property for the text */
-	g_object_class_install_property (gobject_class, PROP_TEXT,
+	/* Register one GObject property for the title */
+	g_object_class_install_property (gobject_class, PROP_TITLE,
 									 g_param_spec_pointer ("text", "The text",
 									 					   "The text to show in the lcd",
+									 					   G_PARAM_READWRITE));
+	/* Register one GObject property for the artist */
+	g_object_class_install_property (gobject_class, PROP_ARTIST,
+									 g_param_spec_pointer ("artist", "The artist",
+									 					   "The artist to show in the lcd",
+									 					   G_PARAM_READWRITE));	
+	/* Register one GObject property for the album */
+	g_object_class_install_property (gobject_class, PROP_ALBUM,
+									 g_param_spec_pointer ("album", "The album",
+									 					   "The album to show in the lcd",
+									 					   G_PARAM_READWRITE));
+	/* Register one GObject property for the uri */
+	g_object_class_install_property (gobject_class, PROP_URI,
+									 g_param_spec_pointer ("uri", "The uri",
+									 					   "The uri to show in the lcd",
+									 					   G_PARAM_READWRITE));
+	/* Register one GObject property for the duration */
+	g_object_class_install_property (gobject_class, PROP_DURATION,
+									 g_param_spec_pointer ("duration", "The duration",
+									 					   "The duration to show in the lcd",
 									 					   G_PARAM_READWRITE));	
 }
 
@@ -111,8 +142,20 @@ static void lcd_set_property (GObject *object,
 	Lcd *lcd = LCD(object);
 
 	switch (prop_id) {
-		case PROP_TEXT:
-			lcd_set_text (lcd, g_value_get_string (value));
+		case PROP_TITLE:
+			lcd_set_title (lcd, g_value_get_string (value));
+			break;
+		case PROP_ARTIST:
+			lcd_set_artist (lcd, g_value_get_string (value));
+			break;
+		case PROP_ALBUM:
+			lcd_set_album (lcd, g_value_get_string (value));
+			break;
+		case PROP_URI:
+			lcd_set_uri (lcd, g_value_get_string (value));
+			break;
+		case PROP_DURATION:
+			lcd_set_duration (lcd, g_value_get_string (value));
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -128,18 +171,30 @@ static void lcd_get_property (GObject *object,
                          	  GValue *value,
                       		  GParamSpec *pspec)
 {
-  Lcd *lcd = LCD (object);
-  LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	Lcd *lcd = LCD (object);
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
 
-  switch (prop_id)
-  {
-    case PROP_TEXT:
-      g_value_set_string (value, priv->text);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
+	switch (prop_id)
+	{
+		case PROP_TITLE:
+			g_value_set_string (value, priv->title);
+			break;
+		case PROP_ARTIST:
+			g_value_set_string (value, priv->artist);
+			break;
+		case PROP_ALBUM:
+			g_value_set_string (value, priv->album);
+			break;
+		case PROP_URI:
+			g_value_set_string (value, priv->uri);
+			break;
+		case PROP_DURATION:
+			g_value_set_string (value, priv->duration);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
 }
 
 
@@ -149,6 +204,7 @@ GtkWidget* lcd_new (void)
 }
 
 
+// Rundes Rechteck zeichnen
 static void rectangle_round (cairo_t *cr, double x, double y, double w, double h, double r)
 {
 	cairo_move_to (cr, x + r, y);				
@@ -163,7 +219,8 @@ static void rectangle_round (cairo_t *cr, double x, double y, double w, double h
 }
 
 
-static void draw_message (cairo_t *cr, double w, double h, const gchar *text)
+// Den Text zeichnen
+static void draw_message (cairo_t *cr, double w, double h, const gchar *message)
 {
 	cairo_text_extents_t extents;
 
@@ -175,18 +232,19 @@ static void draw_message (cairo_t *cr, double w, double h, const gchar *text)
 		CAIRO_FONT_WEIGHT_NORMAL);
 
 	cairo_set_font_size (cr, 24);
-	cairo_text_extents (cr, text, &extents);
+	cairo_text_extents (cr, message, &extents);
 	x = x - (extents.width / 2 + extents.x_bearing);
 	y = y - (extents.height / 2 + extents.y_bearing);
 
 	cairo_move_to (cr, x, y);
-	cairo_show_text (cr, text);
+	cairo_show_text (cr, message);
 }
 
 
 static void draw (GtkWidget *lcd, cairo_t *cr)
 {
 	double x, y, w, h;
+	gchar *message;
 
 	// Koordinaten setzen
 	x = OFFSETX;
@@ -212,7 +270,8 @@ static void draw (GtkWidget *lcd, cairo_t *cr)
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	
 	// Text zeichnen
-	draw_message (cr, w, h, "tractasono");
+	message = construct_message (LCD (lcd));
+	draw_message (cr, w, h, message);
 	
 	// Alles zeichnen
 	cairo_stroke (cr);
@@ -241,23 +300,153 @@ static gboolean lcd_expose (GtkWidget *lcd, GdkEventExpose *event)
 
 static void lcd_init (Lcd *lcd)
 {
-	g_message ("LCD init");
+	g_message ("\tLCD Widget init");
+	
+	/* update the LCD once a half second */
+	//g_timeout_add (500, lcd_redraw_canvas, lcd);
 }
 
 
-void lcd_set_text (Lcd *lcd, const gchar *text)
-{
-	g_message ("Die Funktion lcd_set_text ist noch nicht implementiert!");
-}
-
-
-gchar* lcd_get_text (Lcd *lcd)
+// Erzeugt den Message String aus den abgefüllten Members
+static gchar* construct_message (Lcd *lcd)
 {
 	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	GString *message;
 	
-	return priv->text;
+	message = g_string_new (NULL);
+
+	if (!priv->artist && !priv->title) {
+		if (priv->uri) {
+			g_string_append (message, priv->uri);	
+		} else {
+			g_string_append (message, "...");
+		}
+	} else if (!priv->artist) {
+		g_string_append (message, priv->title);
+	} else if (!priv->title) {
+		g_string_append (message, priv->artist);
+	} else {
+		g_string_append (message, priv->artist);
+		g_string_append (message, " - ");
+		g_string_append (message, priv->title);
+	}
+	
+	return message->str;
 }
 
 
+void lcd_set_title (Lcd *lcd, const gchar *title)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
 
+	// Update Members
+	priv->title = strdup (title);
+	
+	// LCD updaten
+	lcd_redraw_canvas (lcd);
+}
+
+
+void lcd_set_artist (Lcd *lcd, const gchar *artist)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+
+	// Update Members
+	priv->artist = strdup (artist);
+	
+	// LCD updaten
+	lcd_redraw_canvas (lcd);
+}
+
+
+void lcd_set_album (Lcd *lcd, const gchar *album)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+
+	// Update Members
+	priv->album = strdup (album);
+	
+	// LCD updaten
+	lcd_redraw_canvas (lcd);
+}
+
+
+void lcd_set_uri (Lcd *lcd, const gchar *uri)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+
+	// Update Members
+	priv->uri = strdup (uri);
+	
+	// LCD updaten
+	lcd_redraw_canvas (lcd);
+}
+
+
+void lcd_set_duration (Lcd *lcd, const gchar *duration)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+
+	// Update Members
+	priv->duration = strdup (duration);
+	
+	// LCD updaten
+	lcd_redraw_canvas (lcd);
+}
+
+
+gchar* lcd_get_title (Lcd *lcd)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	return priv->title;
+}
+
+
+gchar* lcd_get_artist (Lcd *lcd)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	return priv->artist;
+}
+
+
+gchar* lcd_get_album (Lcd *lcd)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	return priv->album;
+}
+
+
+gchar* lcd_get_uri (Lcd *lcd)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	return priv->uri;
+}
+
+
+gchar* lcd_get_duration (Lcd *lcd)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	return priv->duration;
+}
+
+
+static gboolean lcd_redraw_canvas (gpointer data)
+{
+	GtkWidget *widget;
+	GdkRegion *region;
+
+	widget = GTK_WIDGET (data);
+	if (!widget->window) {
+		return FALSE;
+	}
+
+	region = gdk_drawable_get_clip_region (widget->window);
+	/* redraw the cairo canvas completely by exposing it */
+	gdk_window_invalidate_region (widget->window, region, TRUE);
+	gdk_window_process_updates (widget->window, TRUE);
+
+	gdk_region_destroy (region);
+	
+	return TRUE; /* keep running this event */
+}
 

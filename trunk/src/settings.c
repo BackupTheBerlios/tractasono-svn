@@ -34,7 +34,7 @@
 
 void settings_init()
 {
-	g_message ("Settings init");
+	g_message ("\tSettings Modul init");
 }
 
 

@@ -44,6 +44,7 @@ GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *keyboard;
 GtkWidget *vbox_tractasono;
+GtkWidget *lcd;
 
 GtkEntry *actual_entry;
 GtkProgressBar *progress;
