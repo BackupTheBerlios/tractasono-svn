@@ -22,7 +22,7 @@
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 
-gint player_test (int argc, char *argv[]);
+gint player_test (void);
 
 void player_init(int argc, char *argv[]);
 

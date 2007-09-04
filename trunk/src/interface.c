@@ -255,9 +255,9 @@ void interface_set_song_position(gint64 position)
 // Setze die Song Informationen
 void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
 {
-	lcd_set_title (LCD (lcd), title);
-	lcd_set_artist (LCD (lcd), artist);
-	lcd_set_uri (LCD (lcd), uri);
+	//lcd_set_title (LCD (lcd), title);
+	//lcd_set_artist (LCD (lcd), artist);
+	//lcd_set_uri (LCD (lcd), uri);
 }
 
 

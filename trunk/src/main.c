@@ -31,22 +31,25 @@
 #include "database.h"
 
 // Programmeinstieg
-int main(int argc, char *argv[])
-{
+int main (int argc, char *argv[])
+{	
 	// Databenbank initialisieren
 	database_init (argc, argv);
 	
 	// Drives initialisieren
-	drives_init();
+	drives_init ();
 	
 	// Player initialisieren
-	player_init(argc, argv);
+	player_init (argc, argv);
+	
+	// Testfunktionen
+	player_test ();
 	
 	// Interface initialisieren
-	interface_init(argc, argv);
+	interface_init (argc, argv);
 
 	// Programmloop starten
-	gtk_main();
+	gtk_main ();
 
 	return 0;
 }

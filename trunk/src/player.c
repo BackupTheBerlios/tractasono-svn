@@ -38,45 +38,20 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 
 
 
-gint player_test (int argc, char *argv[])
+gint player_test (void)
 {
-	/*GstElement *play, *pipeline, *filter, *sink;
-	GstElement *source;
-	GstBus *bus;
+	const gchar uri[] = "http://85.214.59.226:9000";
+	const gchar uri2[] = "file:///opt/music/DragonForce/Inhuman Rampage/DragonForce - Cry for Eternity.ogg";
+	const gchar uri3[] = "http://www.xiph.org/vorbis/listen/41_30secOgg-b64M.ogg";
+	const gchar uri4[] = "http://ogg2.smgradio.com/vr32.ogg";
+	const gchar uri5[] = "http://network.virginradio.co.uk/core/audio/ogg/live.pls?service=vr";
 	
-	const gchar uri[] = "http://194.158.114.66:8100";
+	gst_element_set_state (pipeline, GST_STATE_NULL);
+
+	g_object_set (G_OBJECT (pipeline), "uri", uri, NULL);
+
 	
-	gst_init (&argc, &argv);
-	g_debug (gst_version_string ());
-	
-	if (gst_uri_is_valid (uri)) {
-		g_debug ("URI ist gültig -> protocol: %s, location: %s", gst_uri_get_protocol (uri), gst_uri_get_location (uri));
-		
-		source = gst_element_make_from_uri (GST_URI_SRC, uri, "tracta-source");
-		
-	}
-
-	pipeline = gst_pipeline_new ("my-pipeline");
-
-	filter = gst_element_factory_make ("identity", "filter");
-	sink = gst_element_factory_make ("alsasink", "sink");
-
-	gst_bin_add_many (GST_BIN (pipeline), source, filter, sink, NULL);
-
-	if (!gst_element_link_many (source, filter, sink, NULL)) {
-	g_warning ("Failed to link elements!");
-	}
-
-	//play = gst_element_factory_make ("playbin", "play");
-	g_object_set (G_OBJECT (source), "location", uri, NULL);
-
-	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
-	gst_bus_add_watch (bus, player_bus_callback, NULL);
-	gst_object_unref (bus);
-
 	gst_element_set_state (pipeline, GST_STATE_PLAYING);
-	
-	*/
 
 	return 0;
 }
@@ -87,6 +62,9 @@ void player_init (int argc, char *argv[])
 {	
 	g_message ("Player init");
 	gst_init (&argc, &argv);
+	
+	// Version anzeigen
+	g_debug (gst_version_string ());
 	
 	// GStreamer Zeitformat einstellen
 	format = GST_FORMAT_TIME;
