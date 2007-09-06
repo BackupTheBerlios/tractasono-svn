@@ -44,3 +44,9 @@ GdaDataModel* database_get_song_model (void);
 void database_settings_set_boolean (gchar *group, gchar *key, gboolean value);
 gboolean database_settings_get_boolean (gchar *group, gchar *key);
 
+void database_settings_set_string (gchar *group, gchar *key, const gchar* value);
+gchar* database_settings_get_string (gchar *group, gchar *key);
+
+void database_settings_set_integer (gchar *group, gchar *key, gint value);
+gint database_settings_get_integer (gchar *group, gchar *key);
+

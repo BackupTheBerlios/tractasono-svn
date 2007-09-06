@@ -26,7 +26,7 @@
 void music_init (void)
 {
 	g_message ("\tMusic Modul init");
-	/*
+	
 	GtkWidget *container, *grid;
 
 	// Genre
@@ -53,5 +53,5 @@ void music_init (void)
 	gtk_container_add(GTK_CONTAINER(container), grid);
 	gtk_widget_show(grid);
 	
-	*/
+	
 }

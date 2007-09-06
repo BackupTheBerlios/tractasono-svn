@@ -41,10 +41,10 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 gint player_test (void)
 {
 	const gchar uri[] = "http://85.214.59.226:9000";
-	const gchar uri2[] = "file:///opt/music/DragonForce/Inhuman Rampage/DragonForce - Cry for Eternity.ogg";
-	const gchar uri3[] = "http://www.xiph.org/vorbis/listen/41_30secOgg-b64M.ogg";
-	const gchar uri4[] = "http://ogg2.smgradio.com/vr32.ogg";
-	const gchar uri5[] = "http://network.virginradio.co.uk/core/audio/ogg/live.pls?service=vr";
+	//const gchar uri[] = "file:///opt/music/DragonForce/Inhuman Rampage/DragonForce - Cry for Eternity.ogg";
+	//const gchar uri[] = "http://www.xiph.org/vorbis/listen/41_30secOgg-b64M.ogg";
+	//const gchar uri[] = "http://ogg2.smgradio.com/vr32.ogg";
+	//const gchar uri[] = "http://network.virginradio.co.uk/core/audio/ogg/live.pls?service=vr";
 	
 	gst_element_set_state (pipeline, GST_STATE_NULL);
 

@@ -377,14 +377,13 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `tractasono`.`tbl_settings`;
 CREATE TABLE  `tractasono`.`tbl_settings` (
   `IDsettings` int(11) NOT NULL auto_increment,
-  `settingsgroup` varchar(20) NOT NULL,
-  `settingskey` varchar(20) NOT NULL,
-  `settingstext` varchar(200) default NULL,
-  `settingsinteger` int(11) default NULL,
-  `settingsfloat` float default NULL,
-  `settingsboolean` tinyint(1) default NULL,
+  `settingsgroup` varchar(25) NOT NULL,
+  `settingskey` varchar(25) NOT NULL,
+  `settingsboolean` tinyint(1) NOT NULL,
+  `settingsstring` varchar(100) NOT NULL,
+  `settingsinteger` int(11) NOT NULL,
   PRIMARY KEY  (`IDsettings`)
-) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=latin1 COMMENT='Wird verwendet um Einstellungen zu speichern';
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `tractasono`.`tbl_settings`
@@ -392,7 +391,9 @@ CREATE TABLE  `tractasono`.`tbl_settings` (
 
 /*!40000 ALTER TABLE `tbl_settings` DISABLE KEYS */;
 LOCK TABLES `tbl_settings` WRITE;
-INSERT INTO `tractasono`.`tbl_settings` VALUES  (28,'module','show_fullscreen',NULL,NULL,NULL,1);
+INSERT INTO `tractasono`.`tbl_settings` VALUES  (2,'library','path',0,'/opt/music/',0),
+ (3,'library','name',0,'Die geilschti Musig!',0),
+ (4,'library','filecount',0,'',122);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `tbl_settings` ENABLE KEYS */;
 

@@ -45,6 +45,14 @@ void database_init (int argc, char *argv[])
 	//database_list_providers ();
 	//database_list_sources ();
 	database_connect ();
+	
+	// Test Funktionen
+	//database_settings_set_string ("library", "path", "/opt/music/");
+	//database_settings_set_string ("library", "name", "Die geilschti Musig!");
+	//database_settings_set_integer ("library", "filecount", 122);
+	//g_debug ("Pfad: %s", database_settings_get_string ("library", "path"));
+	//g_debug ("Name: %s", database_settings_get_string ("library", "name"));
+	//g_debug ("Filecount: %i", database_settings_get_integer ("library", "filecount"));
 }
 
 
@@ -255,4 +263,99 @@ gboolean database_settings_get_boolean (gchar *group, gchar *key)
 	return value;
 }
 
+
+void database_settings_set_string (gchar *group, gchar *key, const gchar* value)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	gint id = 0;
+	GValue *val;
+	
+	// Schaue ob Eintrag schon existiert
+	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
+	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
+	dm = database_execute_sql_command (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		// Datensatz mutieren
+		id = g_value_get_int (val);
+		sql = g_string_new ("UPDATE tbl_settings SET");
+		g_string_append_printf (sql, " settingsstring = '%s' WHERE IDsettings = '%i'", value, id);
+	} else {
+		// Datensatz neu erstellen
+		sql = g_string_new ("INSERT INTO tbl_settings(settingsgroup, settingskey, settingsstring)");
+		g_string_append_printf (sql, " VALUES ('%s', '%s', '%s')", group, key, value);
+	}
+	
+	database_execute_sql (sql->str);
+}
+
+
+gchar* database_settings_get_string (gchar *group, gchar *key)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	gchar* value = NULL;
+	
+	sql = g_string_new ("SELECT settingsstring FROM tbl_settings");
+	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
+	dm = database_execute_sql_command (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		value = gda_value_stringify (val);
+	}
+	
+	return value;
+}
+
+
+void database_settings_set_integer (gchar *group, gchar *key, gint value)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	gint id = 0;
+	GValue *val;
+	
+	// Schaue ob Eintrag schon existiert
+	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
+	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
+	dm = database_execute_sql_command (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		// Datensatz mutieren
+		id = g_value_get_int (val);
+		sql = g_string_new ("UPDATE tbl_settings SET");
+		g_string_append_printf (sql, " settingsinteger = '%i' WHERE IDsettings = '%i'", value, id);
+	} else {
+		// Datensatz neu erstellen
+		sql = g_string_new ("INSERT INTO tbl_settings(settingsgroup, settingskey, settingsinteger)");
+		g_string_append_printf (sql, " VALUES ('%s', '%s', '%i')", group, key, value);
+	}
+	
+	database_execute_sql (sql->str);
+}
+
+
+gint database_settings_get_integer (gchar *group, gchar *key)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	gint value = 0;
+	
+	sql = g_string_new ("SELECT settingsinteger FROM tbl_settings");
+	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
+	dm = database_execute_sql_command (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		value = g_value_get_int (val);
+	}
+	
+	return value;
+}
 
