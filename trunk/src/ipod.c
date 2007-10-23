@@ -157,7 +157,7 @@ void ipod_fill_combo (void)
 	}
 	
 	// Vorhandene Einträge löschen
-	gtk_combo_box_remove_text (GTK_COMBO_BOX(combo), 0);
+	//gtk_combo_box_remove_text (GTK_COMBO_BOX(combo), 0);
 	
 	// Alle iPods finden
     devices = ipod_device_list_devices ();

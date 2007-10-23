@@ -128,7 +128,7 @@ void radio_init(void)
 	g_object_set (pl_parser, "recurse", FALSE, "debug", FALSE, NULL);
 	g_signal_connect (pl_parser, "playlist-start", G_CALLBACK(cb_parser_start), NULL);
 	g_signal_connect (pl_parser, "playlist-end", G_CALLBACK(cb_parser_end), NULL);
-	g_signal_connect (pl_parser, "entry", G_CALLBACK(cb_parser_entry), NULL);
+	g_signal_connect (pl_parser, "entry-parsed", G_CALLBACK(cb_parser_entry), NULL);
 }
 
 

@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
 	player_init (argc, argv);
 	
 	// Testfunktionen
-	player_test ();
+	//player_test ();
 	
 	// Interface initialisieren
 	interface_init (argc, argv);

@@ -70,45 +70,21 @@
                         <property name="n_rows">2</property>
                         <property name="n_columns">2</property>
                         <child>
-                          <widget class="GtkButton" id="button_next">
+                          <widget class="GtkButton" id="button_play">
                             <property name="width_request">40</property>
                             <property name="height_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_trackplay_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image_next">
+                              <widget class="GtkImage" id="image_play">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-media-next</property>
+                                <property name="stock">gtk-media-play</property>
                               </widget>
                             </child>
                           </widget>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                            <property name="x_options"></property>
-                            <property name="y_options"></property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkButton" id="button_previous">
-                            <property name="width_request">40</property>
-                            <property name="height_request">40</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="response_id">0</property>
-                            <child>
-                              <widget class="GtkImage" id="image_previous">
-                                <property name="visible">True</property>
-                                <property name="stock">gtk-media-previous</property>
-                              </widget>
-                            </child>
-                          </widget>
-                          <packing>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
                             <property name="x_options"></property>
                             <property name="y_options"></property>
                           </packing>
@@ -136,21 +112,45 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="button_play">
+                          <widget class="GtkButton" id="button_previous">
                             <property name="width_request">40</property>
                             <property name="height_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="response_id">0</property>
-                            <signal name="clicked" handler="on_trackplay_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image_play">
+                              <widget class="GtkImage" id="image_previous">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-media-play</property>
+                                <property name="stock">gtk-media-previous</property>
                               </widget>
                             </child>
                           </widget>
                           <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options"></property>
+                            <property name="y_options"></property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="button_next">
+                            <property name="width_request">40</property>
+                            <property name="height_request">40</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="response_id">0</property>
+                            <child>
+                              <widget class="GtkImage" id="image_next">
+                                <property name="visible">True</property>
+                                <property name="stock">gtk-media-next</property>
+                              </widget>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
                             <property name="x_options"></property>
                             <property name="y_options"></property>
                           </packing>
@@ -400,9 +400,6 @@
               </packing>
             </child>
           </widget>
-          <packing>
-            <property name="tab_expand">False</property>
-          </packing>
         </child>
         <child>
           <widget class="GtkLabel" id="label_genre">
@@ -411,7 +408,6 @@
           </widget>
           <packing>
             <property name="type">tab</property>
-            <property name="tab_expand">False</property>
             <property name="tab_fill">False</property>
           </packing>
         </child>
@@ -525,7 +521,6 @@
           </widget>
           <packing>
             <property name="position">1</property>
-            <property name="tab_expand">False</property>
           </packing>
         </child>
         <child>
@@ -536,7 +531,6 @@
           <packing>
             <property name="type">tab</property>
             <property name="position">1</property>
-            <property name="tab_expand">False</property>
             <property name="tab_fill">False</property>
           </packing>
         </child>
@@ -650,7 +644,6 @@
           </widget>
           <packing>
             <property name="position">2</property>
-            <property name="tab_expand">False</property>
           </packing>
         </child>
         <child>
@@ -661,7 +654,6 @@
           <packing>
             <property name="type">tab</property>
             <property name="position">2</property>
-            <property name="tab_expand">False</property>
             <property name="tab_fill">False</property>
           </packing>
         </child>
@@ -775,7 +767,6 @@
           </widget>
           <packing>
             <property name="position">3</property>
-            <property name="tab_expand">False</property>
           </packing>
         </child>
         <child>
@@ -786,7 +777,6 @@
           <packing>
             <property name="type">tab</property>
             <property name="position">3</property>
-            <property name="tab_expand">False</property>
             <property name="tab_fill">False</property>
           </packing>
         </child>
@@ -924,9 +914,6 @@
                   </packing>
                 </child>
               </widget>
-              <packing>
-                <property name="tab_expand">False</property>
-              </packing>
             </child>
             <child>
               <widget class="GtkHBox" id="hbox8">
@@ -954,7 +941,6 @@
               </widget>
               <packing>
                 <property name="type">tab</property>
-                <property name="tab_expand">False</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -974,7 +960,6 @@
               </widget>
               <packing>
                 <property name="position">1</property>
-                <property name="tab_expand">False</property>
               </packing>
             </child>
             <child>
@@ -1003,7 +988,6 @@
               <packing>
                 <property name="type">tab</property>
                 <property name="position">1</property>
-                <property name="tab_expand">False</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -1036,7 +1020,6 @@
               <packing>
                 <property name="type">tab</property>
                 <property name="position">2</property>
-                <property name="tab_expand">False</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -1112,7 +1095,6 @@
               </widget>
               <packing>
                 <property name="position">3</property>
-                <property name="tab_expand">False</property>
               </packing>
             </child>
             <child>
@@ -1141,7 +1123,6 @@
               <packing>
                 <property name="type">tab</property>
                 <property name="position">3</property>
-                <property name="tab_expand">False</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -2047,7 +2028,6 @@
           <widget class="GtkFrame" id="frame1">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label_xalign">0</property>
             <property name="label_yalign">0</property>
             <child>
               <widget class="GtkTreeView" id="treeview_disc">
@@ -2183,7 +2163,6 @@ Touch the screen to go back!</property>
       <widget class="GtkFrame" id="radiomodul">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="label_xalign">0</property>
         <property name="label_yalign">0</property>
         <property name="shadow_type">GTK_SHADOW_OUT</property>
         <child>
@@ -2361,7 +2340,6 @@ Touch the screen to go back!</property>
       <widget class="GtkFrame" id="ipodmodul">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="label_xalign">0</property>
         <property name="label_yalign">0</property>
         <property name="shadow_type">GTK_SHADOW_OUT</property>
         <child>
@@ -2376,7 +2354,6 @@ Touch the screen to go back!</property>
               <widget class="GtkFrame" id="frame2">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label_xalign">0</property>
                 <property name="shadow_type">GTK_SHADOW_NONE</property>
                 <child>
                   <widget class="GtkVBox" id="vbox2">
@@ -2390,7 +2367,7 @@ Touch the screen to go back!</property>
                           <widget class="GtkComboBox" id="combobox_ipod_list">
                             <property name="visible">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                            <property name="items" translatable="yes">Test</property>
+                            <property name="items" translatable="yes"></property>
                             <signal name="changed" handler="on_combobox_ipod_list_changed"/>
                           </widget>
                           <packing>
@@ -2539,9 +2516,6 @@ Touch the screen to go back!</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                 <property name="headers_clickable">True</property>
                               </widget>
-                              <packing>
-                                <property name="tab_expand">False</property>
-                              </packing>
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label4">
@@ -2551,7 +2525,6 @@ Touch the screen to go back!</property>
                               </widget>
                               <packing>
                                 <property name="type">tab</property>
-                                <property name="tab_expand">False</property>
                                 <property name="tab_fill">False</property>
                               </packing>
                             </child>
@@ -2564,7 +2537,6 @@ Touch the screen to go back!</property>
                               </widget>
                               <packing>
                                 <property name="position">1</property>
-                                <property name="tab_expand">False</property>
                               </packing>
                             </child>
                             <child>
@@ -2576,7 +2548,6 @@ Touch the screen to go back!</property>
                               <packing>
                                 <property name="type">tab</property>
                                 <property name="position">1</property>
-                                <property name="tab_expand">False</property>
                                 <property name="tab_fill">False</property>
                               </packing>
                             </child>
