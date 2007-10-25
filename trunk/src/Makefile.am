@@ -5,7 +5,6 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
 		   $(LIBGDA_CFLAGS) \
 		   $(LIBGNOMEDB_CFLAGS) \
-		   $(LIBMUSICBRAINZ_CFLAGS) \
 		   $(LIBGPOD_CFLAGS) \
 		   $(LIBIPODDEVICE_CFLAGS) \
 		   $(TOTEMPLPARSE_CFLAGS)
@@ -39,8 +38,6 @@ tractasono_SOURCES = main.c \
 					 disc.h \
 					 database.c \
 					 database.h \
-					 musicbrainz.c \
-					 musicbrainz.h \
 					 lcd.c \
 					 lcd.h \
 					 ipod.c \
@@ -55,7 +52,6 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(GSTREAMER_LIBS) \
 				   $(LIBGDA_LIBS) \
 				   $(LIBGNOMEDB_LIBS) \
-				   $(LIBMUSICBRAINZ_LIBS) \
 				   $(LIBGPOD_LIBS) \
 				   $(LIBIPODDEVICE_LIBS) \
 				   $(TOTEMPLPARSE_LIBS)
