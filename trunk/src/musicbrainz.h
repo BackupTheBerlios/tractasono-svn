@@ -25,3 +25,4 @@ void musicbrainz_init (void);
 
 void musicbrainz_read_disc (gchar *drive);
 gchar* musicbrainz_get_disctitle (void);
+

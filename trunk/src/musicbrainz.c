@@ -93,3 +93,4 @@ gchar* musicbrainz_get_disctitle (void)
 	
 	return "";
 }
+

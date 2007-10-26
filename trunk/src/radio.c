@@ -33,6 +33,7 @@
 #include "radio.h"
 #include "player.h"
 #include "interface.h"
+#include "lcd.h"
 
 
 
@@ -169,6 +170,8 @@ void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
 	
 	// Stream abspielen
 	player_play_uri(url);
+
+	lcd_set_title (LCD(lcd), "Bla Bla");
 }
 
 
@@ -435,6 +438,17 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 		g_debug ("   Parsing war nicht erfolgreich!");
 	}
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+
+	GtkWidget *urlinput;
+	const gchar *url;
+	
+	urlinput = glade_xml_get_widget(glade, "radio_url_combo_entry");
+	url = gtk_entry_get_text(GTK_ENTRY(urlinput));
+
+	// Stream abspielen
+	player_play_uri(url);
+
+	lcd_set_title (LCD(lcd), name);
 }
 
 
