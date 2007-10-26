@@ -34,7 +34,7 @@
 int main (int argc, char *argv[])
 {	
 	// Databenbank initialisieren
-	database_init (argc, argv);
+	//database_init (argc, argv);
 	
 	// Drives initialisieren
 	drives_init ();

@@ -64,7 +64,7 @@ void player_init (int argc, char *argv[])
 	gst_init (&argc, &argv);
 	
 	// Version anzeigen
-	g_debug (gst_version_string ());
+	//g_debug (gst_version_string ());
 	
 	// GStreamer Zeitformat einstellen
 	format = GST_FORMAT_TIME;

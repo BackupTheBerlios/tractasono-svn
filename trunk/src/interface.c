@@ -58,7 +58,6 @@ void interface_init (int argc, char *argv[])
 	module.disc = NULL;
 	module.previous = NULL;
 	
-	
 	// Das Interface laden
 	GString* buildfile = g_string_new(g_get_current_dir());
 	buildfile = g_string_append(buildfile, "/data/tractasono.glade");
@@ -187,24 +186,50 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 // Alle Button Switches hier
 
 
+// Zeige das vorherige Widget im Platzhalter an (für Fullscreen Modus)
+void interface_show_previous_module (void)
+{
+	interface_show_module(module.previous);
+}
+
+
+// Event-Handler für den Musik Button
+void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
+{
+	interface_show_module(module.music);
+}
+
+
+// Event-Handler für den Einstellungen Button
+void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
+{
+	interface_show_module(module.settings);
+}
+
+
+// Event-Handler für den CD Button
+void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
+{
+	interface_show_module(module.disc);
+}
+
+
+// Event-Handler für den Vollbild Button
+void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
+{
+	interface_show_module(module.fullscreen);
+}
+
 // Event-Handler für den iPod Button
 void on_button_ipod_clicked (GtkWidget *widget, gpointer user_data)
 {
-	g_print("Button iPod wurde gedrückt!\n");
-
 	interface_show_module(module.ipod);
-	
-	ipod_load (); 
 }
 
 // Event-Handler für den Internetradio Button
 void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 {
-	g_print("Button Internetradio wurde gedrückt!\n");
-
 	interface_show_module(module.radio);
-	
-	// Todo: Load Funktion
 }
 
 
@@ -230,8 +255,7 @@ void interface_clean(){
 
 void interface_set_song_position(gint64 position)
 {
-	g_debug("interface_set_song_position()");
-	g_debug("\tposition is %s (minutes:seconds)", ns_formatted(position));
+	g_debug ("interface_set_song_position(): %s (minutes:seconds)", ns_formatted(position));
 
 	gdouble fraction;
 	gint64 duration;
@@ -241,12 +265,10 @@ void interface_set_song_position(gint64 position)
 	// Position berechnen
 	if (duration > 0) {
 		// fraction mode
-		g_debug("\tfraction mode");
 		fraction = (gdouble) position / duration;
 		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);
 	} else {
 		// pulse mode
-		g_debug("\tpulse mode");
 		gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress));
 	}
 }
@@ -351,52 +373,6 @@ void interface_show_module_fullscreen (GtkWidget *widget)
 	gtk_widget_unref(widget);
 
 	gtk_widget_show(widget);
-}
-
-
-// Zeige das vorherige Widget im Platzhalter an (für Fullscreen Modus)
-void interface_show_previous_module (void)
-{
-	interface_show_module(module.previous);
-}
-
-
-// Event-Handler für den Musik Button
-void on_button_music_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Musik gedrückt!\n");
-
-	interface_show_module(module.music);
-}
-
-
-// Event-Handler für den Einstellungen Button
-void on_button_settings_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Einstellungen gedrückt!\n");
-
-	interface_show_module(module.settings);
-}
-
-
-// Event-Handler für den CD Button
-void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("CD gedrückt!\n");
-
-	interface_show_module(module.disc);
-}
-
-
-// Event-Handler für den Vollbild Button
-void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
-{
-	g_print("Vollbild gedrückt!\n");
-
-	//interface_clean_all();
-	//root = GTK_CONTAINER(vbox_tractasono);
-	
-	interface_show_module(module.fullscreen);
 }
 
 
