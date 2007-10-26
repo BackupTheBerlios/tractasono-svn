@@ -70,21 +70,45 @@
                         <property name="n_rows">2</property>
                         <property name="n_columns">2</property>
                         <child>
-                          <widget class="GtkButton" id="button_play">
+                          <widget class="GtkButton" id="button_next">
                             <property name="width_request">40</property>
                             <property name="height_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="response_id">0</property>
-                            <signal name="clicked" handler="on_trackplay_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image_play">
+                              <widget class="GtkImage" id="image_next">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-media-play</property>
+                                <property name="stock">gtk-media-next</property>
                               </widget>
                             </child>
                           </widget>
                           <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options"></property>
+                            <property name="y_options"></property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="button_previous">
+                            <property name="width_request">40</property>
+                            <property name="height_request">40</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="response_id">0</property>
+                            <child>
+                              <widget class="GtkImage" id="image_previous">
+                                <property name="visible">True</property>
+                                <property name="stock">gtk-media-previous</property>
+                              </widget>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
                             <property name="x_options"></property>
                             <property name="y_options"></property>
                           </packing>
@@ -112,45 +136,21 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="button_previous">
+                          <widget class="GtkButton" id="button_play">
                             <property name="width_request">40</property>
                             <property name="height_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_trackplay_clicked"/>
                             <child>
-                              <widget class="GtkImage" id="image_previous">
+                              <widget class="GtkImage" id="image_play">
                                 <property name="visible">True</property>
-                                <property name="stock">gtk-media-previous</property>
+                                <property name="stock">gtk-media-play</property>
                               </widget>
                             </child>
                           </widget>
                           <packing>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                            <property name="x_options"></property>
-                            <property name="y_options"></property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkButton" id="button_next">
-                            <property name="width_request">40</property>
-                            <property name="height_request">40</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="response_id">0</property>
-                            <child>
-                              <widget class="GtkImage" id="image_next">
-                                <property name="visible">True</property>
-                                <property name="stock">gtk-media-next</property>
-                              </widget>
-                            </child>
-                          </widget>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
                             <property name="x_options"></property>
                             <property name="y_options"></property>
                           </packing>
@@ -796,122 +796,27 @@
             <property name="can_focus">True</property>
             <signal name="switch_page" handler="on_notebook1_switch_page"/>
             <child>
-              <widget class="GtkVBox" id="vbox20">
+              <widget class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
-                <property name="border_width">5</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <child>
-                  <widget class="GtkLabel" id="label17">
-                    <property name="visible">True</property>
-                    <property name="xpad">5</property>
-                    <property name="ypad">5</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Identität&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                    <property name="ellipsize">PANGO_ELLIPSIZE_START</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
-                  <widget class="GtkHBox" id="hbox13">
+                  <widget class="GtkLabel" id="label6">
                     <property name="visible">True</property>
-                    <property name="border_width">5</property>
-                    <child>
-                      <widget class="GtkLabel" id="label18">
-                        <property name="visible">True</property>
-                        <property name="xpad">5</property>
-                        <property name="ypad">5</property>
-                        <property name="label" translatable="yes">Gerätename:</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkEntry" id="entry_devicename">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <signal name="button_press_event" handler="on_entry_button_press_event"/>
-                      </widget>
-                      <packing>
-                        <property name="padding">5</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Einstellungen müssen direkt in der
+Datenbank vorgenommen werden!&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                    <property name="justify">GTK_JUSTIFY_CENTER</property>
                   </widget>
                   <packing>
-                    <property name="expand">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkHSeparator" id="hseparator4">
-                    <property name="visible">True</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="padding">5</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label19">
-                    <property name="visible">True</property>
-                    <property name="xpad">5</property>
-                    <property name="ypad">5</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Testeintrag&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                    <property name="ellipsize">PANGO_ELLIPSIZE_START</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkHBox" id="hbox14">
-                    <property name="visible">True</property>
-                    <property name="border_width">5</property>
-                    <child>
-                      <widget class="GtkLabel" id="label20">
-                        <property name="visible">True</property>
-                        <property name="xpad">5</property>
-                        <property name="ypad">5</property>
-                        <property name="label" translatable="yes">Gerätename:</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkEntry" id="entry2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <signal name="button_press_event" handler="on_entry_button_press_event"/>
-                      </widget>
-                      <packing>
-                        <property name="padding">5</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkHSeparator" id="hseparator5">
-                    <property name="visible">True</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">5</property>
-                  </packing>
+                  <placeholder/>
                 </child>
               </widget>
             </child>
@@ -945,85 +850,6 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkScrolledWindow" id="scrolledwindow3">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                <property name="shadow_type">GTK_SHADOW_IN</property>
-                <child>
-                  <widget class="GtkTextView" id="textview3">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                  </widget>
-                </child>
-              </widget>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkHBox" id="hbox9">
-                <property name="visible">True</property>
-                <child>
-                  <widget class="GtkImage" id="image21">
-                    <property name="visible">True</property>
-                    <property name="stock">gtk-media-play</property>
-                  </widget>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label14">
-                    <property name="visible">True</property>
-                    <property name="xpad">5</property>
-                    <property name="ypad">2</property>
-                    <property name="label" translatable="yes">Abspielen</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </widget>
-              <packing>
-                <property name="type">tab</property>
-                <property name="position">1</property>
-                <property name="tab_fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <widget class="GtkHBox" id="hbox10">
-                <property name="visible">True</property>
-                <child>
-                  <widget class="GtkImage" id="image22">
-                    <property name="visible">True</property>
-                    <property name="stock">gtk-media-record</property>
-                  </widget>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label15">
-                    <property name="visible">True</property>
-                    <property name="xpad">5</property>
-                    <property name="ypad">2</property>
-                    <property name="label" translatable="yes">Import</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </widget>
-              <packing>
-                <property name="type">tab</property>
-                <property name="position">2</property>
-                <property name="tab_fill">False</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkScrolledWindow" id="scrolledwindow5">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1032,6 +858,7 @@
                 <child>
                   <widget class="GtkViewport" id="viewport1">
                     <property name="visible">True</property>
+                    <property name="shadow_type">GTK_SHADOW_NONE</property>
                     <child>
                       <widget class="GtkVBox" id="vbox8">
                         <property name="visible">True</property>
@@ -1063,7 +890,8 @@
                           <widget class="GtkLabel" id="label24">
                             <property name="visible">True</property>
                             <property name="ypad">15</property>
-                            <property name="label" translatable="yes">tractasono bildet zusammen mit der entsprechenden Hardware die ultimative Musik-Jukebox</property>
+                            <property name="label" translatable="yes">tractasono bildet zusammen mit der entsprechenden
+Hardware die ultimative digitale Musik-Jukebox!</property>
                             <property name="justify">GTK_JUSTIFY_CENTER</property>
                             <property name="wrap">True</property>
                           </widget>
@@ -1094,7 +922,7 @@
                 </child>
               </widget>
               <packing>
-                <property name="position">3</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -1122,7 +950,7 @@
               </widget>
               <packing>
                 <property name="type">tab</property>
-                <property name="position">3</property>
+                <property name="position">1</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -2028,6 +1856,7 @@
           <widget class="GtkFrame" id="frame1">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label_xalign">0</property>
             <property name="label_yalign">0</property>
             <child>
               <widget class="GtkTreeView" id="treeview_disc">
@@ -2163,6 +1992,7 @@ Touch the screen to go back!</property>
       <widget class="GtkFrame" id="radiomodul">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <property name="label_xalign">0</property>
         <property name="label_yalign">0</property>
         <property name="shadow_type">GTK_SHADOW_OUT</property>
         <child>
@@ -2340,6 +2170,7 @@ Touch the screen to go back!</property>
       <widget class="GtkFrame" id="ipodmodul">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <property name="label_xalign">0</property>
         <property name="label_yalign">0</property>
         <property name="shadow_type">GTK_SHADOW_OUT</property>
         <child>
@@ -2354,6 +2185,7 @@ Touch the screen to go back!</property>
               <widget class="GtkFrame" id="frame2">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label_xalign">0</property>
                 <property name="shadow_type">GTK_SHADOW_NONE</property>
                 <child>
                   <widget class="GtkVBox" id="vbox2">

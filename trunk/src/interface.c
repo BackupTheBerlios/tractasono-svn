@@ -260,16 +260,17 @@ void interface_set_song_position(gint64 position)
 	gdouble fraction;
 	gint64 duration;
 	
-	duration = player_get_duration();
+	duration = player_get_duration ();
 
 	// Position berechnen
 	if (duration > 0) {
 		// fraction mode
 		fraction = (gdouble) position / duration;
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), fraction);
+		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(progress), fraction);
 	} else {
 		// pulse mode
-		gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress));
+		//gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress));
+		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR(progress), 1);
 	}
 }
 
