@@ -339,11 +339,13 @@ void lcd_set_title (Lcd *lcd, const gchar *title)
 {
 	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
 
-	// Update Members
-	priv->title = strdup (title);
-	
-	// LCD updaten
-	lcd_redraw_canvas (lcd);
+	if (title != NULL) {
+		// Update Members
+		priv->title = strdup (title);
+		// LCD updaten
+		lcd_redraw_canvas (lcd);
+	}
+
 }
 
 
@@ -351,11 +353,12 @@ void lcd_set_artist (Lcd *lcd, const gchar *artist)
 {
 	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
 
-	// Update Members
-	priv->artist = strdup (artist);
-	
-	// LCD updaten
-	lcd_redraw_canvas (lcd);
+	if (artist != NULL) {
+		// Update Members
+		priv->artist = strdup (artist);
+		// LCD updaten
+		lcd_redraw_canvas (lcd);
+	}
 }
 
 
@@ -363,23 +366,25 @@ void lcd_set_album (Lcd *lcd, const gchar *album)
 {
 	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
 
-	// Update Members
-	priv->album = strdup (album);
-	
-	// LCD updaten
-	lcd_redraw_canvas (lcd);
+	if (album != NULL) {
+		// Update Members
+		priv->album = strdup (album);
+		// LCD updaten
+		lcd_redraw_canvas (lcd);
+	}
 }
 
 
 void lcd_set_uri (Lcd *lcd, const gchar *uri)
 {
 	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
-
-	// Update Members
-	priv->uri = strdup (uri);
 	
-	// LCD updaten
-	lcd_redraw_canvas (lcd);
+	if (uri != NULL) {
+		// Update Members
+		priv->uri = strdup (uri);
+		// LCD updaten
+		lcd_redraw_canvas (lcd);
+	}
 }
 
 

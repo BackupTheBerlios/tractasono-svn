@@ -279,8 +279,8 @@ void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar
 {
 	g_debug ("artist: %s, title: %s, uri: %s", artist, title, uri);
 	lcd_set_title (LCD (lcd), title);
-	//lcd_set_artist (LCD (lcd), artist);
-	//lcd_set_uri (LCD (lcd), uri);
+	lcd_set_artist (LCD (lcd), artist);
+	lcd_set_uri (LCD (lcd), uri);
 }
 
 
