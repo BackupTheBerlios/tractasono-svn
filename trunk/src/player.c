@@ -116,16 +116,16 @@ gint64 player_get_position(void)
 // Callback Behandlung
 gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
+	//g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
 	
 	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
 		/* Musik Tags */
 		player_handle_tag_message(message);
 	}
 	
-	/*if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
+	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
 		return TRUE;
-	}*/
+	}
 
 	switch (GST_MESSAGE_TYPE (message)) {
 		case GST_MESSAGE_ERROR: {
@@ -161,7 +161,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 		}
 		default: {
 			/* unhandled message */
-			g_debug ("Unhandled Message %i", GST_MESSAGE_TYPE (message));
+			//g_debug ("Unhandled Message %i", GST_MESSAGE_TYPE (message));
 			break;
 		}
 	}

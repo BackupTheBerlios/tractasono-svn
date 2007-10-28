@@ -135,19 +135,19 @@ void radio_init(void)
 
 void cb_parser_start (TotemPlParser *parser, const char *title)
 {
-	g_message ("Playlist with name '%s' started", title);
+	//g_message ("Playlist with name '%s' started", title);
 }
 
 void cb_parser_end (TotemPlParser *parser, const char *title)
 {
-	g_message ("Playlist with name '%s' ended", title);
+	//g_message ("Playlist with name '%s' ended", title);
 }
 
 
 void cb_parser_entry (TotemPlParser *parser, const char *uri, const char *title,
 				  const char *genre, gpointer data)
 {
-	g_debug ("added URI '%s' with title '%s'", uri, title ? title : "empty");
+	//g_debug ("added URI '%s' with title '%s'", uri, title ? title : "empty");
 	
 	// GUI aktualisieren
 	while (gtk_events_pending ()) {
@@ -160,7 +160,7 @@ void cb_parser_entry (TotemPlParser *parser, const char *uri, const char *title,
 
 void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
 {
-	g_message ("Radio Stream abspielen...");
+	//g_message ("Radio Stream abspielen...");
 	
 	GtkWidget *urlinput;
 	const gchar *url;
@@ -200,11 +200,11 @@ static void xml_station_start (GMarkupParseContext *context,
 					  		   GError **error)
 {
 	if (g_ascii_strcasecmp(element_name, "station") == 0) {
-		g_debug("%s=%s // %s=%s // %s=%s // %s=%s // %s=%s", attribute_names[0], attribute_values[0],
+		/*g_debug("%s=%s // %s=%s // %s=%s // %s=%s // %s=%s", attribute_names[0], attribute_values[0],
 											  attribute_names[1], attribute_values[1],
 											  attribute_names[2], attribute_values[2],
 											  attribute_names[3], attribute_values[3],
-											  attribute_names[4], attribute_values[4]);
+											  attribute_names[4], attribute_values[4]);*/
 		radio_station_insert (attribute_values[0], attribute_values[3], attribute_values[2]);
 	}
 }
@@ -312,7 +312,7 @@ void radio_genre_insert (gchar *name)
 {
 	GtkTreeIter iter;
 	
-	g_debug ("radio_insert_genre: name=%s", name);
+	//g_debug ("radio_insert_genre: name=%s", name);
 	
 	genre_store = (GtkListStore*) gtk_tree_view_get_model (genre_tree);
 	
@@ -324,7 +324,7 @@ void radio_genre_insert (gchar *name)
 
 void radio_genre_parse (void)
 {
-	g_debug("Fetch & parse genres...");
+	//g_debug("Fetch & parse genres...");
 	
 	gchar *content;
 	
@@ -343,7 +343,7 @@ void radio_genre_parse (void)
 
 void radio_station_parse (const gchar *genre)
 {
-	g_debug("Fetch & parse radio stations...");
+	//g_debug("Fetch & parse radio stations...");
 	
 	GString *s_genre;
 	gchar *content;
@@ -395,7 +395,7 @@ void on_treeview_radio_genre_row_activated (GtkTreeView *tree,
 	
 	gtk_tree_model_get (model, &iter, COL_R_G_NAME, &name, -1);
 	
-	g_debug ("Row activated: column=%s", name);
+	//g_debug ("Row activated: column=%s", name);
 	
 	// Vorhandene Stationen zuerst löschen
 	gtk_list_store_clear (station_store);
@@ -420,7 +420,7 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	
 	gtk_tree_model_get (model, &iter, STORE_S_NAME, &name, STORE_S_ID, &id, -1);
 	
-	g_debug ("Station Row activated: name=%s, id=%s", name, id);
+	//g_debug ("Station Row activated: name=%s, id=%s", name, id);
 	
 	s_url = g_string_new (url_playlist);
 	g_string_append_printf (s_url, "%s", id);
@@ -429,14 +429,14 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	radio_combo_clean ();
 	
 	// Hole Playlist des Senders
-	g_debug ("Playlist parsing beginnt!");
+	//g_debug ("Playlist parsing beginnt!");
 	parser_result = totem_pl_parser_parse (pl_parser, s_url->str, FALSE);
-	g_debug ("Playlist parsing beendet!");
-	if (parser_result == TOTEM_PL_PARSER_RESULT_SUCCESS) {
+	//g_debug ("Playlist parsing beendet!");
+	/*if (parser_result == TOTEM_PL_PARSER_RESULT_SUCCESS) {
 		g_debug ("   Parsing war erfolgreich!");
 	} else {
 		g_debug ("   Parsing war nicht erfolgreich!");
-	}
+	}*/
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
 
 	GtkWidget *urlinput;
@@ -562,11 +562,11 @@ gchar* xml_load (const gchar *uri)
 
 int vfs_print_error (GnomeVFSResult result, const char *uri_string)
 {
-  const char *error_string;
-  /* get the string corresponding to this GnomeVFSResult value */
-  error_string = gnome_vfs_result_to_string (result);
-  printf ("Error %s occured opening location %s\n", error_string, uri_string);
-  return 1;
+	const char *error_string;
+	/* get the string corresponding to this GnomeVFSResult value */
+	error_string = gnome_vfs_result_to_string (result);
+	printf ("Error %s occured opening location %s\n", error_string, uri_string);
+	return 1;
 }
 
 
@@ -590,7 +590,7 @@ void radio_combo_add_url (const gchar *url)
 	GtkListStore *store;
 	GtkTreeIter iter;
 	
-	g_debug ("radio_combo_add_url");
+	//g_debug ("radio_combo_add_url");
 	
 	store = (GtkListStore*) gtk_combo_box_get_model (GTK_COMBO_BOX(combo));
 	gtk_list_store_append (store, &iter);
@@ -602,7 +602,7 @@ void radio_combo_clean (void)
 {
 	GtkListStore *store;
 	
-	g_debug ("radio_combo_clean");
+	//g_debug ("radio_combo_clean");
 	
 	store = (GtkListStore*) gtk_combo_box_get_model (GTK_COMBO_BOX(combo));
 	gtk_list_store_clear (store);

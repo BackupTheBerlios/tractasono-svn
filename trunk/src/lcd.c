@@ -227,14 +227,13 @@ static void draw_message (cairo_t *cr, double w, double h, const gchar *message)
 	gdouble x = w / 2;
 	gdouble y = h / 2;
 
-	cairo_select_font_face (cr, "Mono",
-		CAIRO_FONT_SLANT_NORMAL,
-		CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_select_font_face (cr, "Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 
 	cairo_set_font_size (cr, 24);
 	cairo_text_extents (cr, message, &extents);
-	x = x - (extents.width / 2 + extents.x_bearing);
-	y = y - (extents.height / 2 + extents.y_bearing);
+
+	x = x - (extents.width / 2);
+	y = y + (extents.height / 2) - 2;
 
 	cairo_move_to (cr, x, y);
 	cairo_show_text (cr, message);
