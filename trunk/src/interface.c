@@ -285,26 +285,16 @@ void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar
 }
 
 
-// Setzt auf dem Play Button auf Play oder Pause
-void interface_set_playimage(const gchar *stock_id)
+void interface_set_playing (gboolean isplaying)
 {
-	GtkImage *playimage = NULL;
-	
-	playimage = GTK_IMAGE(glade_xml_get_widget(glade, "image_play"));
-	if (playimage == NULL) {
-		g_print("Fehler beim play Bild holen!\n");
-	} else {
-		gtk_image_set_from_stock(playimage, stock_id, GTK_ICON_SIZE_BUTTON);
-	}
-}
+	GtkWidget *button;
 
+	button = GTK_WIDGET(glade_xml_get_widget(glade, "button_play"));
 
-void interface_set_playing(gboolean isplaying)
-{	
 	if (isplaying) {
-		interface_set_playimage("gtk-media-pause");
+		gtk_widget_set_state  (button, GTK_STATE_ACTIVE);
 	} else {
-		interface_set_playimage("gtk-media-play");
+		gtk_widget_set_state  (button, GTK_STATE_NORMAL);
 	}
 }
 

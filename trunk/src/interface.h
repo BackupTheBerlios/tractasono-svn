@@ -62,7 +62,6 @@ void interface_set_songinfo (const gchar *artist, const gchar *title, const gcha
 void interface_set_song_position (gint64 position);
 void interface_set_song_duration (gint64 duration);
 void interface_set_playing (gboolean isplaying);
-void interface_set_playimage (const gchar *stock_id);
 
 GtkStyle* interface_create_style (GdkColor *fg, GdkColor *bg, gboolean do_grade);
 GdkColor* interface_create_color (int red, int green, int blue);

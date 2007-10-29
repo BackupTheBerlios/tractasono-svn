@@ -146,12 +146,12 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 
 			if (newstate == 4) {
 				g_message ("GStreamer is now playing!\n");	
-				interface_set_playing(TRUE);
+				interface_set_playing (TRUE);
 			}
 			
 			if ((newstate == 3) && (oldstate == 4)) {
 				g_message ("GStreamer is now paused!\n");
-				interface_set_playing(FALSE);
+				interface_set_playing (FALSE);
 			}
 			
 		}

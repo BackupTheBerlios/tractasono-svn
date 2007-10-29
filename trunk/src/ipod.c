@@ -23,6 +23,7 @@
 #include "ipod.h"
 #include "interface.h"
 
+#include <stdio.h>
 #include <gpod/itdb.h>
 #include <ipoddevice/ipod-device.h>
 #include <ipoddevice/ipod-device-event-listener.h>
@@ -124,14 +125,14 @@ void ipod_init (void)
 	g_signal_connect (listener, "device-added", G_CALLBACK(ipod_added), NULL);
 	g_signal_connect (listener, "device-removed", G_CALLBACK(ipod_removed), NULL);
 	
-	// iPod Liste befüllen
-	ipod_fill_combo ();
-	
 	// Trees erstellen
 	setup_track_tree ();
 	setup_playlist_tree ();
+
+	// iPod Liste befüllen
+	ipod_fill_combo ();
 	
-	insert_test_daten ();
+	//insert_test_daten ();
 }
 
 void ipod_load (void)
@@ -142,47 +143,97 @@ void ipod_load (void)
 }
 
 
+void ipod_track (gpointer data, gpointer user_data)
+{
+	Itdb_Track *track = (Itdb_Track*)data;
+	g_message ("Track -> title: %s -> artist: %s", track->title, track->artist);
+
+	GtkTreeIter iter;
+	gchar *nr;
+
+	sprintf(nr,"%d", track->track_nr);
+	
+	gtk_tree_store_append (trees.track_store, &iter, NULL);
+	gtk_tree_store_set (trees.track_store, &iter,
+						COL_NR, nr, 
+						COL_TITLE, track->title,
+						COL_ARTIST, track->artist,
+						COL_ALBUM, track->album, -1);
+
+}
+
+
 void ipod_fill_combo (void)
 {
 	GtkWidget *combo;
 	IpodDevice *device;
 	GList *devices;
-    gint i, n;
-    gchar *mount_path;
-	
+	gint i, n;
+	gchar *mount_path;
+	gchar *label;
+
 	// iPod Liste holen
 	combo = glade_xml_get_widget (glade, "combobox_ipod_list");
 	if (combo == NULL) {
 		g_warning ("Fehler: Konnte combobox_ipod_list nicht holen!\n");
 	}
-	
+
 	// Vorhandene Einträge löschen
 	//gtk_combo_box_remove_text (GTK_COMBO_BOX(combo), 0);
-	
+
 	// Alle iPods finden
-    devices = ipod_device_list_devices ();
-    n = g_list_length (devices);
-    
-    // Wenn kein iPod vorhanden ist
-    if (n == 0) {
-        //g_warning ("No iPod devices present");
-        gtk_combo_box_append_text (GTK_COMBO_BOX(combo), "Kein iPod vorhanden");
-    }
+	devices = ipod_device_list_devices ();
+	n = g_list_length (devices);
+
+	// Wenn kein iPod vorhanden ist
+	if (n == 0) {
+		//g_warning ("No iPod devices present");
+		gtk_combo_box_append_text (GTK_COMBO_BOX(combo), "Kein iPod vorhanden");
+	}
 
 	// Durch vorhandene iPods loopen
-    for (i = 0; i < n; i++) {
-        device = (IpodDevice *) g_list_nth_data (devices, i);
-        //ipod_device_debug (device);
-        g_object_get (device, "mount-point", &mount_path, NULL);
-        //g_debug ("Path: %s", path);
-        gtk_combo_box_append_text (GTK_COMBO_BOX(combo), mount_path);
-        g_object_unref (device);
-    }
-    
-    // Ersten iPod slektieren
-    gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
+	for (i = 0; i < n; i++) {
+		device = (IpodDevice *) g_list_nth_data (devices, i);
+		ipod_device_debug (device);
+		g_object_get (device, "mount-point", &mount_path, NULL);
+		//g_object_get (device, "volume-label", &label, NULL);
+		//g_debug ("Path: %s", path);
+		gtk_combo_box_append_text (GTK_COMBO_BOX(combo), mount_path);
+		g_object_unref (device);
 
-    g_list_free (devices);
+		GError *error = NULL;
+
+		Itdb_iTunesDB *itdb = NULL;
+
+		itdb = itdb_parse (mount_path, &error);
+
+		if (itdb == NULL) {
+			g_message ("itdb ist NULL!");
+		} else {
+			g_message ("itdb ist nicht NULL!");
+
+
+			guint32 anz_tracks = 0;
+			
+			anz_tracks = itdb_tracks_number (itdb);
+			g_message ("Anzahl Tracks: %d", anz_tracks);
+			
+			Itdb_Track *track = NULL;
+
+			g_list_foreach (itdb->tracks, ipod_track, itdb);
+
+		}
+
+
+
+
+
+	}
+
+	// Ersten iPod slektieren
+	gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
+
+	g_list_free (devices);
 }
 
 
@@ -190,15 +241,15 @@ void ipod_added (IpodDeviceEventListener *listener, const gchar *udi)
 {	
 	IpodDevice *device;
     
-    g_message ("Device Added: %s", udi);
-    device = ipod_device_new (udi);
-    
-    if(device == NULL) {
-        g_warning ("Not a Valid iPod! Try Rebooting the iPod");
-    } else {
-        ipod_device_debug (device);
-        g_object_unref (device);
-    }
+	g_message ("Device Added: %s", udi);
+	device = ipod_device_new (udi);
+
+	if(device == NULL) {
+		g_warning ("Not a Valid iPod! Try Rebooting the iPod");
+	} else {
+		ipod_device_debug (device);
+		g_object_unref (device);
+	}
 }
 
 
@@ -326,7 +377,7 @@ void on_combobox_ipod_list_changed (GtkWidget *widget, gpointer user_data)
 		return;
 	}
 	
-	g_object_get (vars.device, "device-name", &device_name,
+	g_object_get (vars.device, "volume-label", &device_name,
 							   "device-model-string", &device_model,
 							   "advertised-capacity", &capacity, NULL);
 	

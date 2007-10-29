@@ -21,13 +21,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <musicbrainz3/mb_c.h>
+#include <musicbrainz/mb_c.h>
+#include <musicbrainz/browser.h>
 
 #include "musicbrainz.h"
 
-
-
-MbDisc *disc;
 
 
 void musicbrainz_init (void)
@@ -37,49 +35,86 @@ void musicbrainz_init (void)
 
 
 
-void musicbrainz_read_disc (gchar *drive)
+gboolean musicbrainz_lookup_disc (gchar *device, gchar *discid)
 {
-	/*int i, size;
-	MbQuery q;
-    MbReleaseFilter f;
-    MbResultList results;
-    GString *id;
-    
-    id = g_string_new_len ("", 100);
+	musicbrainz_t o;
+	char error[256], data[256], temp[256], *args[2];
+	int ret, numTracks, trackNum, i, isMultipleArtist = 0, numDates, albumNum;
 
-    disc = mb_read_disc (drive);
-    
-    if (!disc) {
-    	g_warning ("Konnte Disc nicht einlesen!");
-    	return;
-    }
-    
-    mb_disc_get_id (disc, id->str, 100);
-    g_message ("Disc Id: %s", id->str);
+	// Create the musicbrainz object, which will be needed for subsequent calls
+	o = mb_New();
 
-    q = mb_query_new (NULL, NULL);
-    f = mb_release_filter_new ();
-    mb_release_filter_disc_id (f, m_disc.discid);
-    results = mb_query_get_releases (q, f);
-    mb_release_filter_free (f);
-    mb_query_free (q);
-    if (!results) {
-        g_warning ("Konnte keine Resultate empfangen!");
-        return;
-    }
+	// enable debug
+	mb_SetDebug(o, TRUE);
 
-    size = mb_result_list_get_size (results);
-    for (i = 0; i < size; i++) {
-        MbRelease release = mb_result_list_get_release (results, i);
-        mb_release_get_id (release, m_disc.discid, 100);
-        g_print ("Id    : %s\n", m_disc.discid);
-        mb_release_get_title (release, m_disc.disctitle, 256);
-        g_print ("Title : %s\n\n", m_disc.disctitle);
-        mb_release_free (release);
-    }
-    mb_result_list_free (results);
+	// Tell the client library to return data in ISO8859-1 and not UTF-8
+	mb_UseUTF8(o, 0);
 
-    return;*/
+	// Tell the server to only return 4 levels of data, unless the MB_DEPTH env var is set
+	mb_SetDepth(o, 4);
+
+	// Set up the args for the find album query
+	args[0] = discid;
+	args[1] = NULL;
+
+	if (strlen(discid) != MB_CDINDEX_ID_LEN) {
+		// Execute the MB_GetAlbumById query
+		ret = mb_QueryWithArgs(o, MBQ_GetAlbumById, args);
+	} else {
+		// Execute the MBQ_GetCDInfoFromCDIndexId
+		ret = mb_QueryWithArgs(o, MBQ_GetCDInfoFromCDIndexId, args);
+	}
+
+	if (!ret) {
+		mb_GetQueryError(o, error, 256);
+		printf("Query failed: %s\n", error);
+		mb_Delete(o);
+		return FALSE;
+	}
+
+	return TRUE;
+
+	// Select the first album
+	if (!mb_Select1(o, MBS_SelectAlbum, albumNum)) {
+		return FALSE;
+	}
+	
+	// Pull back the album id to see if we got the album
+	if (!mb_GetResultData(o, MBE_AlbumGetAlbumId, data, 256)) {
+		printf("Album not found.\n");
+		return FALSE;
+	}
+
+	printf("Match #: %d\n-------------------------------------------------\n", albumNum);
+	mb_GetIDFromURL(o, data, temp, 256);
+	printf("    AlbumId: %s\n", temp);
+
+	// Extract the album name
+	if (mb_GetResultData(o, MBE_AlbumGetAlbumName, data, 256)) {
+		printf("       Name: %s\n", data);
+	}
+
+	// Extract the number of tracks
+	numTracks = mb_GetResultInt(o, MBE_AlbumGetNumTracks);
+	if (numTracks > 0 && numTracks < 100) {
+		printf("  NumTracks: %d\n", numTracks);
+	}
+
+	// Extract the artist name from the album
+	if (mb_GetResultData1(o, MBE_AlbumGetArtistName, data, 256, 1)) {
+		printf("AlbumArtist: %s\n", data);
+	}
+
+	// Extract the artist id from the album
+	if (mb_GetResultData1(o, MBE_AlbumGetArtistId, data, 256, 1)) {
+		mb_GetIDFromURL(o, data, temp, 256);
+		printf("   ArtistId: %s\n", temp);
+	}
+
+	// and clean up the musicbrainz object
+	mb_Delete(o);
+
+	return TRUE;
 }
 
 

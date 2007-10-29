@@ -3,6 +3,7 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(LIBGLADE_CFLAGS) \
 		   $(GCONF_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
+		   $(MUSICBRAINZ_CFLAGS) \
 		   $(LIBGDA_CFLAGS) \
 		   $(LIBGNOMEDB_CFLAGS) \
 		   $(LIBGPOD_CFLAGS) \
@@ -32,6 +33,8 @@ tractasono_SOURCES = main.c \
 					 fullscreen.h \
 					 music.c \
 					 music.h \
+					 musicbrainz.c \
+					 musicbrainz.h \
 					 keyboard.c \
 					 keyboard.h \
 					 disc.c \
@@ -50,8 +53,10 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(LIBGLADE_LIBS) \
 				   $(GCONF_LIBS) \
 				   $(GSTREAMER_LIBS) \
+				   $(MUSICBRAINZ_LIBS) \
 				   $(LIBGDA_LIBS) \
 				   $(LIBGNOMEDB_LIBS) \
 				   $(LIBGPOD_LIBS) \
 				   $(LIBIPODDEVICE_LIBS) \
 				   $(TOTEMPLPARSE_LIBS)
+

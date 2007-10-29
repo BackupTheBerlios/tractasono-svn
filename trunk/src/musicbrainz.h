@@ -20,9 +20,10 @@
  */
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 void musicbrainz_init (void);
 
-void musicbrainz_read_disc (gchar *drive);
+gboolean musicbrainz_lookup_disc (gchar *device, gchar *discid);
 gchar* musicbrainz_get_disctitle (void);
 
