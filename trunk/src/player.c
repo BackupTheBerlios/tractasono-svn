@@ -77,6 +77,8 @@ void player_init (int argc, char *argv[])
 	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
 	gst_bus_add_watch (bus, player_bus_callback, NULL);
 	gst_object_unref (bus);
+
+	//gst_xml_write_file (GST_ELEMENT (pipeline), fopen ("xmlTest.gst", "w"));
 	
 	// Watch hinzufügen welcher jede Sekunde auftritt
 	g_timeout_add (1000, (GSourceFunc) player_timer_event, pipeline);
@@ -120,7 +122,8 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 	
 	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
 		/* Musik Tags */
-		player_handle_tag_message(message);
+		//g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
+		player_handle_tag_message (message);
 	}
 	
 	if (GST_MESSAGE_SRC(message) != GST_OBJECT(pipeline)) {		
@@ -278,12 +281,16 @@ void player_handle_tag_message(GstMessage *message)
 	gchar *artist = NULL;
 	gchar *title = NULL;
 	gchar *uri = NULL;
+	gchar *discid = NULL;
 	
 	gst_message_parse_tag (message, &tag_list);
 	
 	gst_tag_list_get_string (tag_list, GST_TAG_ARTIST, &artist);
 	gst_tag_list_get_string (tag_list, GST_TAG_TITLE, &title);
 	gst_tag_list_get_string (tag_list, GST_TAG_LOCATION, &uri);
+	gst_tag_list_get_string (tag_list, GST_TAG_CDDA_MUSICBRAINZ_DISCID, &discid);
+
+	g_message ("DiscID: %s", discid);
 	
 	interface_set_songinfo (artist, title, uri);
 	

@@ -21,6 +21,7 @@
 
 #include <gtk/gtk.h>
 #include <gst/gst.h>
+#include <gst/tag/tag.h>
 
 gint player_test (void);
 
