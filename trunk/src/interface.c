@@ -284,21 +284,6 @@ void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar
 	lcd_set_uri (LCD (lcd), uri);
 }
 
-
-void interface_set_playing (gboolean isplaying)
-{
-	GtkWidget *button;
-
-	button = GTK_WIDGET(glade_xml_get_widget(glade, "button_play"));
-
-	if (isplaying) {
-		gtk_widget_set_state  (button, GTK_STATE_ACTIVE);
-	} else {
-		gtk_widget_set_state  (button, GTK_STATE_NORMAL);
-	}
-}
-
-
 // Räume alle Fenster auf
 void interface_clean_all()
 {
@@ -404,12 +389,35 @@ gboolean on_range_song_motion_notify_event(GtkWidget *widget, GdkEventMotion *ev
 	return TRUE;
 }
 
+// Setzt auf dem Play Button auf Play oder Pause
+void interface_set_playimage(const gchar *stock_id)
+{
+        GtkImage *playimage = NULL;
+        
+        playimage = GTK_IMAGE(glade_xml_get_widget(glade, "image_play"));
+        if (playimage == NULL) {
+                g_print("Fehler beim play Bild holen!\n");
+        } else {
+                gtk_image_set_from_stock(playimage, stock_id, GTK_ICON_SIZE_BUTTON);
+        }
+}
+
+
+void interface_set_playing(gboolean isplaying)
+{	
+        if (isplaying) {
+                interface_set_playimage("gtk-media-pause");
+        } else {
+                interface_set_playimage("gtk-media-play");
+        }
+}
 
 void on_trackplay_clicked (GtkButton *button, gpointer user_data)
 {	
 	if (player_get_playing()) {
 		g_debug ("Pause wurde gedrückt");
 		player_set_pause ();
+	//	interface_set_playing(FALSE);
 	} else {
 		g_debug ("Play wurde gedrückt");
 		player_set_play ();
