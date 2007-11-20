@@ -83,6 +83,8 @@ enum
 void radio_genre_setup_tree (void);
 void radio_station_setup_tree (void);
 
+void radio_genre_insert_initial (void);
+
 void radio_genre_insert (gchar *name);
 void radio_station_insert (const gchar *name, const gchar *bitrate, const gchar *id);
 
@@ -120,6 +122,9 @@ void radio_init(void)
 	// Die beiden Trees aufbereiten
 	radio_genre_setup_tree ();
 	radio_station_setup_tree ();
+	
+	// Genres einfügen
+	radio_genre_insert_initial ();
 	
 	// Combo holen
 	setup_url_combo ();
@@ -319,6 +324,54 @@ void radio_genre_insert (gchar *name)
 	gtk_list_store_append (genre_store, &iter);
 	gtk_list_store_set (genre_store, &iter,
 						COL_R_G_NAME, name, -1);		
+}
+
+
+// Beispiel Genres laden
+void radio_genre_insert_initial (void)
+{
+	radio_genre_insert ("50s");
+	radio_genre_insert ("60s");
+	radio_genre_insert ("70s");
+	radio_genre_insert ("80s");
+	radio_genre_insert ("90s");
+	radio_genre_insert ("Ambient");
+	radio_genre_insert ("Blues");
+	radio_genre_insert ("Breakbeat");
+	radio_genre_insert ("Chillout");
+	radio_genre_insert ("Charts");
+	radio_genre_insert ("Classic");
+	radio_genre_insert ("Club");
+	radio_genre_insert ("Comedy");
+	radio_genre_insert ("Country");
+	radio_genre_insert ("Dance");
+	radio_genre_insert ("Darkwave");
+	radio_genre_insert ("Disco");
+	radio_genre_insert ("EBM");
+	radio_genre_insert ("Electro");
+	radio_genre_insert ("Eurodance");
+	radio_genre_insert ("Funk");
+	radio_genre_insert ("Gothic");
+	radio_genre_insert ("Hardcore");
+	radio_genre_insert ("HipHop");
+	radio_genre_insert ("Hits");
+	radio_genre_insert ("House");
+	radio_genre_insert ("Industrial");
+	radio_genre_insert ("Jazz");
+	radio_genre_insert ("Lounge");
+	radio_genre_insert ("Metal");
+	radio_genre_insert ("Minimal");
+	radio_genre_insert ("News");
+	radio_genre_insert ("Oldies");
+	radio_genre_insert ("Pop");
+	radio_genre_insert ("Punk");
+	radio_genre_insert ("Reggae");
+	radio_genre_insert ("Rock");
+	radio_genre_insert ("Ska");
+	radio_genre_insert ("Soul");
+	radio_genre_insert ("Techno");
+	radio_genre_insert ("Top40");
+	radio_genre_insert ("Trance");
 }
 
 

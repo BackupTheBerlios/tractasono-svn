@@ -230,8 +230,6 @@ void on_button_ipod_clicked (GtkWidget *widget, gpointer user_data)
 void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 {
 	interface_show_module(module.radio);
-	g_debug("hole genres...");
-	radio_genre_parse();
 }
 
 
