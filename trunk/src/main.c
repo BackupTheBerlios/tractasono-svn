@@ -37,7 +37,7 @@ int main (int argc, char *argv[])
 	//database_init (argc, argv);
 	
 	// Drives initialisieren
-	drives_init ();
+	//drives_init ();
 	
 	// Player initialisieren
 	player_init (argc, argv);

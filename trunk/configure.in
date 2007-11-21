@@ -61,4 +61,21 @@ AC_OUTPUT([ Makefile \
 			doc/Makefile \
 			src/Makefile \
 			src/data/Makefile ])
-		   
+
+# Nette Ausgabe
+AC_MSG_RESULT([
+  ************************************************************
+ * tractasono $VERSION:  Automatic configuration OK.
+**
+**  Installation directories:
+**
+**     Program: ................. ${prefix}/bin
+**
+**************************************************************
+**
+**  Type 'make' to compile tractasono.
+** 
+**  Have fun with tractasono!
+ *
+  ************************************************************
+])  
