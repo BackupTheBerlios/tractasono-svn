@@ -56,9 +56,14 @@ PKG_CHECK_MODULES(TOTEMPLPARSE, totem-plparser)
 AC_SUBST(TOTEMPLPARSE_LIBS)
 AC_SUBST(TOTEMPLPARSE_CFLAGS)
 
+PKG_CHECK_MODULES(TAGLIB, taglib)
+AC_SUBST(TAGLIB_LIBS)
+AC_SUBST(TAGLIB_CFLAGS)
+
 # Makefile output
 AC_OUTPUT([ Makefile \
 			doc/Makefile \
+			spider/Makefile \
 			src/Makefile \
 			src/data/Makefile ])
 

@@ -1,4 +1,5 @@
 SUBDIRS =	doc \
+			spider \
 			src \
 			src/data
 
