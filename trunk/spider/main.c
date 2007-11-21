@@ -22,56 +22,124 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// Includes
 #include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <tag_c.h>
+#include <glib.h>
 
-#ifndef FALSE
-#define FALSE 0
-#endif
+// Defines
+#define RETURN_SUCCESS	0
+#define RETURN_ERROR	1
 
-int main(int argc, char *argv[])
+// Prototypen
+void recursive_dir (const gchar *path);
+void print_file_tags (const gchar *path);
+gchar *get_export_dir (void);
+void create_artist_dir (const gchar *artist);
+
+
+// Hauptprogramm
+int main (int argc, char *argv[])
 {
-  int i;
-  int seconds;
-  int minutes;
-  TagLib_File *file;
-  TagLib_Tag *tag;
-  const TagLib_AudioProperties *properties;
+	gchar *importdir;
+	
+	// Prüfe ob ein Pfad übergeben wurde
+	if (argc < 2) {
+		g_message ("Es wurde kein Import-Verzeichnis angegeben!");
+		return RETURN_ERROR;
+	}
 
-  taglib_set_strings_unicode(FALSE);
+	// Braucht es das?
+	taglib_set_strings_unicode(FALSE);
 
-  for(i = 1; i < argc; i++) {
-    printf("******************** \"%s\" ********************\n", argv[i]);
+	// Pfade bestimmen
+	importdir = g_strdup(argv[1]);
+	g_message ("import dir: %s", importdir);
+	g_message ("export dir: %s", get_export_dir ());
 
-    file = taglib_file_new(argv[i]);
+	// Starte Scan
+	recursive_dir (importdir);
 
-    if(file == NULL)
-      break;
+	return RETURN_SUCCESS;
+}
 
-    tag = taglib_file_tag(file);
-    properties = taglib_file_audioproperties(file);
+// Rekursiv durch ein Verzeichnis loopen
+void recursive_dir (const gchar *path)
+{
+	GDir *dir;
+	const gchar *dirname, *full_path;
 
-    printf("-- TAG --\n");
-    printf("title   - \"%s\"\n", taglib_tag_title(tag));
-    printf("artist  - \"%s\"\n", taglib_tag_artist(tag));
-    printf("album   - \"%s\"\n", taglib_tag_album(tag));
-    printf("year    - \"%i\"\n", taglib_tag_year(tag));
-    printf("comment - \"%s\"\n", taglib_tag_comment(tag));
-    printf("track   - \"%i\"\n", taglib_tag_track(tag));
-    printf("genre   - \"%s\"\n", taglib_tag_genre(tag));
+	if ((dir = g_dir_open (path, 0, NULL))) {
+		while ((dirname = g_dir_read_name (dir))) {
+			/* This should be useless, but we'd better keep it for security */
+			g_assert (strcmp (dirname, ".") != 0);
+			g_assert (strcmp (dirname, "..") != 0);
+			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0)
+				continue;
 
-    seconds = taglib_audioproperties_length(properties) % 60;
-    minutes = (taglib_audioproperties_length(properties) - seconds) / 60;
+			full_path = g_build_filename (path, dirname, NULL);
+			recursive_dir (full_path);
+			g_free ((gchar *) full_path);
+		}
+		g_dir_close (dir);
+	}
 
-    printf("-- AUDIO --\n");
-    printf("bitrate     - %i\n", taglib_audioproperties_bitrate(properties));
-    printf("sample rate - %i\n", taglib_audioproperties_samplerate(properties));
-    printf("channels    - %i\n", taglib_audioproperties_channels(properties));
-    printf("length      - %i:%02i\n", minutes, seconds);
+	if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
+		//g_debug ("File: %s", path);
+		print_file_tags (path);
+	}
 
-    taglib_tag_free_strings();
-    taglib_file_free(file);
-  }
+	return;
+}
 
-  return 0;
+
+// Tag Informationen ausgeben
+void print_file_tags (const gchar *path)
+{
+	TagLib_File *file;
+	TagLib_Tag *tag;
+	
+	file = taglib_file_new (path);
+	
+	if (file == NULL) {
+		return;
+	}
+	
+	tag = taglib_file_tag (file);
+
+	//g_message ("%s - %s", taglib_tag_artist(tag), taglib_tag_title(tag));
+	
+	create_artist_dir (taglib_tag_artist(tag));
+
+	/*printf ("-- TAG --\n");
+	printf ("title   - \"%s\"\n", taglib_tag_title(tag));
+	printf ("artist  - \"%s\"\n", taglib_tag_artist(tag));
+	printf ("album   - \"%s\"\n", taglib_tag_album(tag));
+	printf ("year    - \"%i\"\n", taglib_tag_year(tag));
+	printf ("comment - \"%s\"\n", taglib_tag_comment(tag));
+	printf ("track   - \"%i\"\n", taglib_tag_track(tag));
+	printf ("genre   - \"%s\"\n", taglib_tag_genre(tag));
+	*/
+
+	taglib_tag_free_strings ();
+	taglib_file_free (file);
+}
+
+gchar *get_export_dir (void)
+{
+	return g_strdup_printf ("%s/tractasono/music/", g_get_home_dir());
+}
+
+void create_artist_dir (const gchar *artist)
+{
+	gchar *artist_dir;
+	
+	artist_dir = g_strdup_printf ("%s%s", get_export_dir (), artist);
+	
+	if (!g_file_test(artist_dir, G_FILE_TEST_EXISTS)) {
+		g_mkdir (artist_dir, 493);
+		g_message ("Artist dir created: %s", artist_dir);
+	}
 }
