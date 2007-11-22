@@ -20,7 +20,6 @@
  */
 
 #include "player.h"
-#include "interface.h"
 
 
 // GStreamer Variablen
@@ -142,16 +141,20 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			GstState oldstate, newstate, pending;
 			
 			gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
-			//g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
+			g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
 
 			if (newstate == 4) {
 				g_message ("GStreamer is now playing!\n");	
-				interface_set_playing (TRUE);
+				interface_set_playing (player_get_state ());
 			}
 			
 			if ((newstate == 3) && (oldstate == 4)) {
 				g_message ("GStreamer is now paused!\n");
-				interface_set_playing (FALSE);
+				interface_set_playing (STATE_PLAY_NOTHING);
+			}
+			if ((newstate == 2) && (oldstate == 3)) {
+				g_message ("GStreamer is now ready(stoped)!\n");
+				interface_set_playing (STATE_PLAY_NOTHING);
 			}
 			
 		}
@@ -176,7 +179,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 }
 
 
-// Gibt den aktuellen Player Status zurück
+// Gibt den zurück ob der Player etwas Spielt
 gboolean player_get_playing(void)
 {
 	GstState state;
@@ -187,6 +190,25 @@ gboolean player_get_playing(void)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+
+// Gibt den aktuellen Player Status zurück (STATE_PLAY_NOTHING, STATE_PLAY_LOCAL, STATE_PLAY_STREAM)
+PlayerState player_get_state(void)
+{
+	GstState state;
+	
+	gst_element_get_state(GST_ELEMENT(pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
+	
+	if (state != GST_STATE_PLAYING) {
+		return STATE_PLAY_NOTHING;
+	} else {
+		if(player_get_duration () > 0){ // Wenn duration grösser 0 ist Musik == lokal
+			return STATE_PLAY_LOCAL;
+		} else {
+			return STATE_PLAY_STREAM;		
+		}          
+	}
 }
 
 // Play

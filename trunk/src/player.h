@@ -19,9 +19,21 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef PLAYER_H
+#define PLAYER_H
+
+
+typedef enum {
+  STATE_PLAY_LOCAL,
+  STATE_PLAY_STREAM,
+  STATE_PLAY_NOTHING
+} PlayerState;
+
+
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
+
 
 gint player_test (void);
 
@@ -36,9 +48,12 @@ void player_play_uri(const gchar *uri);
 gboolean player_seek_to_position(gint64 position);
 
 gboolean player_get_playing(void);
+PlayerState player_get_state(void);
 
 gint64 player_get_duration(void);
 gint64 player_get_position(void);
 
 gint64 ns_to_seconds(gint64 ns);
 gchar* ns_formatted(gint64 ns);
+
+#endif

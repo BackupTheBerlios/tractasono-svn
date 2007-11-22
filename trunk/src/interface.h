@@ -19,13 +19,15 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef INTERFACE_H
+#define INTERFACE_H
+
 // Globale Includes
 #include <gtk/gtk.h>
 #include <glade/glade.h>
-
+#include "player.h"
 
 // Strukturen
-
 typedef struct {
 	GtkWidget *music;
 	GtkWidget *radio;
@@ -61,8 +63,9 @@ void interface_show_previous_module ();
 void interface_set_songinfo (const gchar *artist, const gchar *title, const gchar *uri);
 void interface_set_song_position (gint64 position);
 void interface_set_song_duration (gint64 duration);
-void interface_set_playing (gboolean isplaying);
+void interface_set_playing (PlayerState state);
 
 GtkStyle* interface_create_style (GdkColor *fg, GdkColor *bg, gboolean do_grade);
 GdkColor* interface_create_color (int red, int green, int blue);
 
+#endif

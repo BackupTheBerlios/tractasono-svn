@@ -20,7 +20,6 @@
  */
 
 #include "interface.h"
-#include "player.h"
 #include "fullscreen.h"
 #include "disc.h"
 #include "radio.h"
@@ -403,24 +402,36 @@ void interface_set_playimage(const gchar *stock_id)
 }
 
 
-void interface_set_playing(gboolean isplaying)
+void interface_set_playing (PlayerState state)
 {	
-        if (isplaying) {
-                interface_set_playimage("gtk-media-pause");
-        } else {
-                interface_set_playimage("gtk-media-play");
-        }
+	switch(state) {
+		case STATE_PLAY_LOCAL:	
+			interface_set_playimage("gtk-media-pause");
+			break;
+		case STATE_PLAY_STREAM:
+			interface_set_playimage("gtk-media-stop");
+			break;
+		case STATE_PLAY_NOTHING:
+			interface_set_playimage("gtk-media-play");
+			break;
+	}
 }
 
 void on_trackplay_clicked (GtkButton *button, gpointer user_data)
 {	
-	if (player_get_playing()) {
-		g_debug ("Pause wurde gedrückt");
-		player_set_pause ();
-	//	interface_set_playing(FALSE);
-	} else {
-		g_debug ("Play wurde gedrückt");
-		player_set_play ();
+	switch(player_get_state()) {
+		case STATE_PLAY_LOCAL:	
+			g_debug ("Pause wurde gedrückt");
+			player_set_pause ();
+			break;
+		case STATE_PLAY_STREAM:
+			g_debug ("Stop wurde gedrückt");
+			player_set_stop ();
+			break;
+		case STATE_PLAY_NOTHING:
+			g_debug ("Play wurde gedrückt");
+			player_set_play ();
+			break;
 	}
 }
 

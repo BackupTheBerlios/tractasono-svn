@@ -26,9 +26,9 @@
 // Lokale Includes
 #include "settings.h"
 #include "drives.h"
-#include "player.h"
 #include "interface.h"
 #include "database.h"
+#include "player.h"
 
 // Programmeinstieg
 int main (int argc, char *argv[])
