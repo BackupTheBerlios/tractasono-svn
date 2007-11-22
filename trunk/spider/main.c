@@ -21,6 +21,7 @@
 
 
 // Includes
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -41,7 +42,8 @@ gchar *get_artist_dir (const gchar *artist);
 void create_artist_dir (const gchar *artist);
 gchar *get_album_dir (const gchar *album, const gchar *artist);
 void create_album_dir (const gchar *album, const gchar *artist);
-gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track);
+gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track, gchar *filename);
+gchar *get_file_extension (gchar *path);
 
 
 // Hauptprogramm
@@ -83,10 +85,18 @@ void recursive_dir (const gchar *path)
 			/* This should be useless, but we'd better keep it for security */
 			g_assert (strcmp (dirname, ".") != 0);
 			g_assert (strcmp (dirname, "..") != 0);
-			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0)
+			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0) {
 				continue;
+			}
 
+			// Ganzen Pfad zusammenstellen
 			full_path = g_build_filename (path, dirname, NULL);
+			
+			// Export Verzeichnis ebenfalls ignorieren
+			if (strcmp (g_strdup_printf("%s/", full_path), get_export_dir ()) == 0) {
+				continue;
+			}
+			
 			recursive_dir (full_path);
 			g_free ((gchar *) full_path);
 		}
@@ -107,6 +117,7 @@ void print_file_tags (const gchar *path)
 {
 	TagLib_File *file;
 	TagLib_Tag *tag;
+	gchar *filename;
 	gchar *artist;
 	gchar *title;
 	gchar *album;
@@ -124,28 +135,28 @@ void print_file_tags (const gchar *path)
 		return;
 	}
 	
+	// Dateiname holen
+	filename = g_path_get_basename (path);
+	
 	// Die einzelnen Tags holen
 	artist = taglib_tag_artist(tag);
 	title = taglib_tag_title(tag);
 	album = taglib_tag_album (tag);
 	track = taglib_tag_track (tag);
-	
-	// Tags gegebenenfalls überschreiben
-	if (artist == NULL || strcmp(artist, "") == 0) {
-		artist = g_strdup_printf ("Unknown Artist");
-	}
-	if (title == NULL || strcmp(title, "") == 0) {
-		title = g_strdup_printf ("Unknown Title");
-	}
-	if (album == NULL || strcmp(album, "") == 0) {
-		album = g_strdup_printf ("Unknown Album");
-	}
 
-	//g_message("Song: %s", get_song_path (album, artist, title, track));
+	//g_message("Song: %s", get_song_path (album, artist, title, track, filename));
 	
 	// Artist & Album Ordner erstellen
 	create_artist_dir (artist);
 	create_album_dir (album, artist);
+	
+	gchar *systemcall;
+	systemcall = g_strdup_printf ("cp \"%s\" \"%s\"", path, get_song_path (album, artist, title, track, filename));
+	if (!system (systemcall)) {
+		g_message ("Kopieren erfolgreich!");
+	} else {
+		g_message ("Kopieren fehlgeschlagen!");
+	}
 	
 	// Speicher wieder freigeben
 	taglib_tag_free_strings ();
@@ -180,7 +191,7 @@ gchar *get_export_dir (void)
 // Gibt den Verzeichnisname für einen Artist zurück
 gchar *get_artist_dir (const gchar *artist)
 {
-	return g_strdup_printf ("%s%s", get_export_dir (), artist);
+	return g_strdup_printf ("%s%s/", get_export_dir (), artist);
 }
 
 // Erstellt ein Verzeichnis für einen Artist
@@ -192,7 +203,7 @@ void create_artist_dir (const gchar *artist)
 // Gibt den Verzeichnisname für einen Album zurück
 gchar *get_album_dir (const gchar *album, const gchar *artist)
 {
-	return g_strdup_printf ("%s%s/%s", get_export_dir (), artist, album);
+	return g_strdup_printf ("%s%s/%s/", get_export_dir (), artist, album);
 }
 
 // Erstellt ein Verzeichnis für einen Album
@@ -203,7 +214,48 @@ void create_album_dir (const gchar *album, const gchar *artist)
 }
 
 // Gibt den Dateiname für einen Song zurück
-gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track)
+gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track, gchar *filename)
 {
-	return g_strdup_printf ("%s/%.2d %s - %s", get_album_dir (album, artist), track, artist, title);
+	GString *path;
+	gchar *extension;
+	
+	// Bestimme Dateiendung
+	extension = get_file_extension (filename);
+	
+	// Dateiname entsprechend den vorhanden Infos formatieren
+	if ( (artist == NULL || strcmp(artist, "") == 0) || (title == NULL || strcmp(title, "") == 0) || (album == NULL || strcmp(album, "") == 0) ) {
+		// Nur Original Dateiname verwenden
+		path = g_string_new (get_export_dir ());
+		g_string_append_printf (path, "Unknown/Unknown/%s", filename);
+	} else {
+		// Tags verwenden
+		path = g_string_new (get_album_dir (album, artist));
+		if (track > 0) {
+			// Mit Track -> "01 Judas Priest - Painkiller"
+			g_string_append_printf (path, "%.2d %s - %s%s", track, artist, title, extension);
+		} else {
+			// Ohne Track -> "Judas Priest - Painkiller"
+			g_string_append_printf (path, "%s - %s%s", artist, title, extension);
+		}
+	}
+	
+	return path->str;
+}
+
+// Gibt die Dateiendung zurück (oder Leerstring falls keine)
+gchar *get_file_extension (gchar *path)
+{
+	gchar *extension;
+	
+	if (g_str_has_suffix (path, ".flac")) {
+		extension = g_strdup_printf (".flac");
+	} else if (g_str_has_suffix (path, ".ogg")) {
+		extension = g_strdup_printf (".ogg");
+	} else if (g_str_has_suffix (path, ".mp3")) {
+		extension = g_strdup_printf (".mp3");
+	} else {
+		extension = g_strdup_printf ("");
+	}
+	
+	return extension;
 }
