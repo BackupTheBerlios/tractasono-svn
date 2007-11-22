@@ -22,7 +22,7 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-// Globale Includes
+// Includes
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 #include "player.h"

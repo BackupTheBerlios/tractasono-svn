@@ -19,6 +19,9 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef DISC_H
+#define DISC_H
+
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 
@@ -123,3 +126,4 @@ void duration_cell_data_cb (GtkTreeViewColumn *tree_column,
 
 void disc_set_disctitle (gchar *title);
 
+#endif

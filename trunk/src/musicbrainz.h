@@ -19,11 +19,17 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef MUSICBRAINZ_H
+#define MUSICBRAINZ_H
+
+// Includes
 #include <glib.h>
 #include <gtk/gtk.h>
 
+// Prototypen
 void musicbrainz_init (void);
 
 gboolean musicbrainz_lookup_disc (gchar *device, gchar *discid);
 gchar* musicbrainz_get_disctitle (void);
 
+#endif

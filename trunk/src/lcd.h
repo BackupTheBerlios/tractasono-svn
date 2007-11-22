@@ -19,10 +19,10 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef __LCD_H__
-#define __LCD_H__
+#ifndef LCD_H
+#define LCD_H
 
-
+// Includes
 #include <gtk/gtk.h>
 
 
@@ -72,6 +72,5 @@ void lcd_set_duration (Lcd *lcd, const gchar *duration);
 gchar* lcd_get_duration (Lcd *lcd);
 
 G_END_DECLS
-
 
 #endif

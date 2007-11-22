@@ -19,6 +19,8 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef DATABASE_H
+#define DATABASE_H
 
 #include <libgda/libgda.h>
 #include <libgnomedb/libgnomedb.h>
@@ -50,3 +52,4 @@ gchar* database_settings_get_string (gchar *group, gchar *key);
 void database_settings_set_integer (gchar *group, gchar *key, gint value);
 gint database_settings_get_integer (gchar *group, gchar *key);
 
+#endif

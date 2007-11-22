@@ -150,8 +150,8 @@ void ipod_track (gpointer data, gpointer user_data)
 
 	GtkTreeIter iter;
 	gchar *nr;
-
-	sprintf(nr,"%d", track->track_nr);
+	
+	nr = g_strdup_printf ("%d", track->track_nr);
 	
 	gtk_tree_store_append (trees.track_store, &iter, NULL);
 	gtk_tree_store_set (trees.track_store, &iter,
@@ -170,7 +170,6 @@ void ipod_fill_combo (void)
 	GList *devices;
 	gint i, n;
 	gchar *mount_path;
-	gchar *label;
 
 	// iPod Liste holen
 	combo = glade_xml_get_widget (glade, "combobox_ipod_list");
@@ -217,17 +216,9 @@ void ipod_fill_combo (void)
 			
 			anz_tracks = itdb_tracks_number (itdb);
 			g_message ("Anzahl Tracks: %d", anz_tracks);
-			
-			Itdb_Track *track = NULL;
 
 			g_list_foreach (itdb->tracks, ipod_track, itdb);
-
 		}
-
-
-
-
-
 	}
 
 	// Ersten iPod slektieren

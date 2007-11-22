@@ -19,10 +19,13 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef RADIO_H
+#define RADIO_H
+
+// Includes
 #include <gtk/gtk.h>
 
-
+// Prototypen
 void radio_init(void);
 
-
-
+#endif

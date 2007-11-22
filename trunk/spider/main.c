@@ -32,11 +32,13 @@
 // Defines
 #define RETURN_SUCCESS	0
 #define RETURN_ERROR	1
+#define UNKNOWN			"Unknown"
+#define BUFFER_SIZE		4096
 
 // Prototypen
 void recursive_dir (const gchar *path);
-void print_file_tags (const gchar *path);
-void create_dir (const gchar *path, gboolean parents);
+void export_file (const gchar *import_path);
+void create_dir (const gchar *path, gboolean with_parents);
 gchar *get_export_dir (void);
 gchar *get_artist_dir (const gchar *artist);
 void create_artist_dir (const gchar *artist);
@@ -44,6 +46,7 @@ gchar *get_album_dir (const gchar *album, const gchar *artist);
 void create_album_dir (const gchar *album, const gchar *artist);
 gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track, gchar *filename);
 gchar *get_file_extension (gchar *path);
+gboolean copy_file (const gchar *source, const gchar *target);
 
 
 // Hauptprogramm
@@ -62,8 +65,8 @@ int main (int argc, char *argv[])
 
 	// Pfade bestimmen
 	importdir = g_strdup(argv[1]);
-	g_message ("import dir: %s", importdir);
-	g_message ("export dir: %s", get_export_dir ());
+	//g_message ("import dir: %s", importdir);
+	//g_message ("export dir: %s", get_export_dir ());
 	
 	// Export Verzeichnis anlegen
 	create_dir (get_export_dir (), TRUE);
@@ -104,19 +107,19 @@ void recursive_dir (const gchar *path)
 	}
 
 	if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
-		//g_debug ("File: %s", path);
-		print_file_tags (path);
+		export_file (path);
 	}
 
 	return;
 }
 
 
-// Tag Informationen ausgeben
-void print_file_tags (const gchar *path)
+// Hier geht die Post ab
+void export_file (const gchar *import_path)
 {
 	TagLib_File *file;
 	TagLib_Tag *tag;
+	gchar *export_path;
 	gchar *filename;
 	gchar *artist;
 	gchar *title;
@@ -124,7 +127,7 @@ void print_file_tags (const gchar *path)
 	gint track;
 	
 	// Prüfen ob die Datei gültig ist
-	file = taglib_file_new (path);
+	file = taglib_file_new (import_path);
 	if (file == NULL) {
 		return;
 	}
@@ -136,26 +139,35 @@ void print_file_tags (const gchar *path)
 	}
 	
 	// Dateiname holen
-	filename = g_path_get_basename (path);
+	filename = g_path_get_basename (import_path);
 	
 	// Die einzelnen Tags holen
 	artist = taglib_tag_artist(tag);
 	title = taglib_tag_title(tag);
 	album = taglib_tag_album (tag);
-	track = taglib_tag_track (tag);
-
-	//g_message("Song: %s", get_song_path (album, artist, title, track, filename));
+	track = taglib_tag_track (tag); // Gibt Track-Nr oder 0 zurück
+	
+	// Falls keine Tags vorhanden sind -> Unknown
+	if (artist == NULL || strcmp(artist, "") == 0) {
+		artist = g_strdup_printf (UNKNOWN);
+	}
+	if (title == NULL || strcmp(title, "") == 0) {
+		title = g_strdup_printf (UNKNOWN);
+	}
+	if (album == NULL || strcmp(album, "") == 0) {
+		album = g_strdup_printf (UNKNOWN);
+	}
 	
 	// Artist & Album Ordner erstellen
 	create_artist_dir (artist);
 	create_album_dir (album, artist);
 	
-	gchar *systemcall;
-	systemcall = g_strdup_printf ("cp \"%s\" \"%s\"", path, get_song_path (album, artist, title, track, filename));
-	if (!system (systemcall)) {
-		g_message ("Kopieren erfolgreich!");
-	} else {
-		g_message ("Kopieren fehlgeschlagen!");
+	// Export Pfad bestimmen
+	export_path = get_song_path (album, artist, title, track, filename);
+	
+	// Datei kopieren
+	if (!copy_file (import_path, export_path)) {
+		g_warning ("Dateikopie fehlgeschlagen! (%s)", filename);
 	}
 	
 	// Speicher wieder freigeben
@@ -165,19 +177,17 @@ void print_file_tags (const gchar *path)
 
 
 // Vezeichnis mit oder ohne Parent-Vereichnissen erstellen
-void create_dir (const gchar *path, gboolean parents)
+void create_dir (const gchar *path, gboolean with_parents)
 {
 	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
 		gint ret;
-		if (parents) {
+		if (with_parents) {
 			ret = g_mkdir_with_parents (path, 493);
 		} else {
 			ret = g_mkdir (path, 493);
 		}
-		if (ret == 0) {
-			g_message ("Directory created: %s", path);	
-		} else {
-			g_message ("Cannot create directory: %s", path);
+		if (ret != 0) {
+			g_warning ("Cannot create directory: %s", path);
 		}
 	}
 }
@@ -222,14 +232,15 @@ gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *titl
 	// Bestimme Dateiendung
 	extension = get_file_extension (filename);
 	
+	// Hole Album Pfad
+	path = g_string_new (get_album_dir (album, artist));
+	
 	// Dateiname entsprechend den vorhanden Infos formatieren
-	if ( (artist == NULL || strcmp(artist, "") == 0) || (title == NULL || strcmp(title, "") == 0) || (album == NULL || strcmp(album, "") == 0) ) {
+	if (strcmp(artist, UNKNOWN) == 0 || strcmp(title, UNKNOWN) == 0 || strcmp(album, UNKNOWN) == 0) {
 		// Nur Original Dateiname verwenden
-		path = g_string_new (get_export_dir ());
-		g_string_append_printf (path, "Unknown/Unknown/%s", filename);
+		g_string_append_printf (path, "%s", filename);
 	} else {
 		// Tags verwenden
-		path = g_string_new (get_album_dir (album, artist));
 		if (track > 0) {
 			// Mit Track -> "01 Judas Priest - Painkiller"
 			g_string_append_printf (path, "%.2d %s - %s%s", track, artist, title, extension);
@@ -254,8 +265,39 @@ gchar *get_file_extension (gchar *path)
 	} else if (g_str_has_suffix (path, ".mp3")) {
 		extension = g_strdup_printf (".mp3");
 	} else {
-		extension = g_strdup_printf ("");
+		extension = "";
 	}
 	
 	return extension;
+}
+
+gboolean copy_file (const gchar *source, const gchar *target)
+{
+	FILE *fp_in;
+	FILE *fp_out;
+	gchar buffer[BUFFER_SIZE];
+
+	// Neue Datei zum befüllen anlegen
+	fp_out = fopen (target, "w");
+	if (fp_out == NULL) {
+		return FALSE;
+	}
+	
+	// Datei zum Lesen öffnen
+	fp_in = fopen (source, "r");
+	if (fp_in == NULL) {
+		return FALSE;
+	}
+	
+	// Daten kopieren
+	while (!feof(fp_in)) {
+		fread (buffer, sizeof (buffer), 1, fp_in);
+		fwrite (buffer, sizeof (buffer), 1, fp_out);
+	}
+	
+	// Dateien schliessen
+	fclose (fp_in);
+	fclose (fp_out);
+	
+	return TRUE;
 }

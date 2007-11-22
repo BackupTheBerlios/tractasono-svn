@@ -39,7 +39,7 @@ gboolean musicbrainz_lookup_disc (gchar *device, gchar *discid)
 {
 	musicbrainz_t o;
 	char error[256], data[256], temp[256], *args[2];
-	int ret, numTracks, trackNum, i, isMultipleArtist = 0, numDates, albumNum;
+	int ret, numTracks, albumNum;
 
 	// Create the musicbrainz object, which will be needed for subsequent calls
 	o = mb_New();

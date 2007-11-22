@@ -19,6 +19,10 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
+// Prototypen
 void settings_init ();
 
+#endif

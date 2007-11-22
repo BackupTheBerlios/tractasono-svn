@@ -19,7 +19,13 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
+
+// Includes
 #include <gtk/gtk.h>
 
-
+// Prototypen
 void keyboard_show(gboolean show);
+
+#endif

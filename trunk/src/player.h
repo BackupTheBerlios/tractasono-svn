@@ -29,12 +29,12 @@ typedef enum {
   STATE_PLAY_NOTHING
 } PlayerState;
 
-
+// Includes
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
 
-
+// Prototypen
 gint player_test (void);
 
 void player_init(int argc, char *argv[]);

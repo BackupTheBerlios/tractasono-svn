@@ -32,7 +32,10 @@
 
 // Programmeinstieg
 int main (int argc, char *argv[])
-{	
+{
+	// Startmeldung
+	g_message ("<== "PACKAGE" "VERSION" starting ==>");
+	
 	// Databenbank initialisieren
 	//database_init (argc, argv);
 	
@@ -42,14 +45,14 @@ int main (int argc, char *argv[])
 	// Player initialisieren
 	player_init (argc, argv);
 	
-	// Testfunktionen
-	//player_test ();
-	
 	// Interface initialisieren
 	interface_init (argc, argv);
 
 	// Programmloop starten
 	gtk_main ();
+
+	// Shutdown Meldung
+	g_message ("<== "PACKAGE" shutting down ==>");
 
 	return 0;
 }

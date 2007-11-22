@@ -1,15 +1,12 @@
-INCLUDES = $(GTK_CFLAGS) \
-		   $(TAGLIB_CFLAGS)
+INCLUDES = -I/usr/include/glib-2.0 \
+		   -I/usr/lib/glib-2.0/include \
+		   -I/usr/include/taglib
 
-AM_CFLAGS = -Wall -g -ltag_c
-
-AM_CPPFLAGS = -DINSTALL_PREFIX=\"$(prefix)\"
+AM_CFLAGS = -Wall
 
 bin_PROGRAMS = spider
 
 spider_SOURCES = main.c
 
-spider_LDFLAGS = -export-dynamic
-
-spider_LDADD = $(GTK_LIBS) \
-			   $(TAGLIB_LIBS)
+spider_LDADD = -lglib-2.0 \
+			   -ltag_c

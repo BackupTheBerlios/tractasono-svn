@@ -19,6 +19,10 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef MUSIC_H
+#define MUSIC_H
 
+// Prototypen
 void music_init (void);
 
+#endif
