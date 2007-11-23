@@ -403,16 +403,22 @@ void interface_set_playimage(const gchar *stock_id)
 
 
 void interface_set_playing (PlayerState state)
-{	
+{
+	GtkWidget *progress;
+	progress = glade_xml_get_widget(glade, "alignment_progress");
+	
 	switch(state) {
 		case STATE_PLAY_LOCAL:	
 			interface_set_playimage("gtk-media-pause");
+			gtk_widget_show (progress);
 			break;
 		case STATE_PLAY_STREAM:
 			interface_set_playimage("gtk-media-stop");
+			gtk_widget_hide (progress);
 			break;
 		case STATE_PLAY_NOTHING:
 			interface_set_playimage("gtk-media-play");
+			//gtk_widget_show (progress);
 			break;
 	}
 }

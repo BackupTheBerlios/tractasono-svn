@@ -148,16 +148,14 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 				g_message ("GStreamer is now playing!\n");	
 				interface_set_playing (player_get_state ());
 			}
-			
-			if ((newstate == 3) && (oldstate == 4)) {
-				g_message ("GStreamer is now paused!\n");
-				interface_set_playing (STATE_PLAY_NOTHING);
-			}
 			if ((newstate == 2) && (oldstate == 3)) {
 				g_message ("GStreamer is now ready(stoped)!\n");
 				interface_set_playing (STATE_PLAY_NOTHING);
 			}
-			
+			if ((newstate == 3) && (oldstate == 4)) {
+				g_message ("GStreamer is now paused!\n");
+				interface_set_playing (STATE_PLAY_NOTHING);
+			}
 		}
 		case GST_MESSAGE_EOS: {
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
