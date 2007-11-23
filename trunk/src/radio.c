@@ -335,6 +335,7 @@ void radio_genre_insert_initial (void)
 	radio_genre_insert ("70s");
 	radio_genre_insert ("80s");
 	radio_genre_insert ("90s");
+	radio_genre_insert ("Adult");
 	radio_genre_insert ("Ambient");
 	radio_genre_insert ("Blues");
 	radio_genre_insert ("Breakbeat");
