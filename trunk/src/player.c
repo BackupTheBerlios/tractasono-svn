@@ -72,6 +72,16 @@ void player_init (int argc, char *argv[])
 	// Pipeline erstellen
 	pipeline = gst_element_factory_make ("playbin", "tracta-player");
 	
+	// Wir wollen die GNOME Einstellungen für die Ausgabe verwenden!
+	// Ausgabegerät kann unter System -> Einstellungen -> Audio
+	// ausgewählt werden (Profil "Musik und Filme")
+	GstElement *sink;
+	sink = gst_element_factory_make ("gconfaudiosink", "sink");
+	if (sink) {
+    	g_object_set (G_OBJECT (sink), "profile", 1, NULL);
+    	g_object_set (G_OBJECT (pipeline), "audio-sink", sink, NULL);
+    }
+	
 	// Bus Callback anbinden
 	GstBus *bus;
 	bus = gst_pipeline_get_bus (GST_PIPELINE (pipeline));
