@@ -343,6 +343,8 @@ void lcd_set_title (Lcd *lcd, const gchar *title)
 		priv->title = strdup (title);
 		// LCD updaten
 		lcd_redraw_canvas (lcd);
+	} else {
+		priv->title = NULL;
 	}
 
 }
@@ -357,6 +359,8 @@ void lcd_set_artist (Lcd *lcd, const gchar *artist)
 		priv->artist = strdup (artist);
 		// LCD updaten
 		lcd_redraw_canvas (lcd);
+	} else {
+		priv->artist = NULL;
 	}
 }
 
@@ -370,6 +374,8 @@ void lcd_set_album (Lcd *lcd, const gchar *album)
 		priv->album = strdup (album);
 		// LCD updaten
 		lcd_redraw_canvas (lcd);
+	} else {
+		priv->album = NULL;
 	}
 }
 
@@ -383,6 +389,8 @@ void lcd_set_uri (Lcd *lcd, const gchar *uri)
 		priv->uri = strdup (uri);
 		// LCD updaten
 		lcd_redraw_canvas (lcd);
+	} else {
+		priv->uri = NULL;
 	}
 }
 

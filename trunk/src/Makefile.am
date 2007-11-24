@@ -8,7 +8,8 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(LIBGNOMEDB_CFLAGS) \
 		   $(LIBGPOD_CFLAGS) \
 		   $(LIBIPODDEVICE_CFLAGS) \
-		   $(TOTEMPLPARSE_CFLAGS)
+		   $(TOTEMPLPARSE_CFLAGS) \
+		   -I/usr/include/taglib
 
 AM_CFLAGS = -Wall -g
 
@@ -58,5 +59,6 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(LIBGNOMEDB_LIBS) \
 				   $(LIBGPOD_LIBS) \
 				   $(LIBIPODDEVICE_LIBS) \
-				   $(TOTEMPLPARSE_LIBS)
+				   $(TOTEMPLPARSE_LIBS) \
+				   -ltag_c
 

@@ -499,9 +499,14 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	urlinput = glade_xml_get_widget(glade, "radio_url_combo_entry");
 	url = gtk_entry_get_text(GTK_ENTRY(urlinput));
 
+	lcd_set_title (LCD(lcd), NULL);
+	lcd_set_artist (LCD(lcd), NULL);
+	lcd_set_album (LCD(lcd), NULL);
+	lcd_set_uri (LCD(lcd), NULL);
+
 	// Stream abspielen
 	player_play_uri(url);
-
+	
 	lcd_set_title (LCD(lcd), name);
 }
 

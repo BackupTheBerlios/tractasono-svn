@@ -91,7 +91,7 @@ void interface_init (int argc, char *argv[])
 	}
 
 	// Die einzelnen Windows laden und referenzieren
-	module.music = g_object_ref(glade_xml_get_widget(glade, "notebook_music"));
+	module.music = g_object_ref(glade_xml_get_widget(glade, "modul_music"));
 	module.disc = g_object_ref(glade_xml_get_widget(glade, "vbox_disc"));
 	module.ipod = g_object_ref(glade_xml_get_widget(glade, "ipodmodul"));
 	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
@@ -278,9 +278,15 @@ void interface_set_song_position(gint64 position)
 void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
 {
 	g_debug ("artist: %s, title: %s, uri: %s", artist, title, uri);
-	lcd_set_title (LCD (lcd), title);
-	lcd_set_artist (LCD (lcd), artist);
-	lcd_set_uri (LCD (lcd), uri);
+	if (title) {
+		lcd_set_title (LCD (lcd), title);
+	}
+	if (artist) {
+		lcd_set_artist (LCD (lcd), artist);
+	}
+	if (uri) {
+		lcd_set_uri (LCD (lcd), uri);
+	}
 }
 
 // Räume alle Fenster auf
