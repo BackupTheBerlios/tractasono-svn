@@ -96,7 +96,7 @@ void interface_init (int argc, char *argv[])
 	module.ipod = g_object_ref(glade_xml_get_widget(glade, "ipodmodul"));
 	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
 	module.radio = g_object_ref(glade_xml_get_widget(glade, "radiomodul"));
-	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "vbox_fullscreen"));
+	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "eventbox_fullscreen"));
 
 	// Keyboard laden
 	GtkWidget *vbox_placeholder_keyboard = NULL;
@@ -188,7 +188,16 @@ gboolean on_main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointe
 // Zeige das vorherige Widget im Platzhalter an (für Fullscreen Modus)
 void interface_show_previous_module (void)
 {
-	interface_show_module(module.previous);
+	// Fullscreen Modus verlassen
+	GtkWidget *tractasono;
+	
+	tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
+	if (tractasono == NULL) {
+		g_warning ("Fehler: Konnte fullscreen widgets nicht holen!");
+	}
+	
+	gtk_widget_hide (module.fullscreen);
+	gtk_widget_show (tractasono);
 }
 
 
@@ -216,7 +225,28 @@ void on_button_ripping_clicked(GtkWidget *widget, gpointer user_data)
 // Event-Handler für den Vollbild Button
 void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 {
-	interface_show_module(module.fullscreen);
+	// Spezialbehandlung für den Fullscreen Modus
+	
+	GtkWidget *vbox_main;
+	GtkWidget *tractasono;
+	
+	vbox_main = glade_xml_get_widget(glade, "vbox_main");
+	tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
+	if (vbox_main == NULL || tractasono == NULL) {
+		g_warning ("Fehler: Konnte fullscreen widgets nicht holen!");
+	}
+	
+	gtk_widget_hide (tractasono);
+	
+	gtk_widget_ref(module.fullscreen);
+	if (module.fullscreen->parent) {
+		gtk_container_remove(GTK_CONTAINER(module.fullscreen->parent), module.fullscreen);
+		gtk_container_add(GTK_CONTAINER(vbox_main), module.fullscreen);
+	}
+	
+
+	gtk_widget_show(module.fullscreen);
+	
 }
 
 // Event-Handler für den iPod Button

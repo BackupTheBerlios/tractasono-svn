@@ -42,3 +42,31 @@ void on_fullscreen_button_close_clicked (GtkWidget *widget, gpointer user_data)
 	interface_show_previous_module ();
 }
 
+
+void on_vbox_fullscreen_button_press_event (GtkWidget      *widget,
+                                            GdkEventButton *event,
+                                            gpointer        user_data)
+{
+	g_message ("Test 2");
+	
+}                                            
+
+void on_eventbox_fullscreen_button_press_event (GtkWidget      *widget,
+                                            GdkEventButton *event,
+                                            gpointer        user_data)
+{
+	g_message ("Vollbild Modus verlassen");
+	
+	interface_show_previous_module ();
+	
+}   
+
+
+
+void on_eventbox1_button_press_event (GtkWidget      *widget,
+                                            GdkEventButton *event,
+                                            gpointer        user_data)
+{
+	g_message ("Kleine Eventbox");
+	
+}  
