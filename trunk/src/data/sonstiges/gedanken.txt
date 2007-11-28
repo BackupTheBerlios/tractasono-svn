@@ -4,3 +4,9 @@ GStreamer Tests
 Einzelner Track rippen:
 
 gst-launch-0.10 cdparanoiasrc device=/dev/cdrom mode=0 track=11 read-speed=4 ! flacenc ! filesink location=track11.flac
+
+===
+
+Einzelne Flac Datei in MP3 konvertieren:
+
+gst-launch-0.10 filesrc location=axxis.flac ! flacdec ! audioconvert ! lame preset=1001 ! id3v2mux ! filesink location=axxis.mp3
