@@ -52,13 +52,15 @@ int drives_init()
 {
 	g_message ("Drives init");
 	
+	// GnomeVFS initialisieren
+	g_message ("\tGnomeVFS init");
 	if (!gnome_vfs_init ()) {
 		g_warning ("Could not initialize GnomeVFS!");
 		return DRIVES_FAIL;
 	}
 
 	// Musicbrainz initialisieren
-	void musicbrainz_init ();
+	//void musicbrainz_init ();
 
 	GnomeVFSVolumeMonitor* monitor = NULL;
 	monitor = gnome_vfs_get_volume_monitor();

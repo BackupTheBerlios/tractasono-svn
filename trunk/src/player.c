@@ -61,10 +61,10 @@ gint player_test (void)
 void player_init (int argc, char *argv[])
 {	
 	g_message ("Player init");
-	gst_init (&argc, &argv);
 	
-	// Version anzeigen
-	//g_debug (gst_version_string ());
+	// GStreamer initialisieren
+	g_message ("\tGStreamer init");
+	gst_init (&argc, &argv);
 	
 	// GStreamer Zeitformat einstellen
 	format = GST_FORMAT_TIME;

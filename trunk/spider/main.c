@@ -28,12 +28,16 @@
 #include <tag_c.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <libgnomevfs/gnome-vfs.h>
+#include <libgnomevfs/gnome-vfs-utils.h>
 
 // Defines
 #define RETURN_SUCCESS	0
 #define RETURN_ERROR	1
 #define UNKNOWN			"Unknown"
-#define BUFFER_SIZE		4096
+#define BUFFER_SIZE		9000
+
+#define DATEIGROESSE 10000000L
 
 // Prototypen
 void recursive_dir (const gchar *path);
@@ -44,14 +48,37 @@ gchar *get_artist_dir (const gchar *artist);
 void create_artist_dir (const gchar *artist);
 gchar *get_album_dir (const gchar *album, const gchar *artist);
 void create_album_dir (const gchar *album, const gchar *artist);
-gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track, gchar *filename);
+gchar *get_song_path (TagLib_Tag *tag, gchar *extension);
 gchar *get_file_extension (gchar *path);
 gboolean copy_file (const gchar *source, const gchar *target);
+gboolean check_tags (TagLib_Tag *tag);
+gboolean exist_target (const gchar *source, const gchar *target);
+
+// Test Funktionen
+void erzeuge_datei(void);
+gboolean copy_file_getc (const gchar *source, const gchar *target);
 
 
 // Hauptprogramm
 int main (int argc, char *argv[])
-{
+{/*
+	// Test
+	
+	// GnomeVFS initialisieren
+	gnome_vfs_init ();
+	
+	//erzeuge_datei ();
+	
+	copy_file ("/home/patrik/ctest.txt", "/home/patrik/ctest_normal.txt");
+	copy_file_getc ("/home/patrik/ctest.txt", "/home/patrik/ctest_getc.txt");
+	
+	
+	
+	return RETURN_SUCCESS;
+	
+	*/
+	
+	
 	gchar *importdir;
 	
 	// Prüfe ob ein Pfad übergeben wurde
@@ -59,6 +86,9 @@ int main (int argc, char *argv[])
 		g_message ("Es wurde kein Import-Verzeichnis angegeben!");
 		return RETURN_ERROR;
 	}
+
+	// GnomeVFS initialisieren
+	gnome_vfs_init ();
 
 	// Braucht es das?
 	taglib_set_strings_unicode(TRUE);
@@ -122,9 +152,7 @@ void export_file (const gchar *import_path)
 	gchar *export_path;
 	gchar *filename;
 	gchar *artist;
-	gchar *title;
 	gchar *album;
-	gint track;
 	
 	// Prüfen ob die Datei gültig ist
 	file = taglib_file_new (import_path);
@@ -132,9 +160,17 @@ void export_file (const gchar *import_path)
 		return;
 	}
 	
+	g_debug ("sizeof(file): %d", sizeof(&tag));
+	
 	// Prüfen ob wir Tags haben
 	tag = taglib_file_tag (file);
 	if (tag == NULL) {
+		return;
+	}
+	
+	// Falls Tags unvollständig sind -> Nicht importieren
+	if (!check_tags (tag)) {
+		g_warning ("Tags unvollständig! -> %s", import_path);
 		return;
 	}
 	
@@ -143,27 +179,14 @@ void export_file (const gchar *import_path)
 	
 	// Die einzelnen Tags holen
 	artist = taglib_tag_artist(tag);
-	title = taglib_tag_title(tag);
 	album = taglib_tag_album (tag);
-	track = taglib_tag_track (tag); // Gibt Track-Nr oder 0 zurück
-	
-	// Falls keine Tags vorhanden sind -> Unknown
-	if (artist == NULL || strcmp(artist, "") == 0) {
-		artist = g_strdup_printf (UNKNOWN);
-	}
-	if (title == NULL || strcmp(title, "") == 0) {
-		title = g_strdup_printf (UNKNOWN);
-	}
-	if (album == NULL || strcmp(album, "") == 0) {
-		album = g_strdup_printf (UNKNOWN);
-	}
 	
 	// Artist & Album Ordner erstellen
 	create_artist_dir (artist);
 	create_album_dir (album, artist);
 	
 	// Export Pfad bestimmen
-	export_path = get_song_path (album, artist, title, track, filename);
+	export_path = get_song_path (tag, get_file_extension (filename));
 	
 	// Datei kopieren
 	if (!copy_file (import_path, export_path)) {
@@ -187,7 +210,7 @@ void create_dir (const gchar *path, gboolean with_parents)
 			ret = g_mkdir (path, 493);
 		}
 		if (ret != 0) {
-			g_warning ("Cannot create directory: %s", path);
+			g_warning ("Konnte Verzeichnis nicht erstellen -> %s", path);
 		}
 	}
 }
@@ -213,7 +236,7 @@ void create_artist_dir (const gchar *artist)
 // Gibt den Verzeichnisname für einen Album zurück
 gchar *get_album_dir (const gchar *album, const gchar *artist)
 {
-	return g_strdup_printf ("%s%s/%s/", get_export_dir (), artist, album);
+	return g_strdup_printf ("%s%s/", get_artist_dir (artist), album);
 }
 
 // Erstellt ein Verzeichnis für einen Album
@@ -224,32 +247,31 @@ void create_album_dir (const gchar *album, const gchar *artist)
 }
 
 // Gibt den Dateiname für einen Song zurück
-gchar *get_song_path (const gchar *album, const gchar *artist, const gchar *title, gint track, gchar *filename)
+gchar *get_song_path (TagLib_Tag *tag, gchar *extension)
 {
 	GString *path;
-	gchar *extension;
+	gchar *artist, *title, *album;
+	gint track;
 	
-	// Bestimme Dateiendung
-	extension = get_file_extension (filename);
+	// Tags holen
+	artist = taglib_tag_artist (tag);
+	title = taglib_tag_title (tag);
+	album = taglib_tag_album (tag);
+	track = taglib_tag_track (tag); // Gibt Track-Nr oder 0 zurück
 	
-	// Hole Album Pfad
+	// Starte mit Album Pfad
 	path = g_string_new (get_album_dir (album, artist));
 	
 	// Dateiname entsprechend den vorhanden Infos formatieren
-	if (strcmp(artist, UNKNOWN) == 0 || strcmp(title, UNKNOWN) == 0 || strcmp(album, UNKNOWN) == 0) {
-		// Nur Original Dateiname verwenden
-		g_string_append_printf (path, "%s", filename);
+	if (track > 0) {
+		// Mit Track -> "01 Judas Priest - Painkiller"
+		g_string_append_printf (path, "%.2d %s - %s%s", track, artist, title, extension);
 	} else {
-		// Tags verwenden
-		if (track > 0) {
-			// Mit Track -> "01 Judas Priest - Painkiller"
-			g_string_append_printf (path, "%.2d %s - %s%s", track, artist, title, extension);
-		} else {
-			// Ohne Track -> "Judas Priest - Painkiller"
-			g_string_append_printf (path, "%s - %s%s", artist, title, extension);
-		}
+		// Ohne Track -> "Judas Priest - Painkiller"
+		g_string_append_printf (path, "%s - %s%s", artist, title, extension);
 	}
 	
+	// Gesamten Dateinamen zurückgeben
 	return path->str;
 }
 
@@ -276,6 +298,14 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	FILE *fp_in;
 	FILE *fp_out;
 	gchar buffer[BUFFER_SIZE];
+	
+	// Prüfen, ob die Datei bereits vorhanden ist
+	if (exist_target (source, target)) {
+		g_message ("Existiert bereits -> %s", source);
+		return TRUE;
+	} else {
+		g_message ("Wird importiert -> %s", source);
+	}
 
 	// Neue Datei zum befüllen anlegen
 	fp_out = fopen (target, "w");
@@ -290,14 +320,161 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	}
 	
 	// Daten kopieren
+	g_debug ("sizeof(char): %d", sizeof(char));
+	
+	int anz;
 	while (!feof(fp_in)) {
-		fread (buffer, sizeof (buffer), 1, fp_in);
-		fwrite (buffer, sizeof (buffer), 1, fp_out);
+		anz = fread (buffer, sizeof(char), sizeof(buffer), fp_in);
+		
+		//g_debug ("Anz: %d", anz);
+		
+		fwrite (buffer, sizeof(char), anz, fp_out);
 	}
+	
+	// Ansatz mit getc
+	/*int c;
+	while ((c = getc(fp_in)) != EOF) {
+		putc(c, fp_out);
+	}*/
+	
 	
 	// Dateien schliessen
 	fclose (fp_in);
 	fclose (fp_out);
 	
+	
+	
+	/*GnomeVFSHandle *input;
+	GnomeVFSHandle *output;
+	GnomeVFSFileSize bytes_read;
+	gchar buffer[BUFFER_SIZE];
+	
+	if (gnome_vfs_open (&input, source, GNOME_VFS_OPEN_READ) != GNOME_VFS_OK) {
+		g_warning ("Konnte Datei nicht zum Lesen öffnen!");
+	}
+	
+	if (gnome_vfs_open (&output, source, GNOME_VFS_OPEN_WRITE && GNOME_VFS_OPEN_TRUNCATE) != GNOME_VFS_OK) {
+		g_warning ("Konnte Datei nicht zum Schreiben öffnen!");
+	}
+	
+	if (gnome_vfs_read (input, buffer, sizeof(buffer), &bytes_read) != GNOME_VFS_OK) {
+		g_debug ("Lesefehler!");	
+	}
+	*/
+	
+	
+	
+	
+	
 	return TRUE;
 }
+
+
+gboolean copy_file_getc (const gchar *source, const gchar *target)
+{
+	FILE *fp_in;
+	FILE *fp_out;
+	gchar buffer[BUFFER_SIZE];
+	
+	// Prüfen, ob die Datei bereits vorhanden ist
+	if (exist_target (source, target)) {
+		g_message ("Existiert bereits -> %s", source);
+		return TRUE;
+	} else {
+		g_message ("Wird importiert -> %s", source);
+	}
+
+	// Neue Datei zum befüllen anlegen
+	fp_out = fopen (target, "w");
+	if (fp_out == NULL) {
+		return FALSE;
+	}
+	
+	// Datei zum Lesen öffnen
+	fp_in = fopen (source, "r");
+	if (fp_in == NULL) {
+		return FALSE;
+	}
+	
+	
+	// Ansatz mit getc
+	int c;
+	while ((c = getc(fp_in)) != EOF) {
+		putc(c, fp_out);
+	}
+	
+	
+	// Dateien schliessen
+	fclose (fp_in);
+	fclose (fp_out);
+	
+	
+	return TRUE;
+}
+
+
+// Prüft ob alle Tags gesetzt sind für den Import
+gboolean check_tags (TagLib_Tag *tag)
+{
+	gboolean correct = TRUE;
+	gchar *artist, *title, *album;
+	
+	artist = taglib_tag_artist (tag);
+	title = taglib_tag_title (tag);
+	album = taglib_tag_album (tag);
+	
+	if (artist == NULL || strcmp(artist, "") == 0) {
+		correct = FALSE;
+	}
+	if (title == NULL || strcmp(title, "") == 0) {
+		correct = FALSE;
+	}
+	if (album == NULL || strcmp(album, "") == 0) {
+		correct = FALSE;
+	}
+	
+	return correct;
+}
+
+
+// Prüfen, ob die Ziel-Datei bereits vorhanden ist
+gboolean exist_target (const gchar *source, const gchar *target)
+{
+	if (g_file_test(target, G_FILE_TEST_EXISTS)) {
+		
+		GnomeVFSFileInfo *info_source, *info_target;
+		
+		info_source = gnome_vfs_file_info_new ();
+		info_target = gnome_vfs_file_info_new ();
+		
+		if (gnome_vfs_get_file_info (source, info_source, 0) != GNOME_VFS_OK) {
+			return FALSE;
+		}
+		
+		if (gnome_vfs_get_file_info (target, info_target, 0) != GNOME_VFS_OK) {
+			return FALSE;
+		}
+		
+		//g_debug ("Source size: %llu / Target size: %llu", info_source->size, info_target->size);
+		
+		if (info_source->size == info_target->size) {
+			return TRUE;
+		}
+	}
+	
+	return FALSE;
+}
+
+
+
+void erzeuge_datei(void) {
+   FILE *create = fopen("/home/patrik/ctest.txt", "wb");
+   if(NULL == create) {
+      fprintf(stderr, "Konnte keine Datei erzeugen\n");
+      exit(EXIT_FAILURE);
+   }
+   fseek(create,DATEIGROESSE-1,SEEK_SET);
+   putc('x',create);
+   fclose(create);
+}
+

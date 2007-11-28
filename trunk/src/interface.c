@@ -38,7 +38,12 @@ void interface_init (int argc, char *argv[])
 {
 	g_message ("Interface init");
 	
+	// GTK initialisieren
+	g_message ("\tGTK init");
 	gtk_init(&argc, &argv);
+	
+	// Glade initialisieren
+	g_message ("\tGlade init");
 	glade_init();
 	
 	glade = NULL;
