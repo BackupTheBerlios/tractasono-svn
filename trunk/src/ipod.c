@@ -27,6 +27,7 @@
 #include <gpod/itdb.h>
 #include <ipoddevice/ipod-device.h>
 #include <ipoddevice/ipod-device-event-listener.h>
+#include <libgnomevfs/gnome-vfs-utils.h>
 
 
 enum 
@@ -36,6 +37,16 @@ enum
   COL_ARTIST,
   COL_ALBUM,
   COLS
+};
+
+enum 
+{ 
+  STORE_NR = 0,
+  STORE_TITLE,
+  STORE_ARTIST,
+  STORE_ALBUM,
+  STORE_PATH,
+  STORES
 };
 
 
@@ -102,6 +113,7 @@ void ipod_display_info (gchar *name, gchar *typ, gchar *capacity);
 void setup_track_tree (void);
 void setup_playlist_tree (void);
 void insert_test_daten (void);
+void update_progressbar_memory (IpodDevice *device);
 
 
 
@@ -145,20 +157,28 @@ void ipod_load (void)
 
 void ipod_track (gpointer data, gpointer user_data)
 {
-	Itdb_Track *track = (Itdb_Track*)data;
+	Itdb_iTunesDB *itdb = (Itdb_iTunesDB*) user_data;
+	Itdb_Track *track = (Itdb_Track*) data;
 	g_message ("Track -> title: %s -> artist: %s", track->title, track->artist);
 
 	GtkTreeIter iter;
 	gchar *nr;
+	gchar *path;
 	
 	nr = g_strdup_printf ("%d", track->track_nr);
 	
+	// Pfad zusammenfrickeln
+	itdb_filename_ipod2fs (track->ipod_path);
+	path = g_strdup_printf ("%s%s", itdb_get_mountpoint (itdb), track->ipod_path);
+	//g_debug ("path: %s", path);
+	
 	gtk_tree_store_append (trees.track_store, &iter, NULL);
 	gtk_tree_store_set (trees.track_store, &iter,
-						COL_NR, nr, 
-						COL_TITLE, track->title,
-						COL_ARTIST, track->artist,
-						COL_ALBUM, track->album, -1);
+						STORE_NR, nr, 
+						STORE_TITLE, track->title,
+						STORE_ARTIST, track->artist,
+						STORE_ALBUM, track->album,
+						STORE_PATH, path, -1);
 
 }
 
@@ -195,6 +215,10 @@ void ipod_fill_combo (void)
 		device = (IpodDevice *) g_list_nth_data (devices, i);
 		ipod_device_debug (device);
 		g_object_get (device, "mount-point", &mount_path, NULL);
+		
+		// Speicheranzeige aktualisieren
+		update_progressbar_memory (device);
+		
 		//g_object_get (device, "volume-label", &label, NULL);
 		//g_debug ("Path: %s", path);
 		gtk_combo_box_append_text (GTK_COMBO_BOX(combo), mount_path);
@@ -429,29 +453,33 @@ void setup_track_tree (void)
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes
 						 ("Nr", renderer, "text", COL_NR, NULL);
+	gtk_tree_view_column_set_sort_column_id (column, COL_NR);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (trees.track_tree), column);
 
 	// Titel
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes
 						 ("Titel", renderer, "text", COL_TITLE, NULL);
+	gtk_tree_view_column_set_sort_column_id (column, COL_TITLE);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (trees.track_tree), column);
 
 	// Artist
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes
 						 ("Artist", renderer, "text", COL_ARTIST, NULL);
+	gtk_tree_view_column_set_sort_column_id (column, COL_ARTIST);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (trees.track_tree), column);
 
 	// Album
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes
 						 ("Album", renderer, "text", COL_ALBUM, NULL);
+	gtk_tree_view_column_set_sort_column_id (column, COL_ALBUM);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (trees.track_tree), column);
 
 	// Store erstellen
-	trees.track_store = gtk_tree_store_new (COLS, G_TYPE_STRING, G_TYPE_STRING,
-											G_TYPE_STRING, G_TYPE_STRING);
+	trees.track_store = gtk_tree_store_new (STORES, G_TYPE_STRING, G_TYPE_STRING,
+											G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 											
 	// Store dem Tree anhängen				
 	gtk_tree_view_set_model (GTK_TREE_VIEW (trees.track_tree),
@@ -507,3 +535,63 @@ void insert_test_daten (void)
 						COL2_ANZAHL, "238", -1);
 }
 
+
+// Aktualisiere die iPod Speicher Anzeige
+void update_progressbar_memory (IpodDevice *device)
+{
+	GtkProgressBar *pbar;
+	gdouble fraction;
+	guint64 volume_size;
+	guint64 volume_used;
+	gchar *pbar_text;
+	gchar *size;
+	gchar *used;
+	
+	// Progressbar holen
+	pbar = (GtkProgressBar*) glade_xml_get_widget (glade, "ipod_progressbar_memory");
+	if (pbar == NULL) {
+		return;
+	}
+		
+	// Werte von iPod-Objekt holen
+	g_object_get (device, "volume-size", &volume_size, NULL);
+	g_object_get (device, "volume-used", &volume_used, NULL);
+	//g_debug ("volume-size: %llu / volume-used: %llu", volume_size, volume_used);
+	
+	// Fraktion berechnen
+	fraction = (gdouble)volume_used / (gdouble)volume_size;
+	gtk_progress_bar_set_fraction (pbar, fraction);
+	//g_debug ("fraction: %f", fraction);
+	
+	// Text auf Progressbar anpassen
+	size = gnome_vfs_format_file_size_for_display ((GnomeVFSFileSize)volume_size);
+	used = gnome_vfs_format_file_size_for_display ((GnomeVFSFileSize)volume_used);
+	pbar_text = g_strdup_printf ("%s von %s belegt", used, size);
+	gtk_progress_bar_set_text (pbar, pbar_text);
+	
+	// Strings wieder freigeben
+	g_free (size);
+	g_free (used);
+	g_free (pbar_text);
+}
+
+
+// Tritt ein, wenn auf dem TreeView eine Zeile aktiviert wird
+void on_treeview_ipod_tracks_row_activated (GtkTreeView *tree,
+										 GtkTreePath *path,
+										 GtkTreeViewColumn *column,
+										 gpointer user_data)
+{
+	GtkTreeModel *model;
+	GtkTreeIter iter;
+	gchar *track_path;
+	
+	model = gtk_tree_view_get_model (tree);
+	gtk_tree_model_get_iter (model, &iter, path);
+	
+	gtk_tree_model_get (model, &iter, STORE_PATH, &track_path, -1);
+	
+	// Musik abspielen
+	track_path = g_strdup_printf ("file://%s", track_path);
+	player_play_uri (track_path);
+}

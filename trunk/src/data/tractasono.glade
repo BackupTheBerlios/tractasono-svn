@@ -1915,6 +1915,7 @@ Touch the screen to go back!</property>
                                     <property name="can_focus">True</property>
                                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                     <property name="headers_clickable">True</property>
+                                    <signal name="row_activated" handler="on_treeview_ipod_tracks_row_activated"/>
                                   </widget>
                                 </child>
                               </widget>
@@ -1964,33 +1965,19 @@ Touch the screen to go back!</property>
                               <widget class="GtkHBox" id="hbox4">
                                 <property name="visible">True</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                                <property name="spacing">5</property>
                                 <child>
-                                  <widget class="GtkProgressBar" id="progressbar1">
+                                  <widget class="GtkProgressBar" id="ipod_progressbar_memory">
                                     <property name="visible">True</property>
                                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                                     <property name="text" translatable="yes">Speicher</property>
                                   </widget>
                                 </child>
                                 <child>
-                                  <widget class="GtkVSeparator" id="vseparator1">
-                                    <property name="visible">True</property>
-                                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="padding">5</property>
-                                    <property name="position">1</property>
-                                  </packing>
+                                  <placeholder/>
                                 </child>
                                 <child>
-                                  <widget class="GtkProgressBar" id="progressbar2">
-                                    <property name="visible">True</property>
-                                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                    <property name="text" translatable="yes">Fortschritt</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="position">2</property>
-                                  </packing>
+                                  <placeholder/>
                                 </child>
                               </widget>
                             </child>
@@ -2002,7 +1989,6 @@ Touch the screen to go back!</property>
                         </child>
                         <child>
                           <widget class="GtkAlignment" id="alignment4">
-                            <property name="visible">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="top_padding">5</property>
                             <child>
@@ -2019,7 +2005,6 @@ Touch the screen to go back!</property>
                         </child>
                         <child>
                           <widget class="GtkAlignment" id="alignment2">
-                            <property name="visible">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="top_padding">5</property>
                             <child>
