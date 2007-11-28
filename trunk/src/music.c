@@ -248,9 +248,9 @@ void music_track_setup_tree (void)
 
 // Sortierungsfunktion für Artist
 gint sort_artist_compare_func (GtkTreeModel *model,
-							 GtkTreeIter  *a,
-							 GtkTreeIter  *b,
-							 gpointer      userdata)
+							   GtkTreeIter  *a,
+							   GtkTreeIter  *b,
+							   gpointer      userdata)
 {
 	gint ret = 0;
 	gchar *name1, *name2;

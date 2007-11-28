@@ -114,7 +114,10 @@ void setup_track_tree (void);
 void setup_playlist_tree (void);
 void insert_test_daten (void);
 void update_progressbar_memory (IpodDevice *device);
-
+gint sort_track_compare_func (GtkTreeModel *model,
+							  GtkTreeIter  *a,
+							  GtkTreeIter  *b,
+							  gpointer      userdata);
 
 
 void ipod_init (void)
@@ -162,10 +165,10 @@ void ipod_track (gpointer data, gpointer user_data)
 	g_message ("Track -> title: %s -> artist: %s", track->title, track->artist);
 
 	GtkTreeIter iter;
-	gchar *nr;
+	//gchar *nr;
 	gchar *path;
 	
-	nr = g_strdup_printf ("%d", track->track_nr);
+	//nr = g_strdup_printf ("%d", track->track_nr);
 	
 	// Pfad zusammenfrickeln
 	itdb_filename_ipod2fs (track->ipod_path);
@@ -174,7 +177,7 @@ void ipod_track (gpointer data, gpointer user_data)
 	
 	gtk_tree_store_append (trees.track_store, &iter, NULL);
 	gtk_tree_store_set (trees.track_store, &iter,
-						STORE_NR, nr, 
+						STORE_NR, track->track_nr, 
 						STORE_TITLE, track->title,
 						STORE_ARTIST, track->artist,
 						STORE_ALBUM, track->album,
@@ -443,6 +446,7 @@ void setup_track_tree (void)
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
+	GtkTreeSortable *sortable;
 	
 	trees.track_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_ipod_tracks");
 	if (trees.track_tree == NULL) {
@@ -478,8 +482,13 @@ void setup_track_tree (void)
 	gtk_tree_view_append_column (GTK_TREE_VIEW (trees.track_tree), column);
 
 	// Store erstellen
-	trees.track_store = gtk_tree_store_new (STORES, G_TYPE_STRING, G_TYPE_STRING,
+	trees.track_store = gtk_tree_store_new (STORES, G_TYPE_INT, G_TYPE_STRING,
 											G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+											
+	// Store sortieren
+	sortable = GTK_TREE_SORTABLE (trees.track_store);
+	gtk_tree_sortable_set_sort_func (sortable, COL_ALBUM, sort_track_compare_func, NULL, NULL);
+    gtk_tree_sortable_set_sort_column_id (sortable, COL_ALBUM, GTK_SORT_ASCENDING);
 											
 	// Store dem Tree anhängen				
 	gtk_tree_view_set_model (GTK_TREE_VIEW (trees.track_tree),
@@ -594,4 +603,38 @@ void on_treeview_ipod_tracks_row_activated (GtkTreeView *tree,
 	// Musik abspielen
 	track_path = g_strdup_printf ("file://%s", track_path);
 	player_play_uri (track_path);
+}
+
+
+// Sortierungsfunktion für die Tracks
+gint sort_track_compare_func (GtkTreeModel *model,
+							  GtkTreeIter  *a,
+							  GtkTreeIter  *b,
+							  gpointer      userdata)
+{
+	gint ret = 0;
+	gchar *name1, *name2;
+	gint track1, track2;
+
+	gtk_tree_model_get (model, a, COL_ALBUM, &name1, COL_NR, &track1, -1);
+	gtk_tree_model_get (model, b, COL_ALBUM, &name2, COL_NR, &track2, -1);
+
+	if (name1 == NULL || name2 == NULL) {
+		if (name1 == NULL && name2 == NULL) {
+			ret = 0;
+		} else if (name1 == NULL) {
+			ret = -1;
+		} else {
+			ret = 1;
+		}
+	} else {
+		
+		ret = g_utf8_collate (name1, name2);
+		
+	}
+
+	g_free(name1);
+	g_free(name2);
+	
+	return ret;
 }

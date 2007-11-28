@@ -34,10 +34,7 @@
 // Defines
 #define RETURN_SUCCESS	0
 #define RETURN_ERROR	1
-#define UNKNOWN			"Unknown"
-#define BUFFER_SIZE		9000
-
-#define DATEIGROESSE 10000000L
+#define BUFFER_SIZE		9216
 
 // Prototypen
 void recursive_dir (const gchar *path);
@@ -54,31 +51,10 @@ gboolean copy_file (const gchar *source, const gchar *target);
 gboolean check_tags (TagLib_Tag *tag);
 gboolean exist_target (const gchar *source, const gchar *target);
 
-// Test Funktionen
-void erzeuge_datei(void);
-gboolean copy_file_getc (const gchar *source, const gchar *target);
-
 
 // Hauptprogramm
 int main (int argc, char *argv[])
-{/*
-	// Test
-	
-	// GnomeVFS initialisieren
-	gnome_vfs_init ();
-	
-	//erzeuge_datei ();
-	
-	copy_file ("/home/patrik/ctest.txt", "/home/patrik/ctest_normal.txt");
-	copy_file_getc ("/home/patrik/ctest.txt", "/home/patrik/ctest_getc.txt");
-	
-	
-	
-	return RETURN_SUCCESS;
-	
-	*/
-	
-	
+{
 	gchar *importdir;
 	
 	// Prüfe ob ein Pfad übergeben wurde
@@ -95,8 +71,8 @@ int main (int argc, char *argv[])
 
 	// Pfade bestimmen
 	importdir = g_strdup(argv[1]);
-	//g_message ("import dir: %s", importdir);
-	//g_message ("export dir: %s", get_export_dir ());
+	//g_message ("Import dir: %s", importdir);
+	//g_message ("Export dir: %s", get_export_dir ());
 	
 	// Export Verzeichnis anlegen
 	create_dir (get_export_dir (), TRUE);
@@ -160,8 +136,6 @@ void export_file (const gchar *import_path)
 		return;
 	}
 	
-	g_debug ("sizeof(file): %d", sizeof(&tag));
-	
 	// Prüfen ob wir Tags haben
 	tag = taglib_file_tag (file);
 	if (tag == NULL) {
@@ -170,7 +144,7 @@ void export_file (const gchar *import_path)
 	
 	// Falls Tags unvollständig sind -> Nicht importieren
 	if (!check_tags (tag)) {
-		g_warning ("Tags unvollständig! -> %s", import_path);
+		g_message ("Nicht importieren! (Tags unvollstaendig) -> %s", import_path);
 		return;
 	}
 	
@@ -190,7 +164,7 @@ void export_file (const gchar *import_path)
 	
 	// Datei kopieren
 	if (!copy_file (import_path, export_path)) {
-		g_warning ("Dateikopie fehlgeschlagen! (%s)", filename);
+		g_warning ("Import fehlgeschlagen! -> %s", filename);
 	}
 	
 	// Speicher wieder freigeben
@@ -298,6 +272,7 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	FILE *fp_in;
 	FILE *fp_out;
 	gchar buffer[BUFFER_SIZE];
+	int anz;
 	
 	// Prüfen, ob die Datei bereits vorhanden ist
 	if (exist_target (source, target)) {
@@ -320,94 +295,14 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	}
 	
 	// Daten kopieren
-	g_debug ("sizeof(char): %d", sizeof(char));
-	
-	int anz;
 	while (!feof(fp_in)) {
-		anz = fread (buffer, sizeof(char), sizeof(buffer), fp_in);
-		
-		//g_debug ("Anz: %d", anz);
-		
+		anz = fread (buffer, sizeof(char), sizeof(buffer), fp_in);	
 		fwrite (buffer, sizeof(char), anz, fp_out);
 	}
 	
-	// Ansatz mit getc
-	/*int c;
-	while ((c = getc(fp_in)) != EOF) {
-		putc(c, fp_out);
-	}*/
-	
-	
 	// Dateien schliessen
 	fclose (fp_in);
 	fclose (fp_out);
-	
-	
-	
-	/*GnomeVFSHandle *input;
-	GnomeVFSHandle *output;
-	GnomeVFSFileSize bytes_read;
-	gchar buffer[BUFFER_SIZE];
-	
-	if (gnome_vfs_open (&input, source, GNOME_VFS_OPEN_READ) != GNOME_VFS_OK) {
-		g_warning ("Konnte Datei nicht zum Lesen öffnen!");
-	}
-	
-	if (gnome_vfs_open (&output, source, GNOME_VFS_OPEN_WRITE && GNOME_VFS_OPEN_TRUNCATE) != GNOME_VFS_OK) {
-		g_warning ("Konnte Datei nicht zum Schreiben öffnen!");
-	}
-	
-	if (gnome_vfs_read (input, buffer, sizeof(buffer), &bytes_read) != GNOME_VFS_OK) {
-		g_debug ("Lesefehler!");	
-	}
-	*/
-	
-	
-	
-	
-	
-	return TRUE;
-}
-
-
-gboolean copy_file_getc (const gchar *source, const gchar *target)
-{
-	FILE *fp_in;
-	FILE *fp_out;
-	gchar buffer[BUFFER_SIZE];
-	
-	// Prüfen, ob die Datei bereits vorhanden ist
-	if (exist_target (source, target)) {
-		g_message ("Existiert bereits -> %s", source);
-		return TRUE;
-	} else {
-		g_message ("Wird importiert -> %s", source);
-	}
-
-	// Neue Datei zum befüllen anlegen
-	fp_out = fopen (target, "w");
-	if (fp_out == NULL) {
-		return FALSE;
-	}
-	
-	// Datei zum Lesen öffnen
-	fp_in = fopen (source, "r");
-	if (fp_in == NULL) {
-		return FALSE;
-	}
-	
-	
-	// Ansatz mit getc
-	int c;
-	while ((c = getc(fp_in)) != EOF) {
-		putc(c, fp_out);
-	}
-	
-	
-	// Dateien schliessen
-	fclose (fp_in);
-	fclose (fp_out);
-	
 	
 	return TRUE;
 }
@@ -464,17 +359,3 @@ gboolean exist_target (const gchar *source, const gchar *target)
 	
 	return FALSE;
 }
-
-
-
-void erzeuge_datei(void) {
-   FILE *create = fopen("/home/patrik/ctest.txt", "wb");
-   if(NULL == create) {
-      fprintf(stderr, "Konnte keine Datei erzeugen\n");
-      exit(EXIT_FAILURE);
-   }
-   fseek(create,DATEIGROESSE-1,SEEK_SET);
-   putc('x',create);
-   fclose(create);
-}
-
