@@ -60,6 +60,7 @@ void track_insert (const TrackDetails *track);
 void track_setup_tree (void);
 void extract_disc (void);
 void extract_track (TrackDetails *track);
+void play_track (TrackDetails *track);
 
 
 void disc_init()
@@ -485,18 +486,27 @@ void on_treeview_disc_row_activated (GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *uri;
-	gint number;
+	TrackDetails *track;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
-	gtk_tree_model_get (model, &iter, COLUMN_NUMBER, &number, -1);
+	gtk_tree_model_get (model, &iter, COLUMN_DETAILS, &track, -1);
 	
-	// Musik abspielen
-	uri = g_strdup_printf ("cdda://%d", number);
-	player_play_uri (uri);
+	play_track (track);
 }
 
 
+
+void play_track (TrackDetails *track)
+{
+	gchar *uri;
+	
+	// Musik abspielen
+	uri = g_strdup_printf ("cdda://%d", track->number);
+	player_play_uri (uri);
+	
+	// Muss manuell gesetzt werden
+	interface_set_songinfo (track->artist, track->title, NULL);
+}
 
