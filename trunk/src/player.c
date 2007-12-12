@@ -75,7 +75,7 @@ void player_init (int argc, char *argv[])
 	format = GST_FORMAT_TIME;
 	
 	// Pipeline erstellen
-	pipeline = gst_element_factory_make ("playbin", "tracta-player");
+	pipeline = gst_element_factory_make ("playbin", "player");
 	
 	// Wir wollen die GNOME Einstellungen für die Ausgabe verwenden!
 	// Ausgabegerät kann unter System -> Einstellungen -> Audio

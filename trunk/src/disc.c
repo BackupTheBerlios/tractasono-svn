@@ -23,10 +23,18 @@
 #include "musicbrainz.h"
 #include "interface.h"
 #include "strukturen.h"
+#include "utils.h"
+
+#include <gconf/gconf-client.h>
+#include <profiles/gnome-media-profiles.h>
 
 
 // GStreamer Variablen
 GstElement *ripper;
+GstElement *source;
+GstElement *sink;
+
+gint track_extracting;
 
 // TreeView
 GtkTreeView *disc_tree;
@@ -53,7 +61,7 @@ typedef enum {
 
 
 // Prototypen
-void setup_ripper_pipeline (void);
+void ripper_setup (void);
 void ripper_test (void);
 void display_disctitle (AlbumDetails *album);
 void track_insert (const TrackDetails *track);
@@ -61,8 +69,13 @@ void track_setup_tree (void);
 void extract_disc (void);
 void extract_track (TrackDetails *track);
 void play_track (TrackDetails *track);
+gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
+static GstElement* build_encoder (void);
+void display_track_state (gint track, TrackState state);
 
 
+
+// Initialisation
 void disc_init()
 {
 	g_message ("\tDisc Modul init");
@@ -70,42 +83,73 @@ void disc_init()
 	// TreeView initialisieren
 	track_setup_tree ();
 	
+	// GConf & Media Profile initialisieren
+	gnome_media_profiles_init (gconf_client_get_default ());
+	
 	// Ripper Pipeline aufsetzen
-	setup_ripper_pipeline ();
+	ripper_setup ();
 
 	// Testfunktion
 	//ripper_test ();
 	
+	track_extracting = 1;
 }
 
-void setup_ripper_pipeline (void)
+void ripper_setup (void)
 {
 	g_message ("\t\tSetup ripper pipeline...");
 	
 	/* elements */
-	GstElement *source;
-	GstElement *conv;
-	GstElement *sink;
+	GstElement *queue;
+	GstElement *encoder;
 
 	/* create ripper pipeline */
 	ripper = gst_pipeline_new ("ripper");
 	if (ripper == NULL) {
-		g_warning ("Ripper pipeline konnte nicht erstellt werden!");
-	}
-
-	/* create ripper elements */
-	source = gst_element_factory_make ("cdparanoiasrc", "source");
-	conv = gst_element_factory_make ("audioconvert", "converter");
-	sink = gst_element_factory_make ("filesink", "sink");
-
-	/* must add elements to pipeline before linking them */
-	gst_bin_add_many (GST_BIN (ripper), source, conv, sink, NULL);
-
-	/* link */
-	if (!gst_element_link_many (source, conv, sink, NULL)) {
-		g_warning ("Failed to link ripper elements!");
+		g_warning ("Konnte ripper pipeline nicht erstellen!");
 	}
 	
+	// Source (CD)
+	source = gst_element_make_from_uri (GST_URI_SRC, "cdda://", "source");
+	if (source == NULL) {
+		g_warning ("Konnte source element nicht erstellen!");
+	}
+	
+	// Warteschlange (grosser Buffer)
+	queue = gst_element_factory_make ("queue", "queue");
+	if (queue == NULL) {
+		g_warning ("Konnte queue element nicht erstellen!");
+	} else {
+		g_object_set (queue, "max-size-time", 120 * GST_SECOND, NULL);
+	}
+	
+	// Encoder (GNOME media profile)
+	encoder = build_encoder ();
+	if (encoder == NULL) {
+		g_warning ("Konnte encoder element nicht erstellen!");
+	}
+	
+	// Sink (File)
+	sink = gst_element_factory_make ("filesink", "sink");
+	if (sink == NULL) {
+		g_warning ("Konnte sink element nicht erstellen!");
+	} else {
+		g_object_set (sink, "location", "/home/patrik/test.ogg", NULL);
+	}
+
+	/* must add elements to pipeline before linking them */
+	gst_bin_add_many (GST_BIN (ripper), source, queue, encoder, sink, NULL);
+
+	/* link all elements together */
+	if (!gst_element_link_many (source, queue, encoder, sink, NULL)) {
+		g_warning ("Konnte ripper elemente nicht linken!");
+	}
+	
+	// Bus Callback anbinden
+	GstBus *bus;
+	bus = gst_pipeline_get_bus (GST_PIPELINE (ripper));
+	gst_bus_add_watch (bus, ripper_bus_callback, NULL);
+	gst_object_unref (bus);
 }
 
 
@@ -113,6 +157,68 @@ void ripper_test (void)
 {
 	
 	
+	
+}
+
+
+
+// Callback Behandlung
+gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
+{
+	g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
+	
+	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
+		/* Musik Tags */
+		g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
+		//player_handle_tag_message (message);
+	}
+	
+	if (GST_MESSAGE_SRC(message) != GST_OBJECT(ripper)) {		
+		return TRUE;
+	}
+
+	switch (GST_MESSAGE_TYPE (message)) {
+		case GST_MESSAGE_ERROR: {
+			GError *err;
+			gst_message_parse_error (message, &err, NULL);
+			g_warning (err->message);
+			g_error_free (err);
+			break;
+		}
+		case GST_MESSAGE_STATE_CHANGED: {
+			GstState oldstate, newstate, pending;
+			
+			gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
+			g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
+
+			if (newstate == 4) {
+				g_message ("GStreamer is now playing!\n");	
+			}
+			if ((newstate == 2) && (oldstate == 3)) {
+				g_message ("GStreamer is now ready(stoped)!\n");
+			}
+			if ((newstate == 3) && (oldstate == 4)) {
+				g_message ("GStreamer is now paused!\n");
+			}
+		}
+		case GST_MESSAGE_EOS: {
+			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
+				g_message ("End Of Stream");
+				display_track_state (track_extracting, STATE_IMPORTED);
+			}
+			break;
+		}
+		default: {
+			/* unhandled message */
+			g_debug ("Unhandled Message %i", GST_MESSAGE_TYPE (message));
+			break;
+		}
+	}
+
+	/* we want to be notified again the next time there is a message
+	* on the bus, so returning TRUE (FALSE means we want to stop watching
+	* for messages on the bus and our callback should not be called again) */
+	return TRUE;
 }
 
 
@@ -352,7 +458,7 @@ void track_setup_tree (void)
 	// Toggle
 	toggle_renderer = gtk_cell_renderer_toggle_new ();
 	g_signal_connect (toggle_renderer, "toggled", G_CALLBACK (on_extract_toggled), NULL);
-	column = gtk_tree_view_column_new_with_attributes ("", toggle_renderer,
+	column = gtk_tree_view_column_new_with_attributes ("Import", toggle_renderer,
 													   "active", COLUMN_EXTRACT, NULL);
 	gtk_tree_view_column_set_resizable (column, FALSE);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (disc_tree), column);
@@ -377,7 +483,7 @@ void track_setup_tree (void)
 	title_renderer = gtk_cell_renderer_text_new ();
 	g_signal_connect (title_renderer, "edited", G_CALLBACK (on_cell_edited), GUINT_TO_POINTER (COLUMN_TITLE));
 	g_object_set (G_OBJECT (title_renderer), "editable", TRUE, NULL);
-	column = gtk_tree_view_column_new_with_attributes ("Title",
+	column = gtk_tree_view_column_new_with_attributes ("Titel",
 										   title_renderer,
 										   "text", COLUMN_TITLE,
 										   NULL);
@@ -388,7 +494,7 @@ void track_setup_tree (void)
 	
 	// Artist
 	artist_renderer = gtk_cell_renderer_text_new ();
-	column = gtk_tree_view_column_new_with_attributes ("Artist",
+	column = gtk_tree_view_column_new_with_attributes ("Interpret",
 										   artist_renderer,
 										   "text", COLUMN_ARTIST,
 										   NULL);
@@ -402,7 +508,7 @@ void track_setup_tree (void)
 	
 	// Duration
 	renderer = gtk_cell_renderer_text_new ();
-	column = gtk_tree_view_column_new_with_attributes ("Duration",
+	column = gtk_tree_view_column_new_with_attributes ("Länge",
 										   renderer,
 										   "text", COLUMN_DURATION,
 										   NULL);
@@ -445,8 +551,9 @@ static gboolean extract_track_cb (GtkTreeModel *model, GtkTreePath *path,
 									 COLUMN_DETAILS, &track, -1);
 	if (extract) {
 		gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_STATE, STATE_EXTRACTING, -1);
+		track_extracting = track->number;
 		extract_track (track);
-		gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_STATE, STATE_IMPORTED, -1);
+		//gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_STATE, STATE_IMPORTED, -1);
 		gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_EXTRACT, FALSE, -1);
 	}
 
@@ -457,10 +564,23 @@ static gboolean extract_track_cb (GtkTreeModel *model, GtkTreePath *path,
 
 void extract_track (TrackDetails *track)
 {
-	g_message ("Rippe Track: %d %s - %s", track->number, track->artist, track->title);
+	g_message ("Rippe Track: %d", track->number);
 	
+	gchar *filename;
+	gchar *filepath;
 	
+	create_artist_dir (track->artist);
+	create_album_dir (track->album->title, track->artist);
 	
+	filename = get_track_name (track->title, track->artist, track->number, ".ogg");
+	filepath = get_track_path (filename, track->album->title, track->artist);
+	
+	g_message ("filepath: %s", filepath);
+	
+	gst_element_set_state (ripper, GST_STATE_NULL);
+	g_object_set (source, "track", track->number, NULL);
+	g_object_set (sink, "location", filepath, NULL);
+	gst_element_set_state (ripper, GST_STATE_PLAYING);
 }
 
 
@@ -494,6 +614,8 @@ void on_treeview_disc_row_activated (GtkTreeView *tree,
 	gtk_tree_model_get (model, &iter, COLUMN_DETAILS, &track, -1);
 	
 	play_track (track);
+	
+	display_track_state (track->number, STATE_PLAYING);
 }
 
 
@@ -510,3 +632,47 @@ void play_track (TrackDetails *track)
 	interface_set_songinfo (track->artist, track->title, NULL);
 }
 
+
+
+static GstElement* build_encoder (void)
+{
+	GstElement *encoder = NULL;
+	GMAudioProfile *profile;
+	gchar *pipeline;
+	
+	const gchar *name;
+	const gchar *desc;
+	const gchar *pipe;
+	const gchar *ext;
+	
+	profile = gm_audio_profile_lookup ("cdlossy");
+	
+	name = gm_audio_profile_get_name (profile);
+	desc = gm_audio_profile_get_description (profile);
+	pipe = gm_audio_profile_get_pipeline (profile);
+	ext = gm_audio_profile_get_extension (profile);
+	
+	//g_message ("current media profile (name=%s | pipe=%s | ext=%s)", name, pipe, ext);
+	
+	pipeline = g_strdup_printf ("audioresample ! audioconvert ! %s", pipe);
+	encoder = gst_parse_bin_from_description (pipeline, TRUE, NULL); /* TODO: return error */
+	g_free(pipeline);
+	
+	return encoder;
+}
+
+
+
+void display_track_state (gint track, TrackState state)
+{
+	GtkTreeModel *model;
+	GtkTreePath* path;
+	GtkTreeIter iter;
+	
+	path = gtk_tree_path_new_from_string (g_strdup_printf ("%d", track-1));
+	
+	model = gtk_tree_view_get_model (disc_tree);
+	gtk_tree_model_get_iter (model, &iter, path);
+	
+	gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_STATE, state, -1);
+}

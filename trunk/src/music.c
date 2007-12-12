@@ -25,6 +25,7 @@
 #include "database.h"
 #include "interface.h"
 #include "player.h"
+#include "utils.h"
 
 
 GtkTreeView *artist_tree;
@@ -89,11 +90,6 @@ void music_album_insert (const gchar *album, const gchar *artist);
 void music_track_insert (const gchar *track, const gchar *album, const gchar *artist);
 
 void music_artist_fill (void);
-
-gchar *get_music_dir (void);
-gchar *get_artist_dir (const gchar *artist);
-gchar *get_album_dir (const gchar *album, const gchar *artist);
-gchar *get_track_path (const gchar *track, const gchar *album, const gchar *artist);
 
 
 // Initialisierung
@@ -389,33 +385,6 @@ void music_artist_fill (void)
 	
 }
 
-
-// Gibt Default Musik Vezeichnis zurück
-gchar *get_music_dir (void)
-{
-	return g_strdup_printf ("%s/tractasono/music/", g_get_home_dir());
-}
-
-
-// Gibt den Verzeichnisname für einen Artist zurück
-gchar *get_artist_dir (const gchar *artist)
-{
-	return g_strdup_printf ("%s%s/", get_music_dir (), artist);
-}
-
-
-// Gibt den Verzeichnisname für einen Album zurück
-gchar *get_album_dir (const gchar *album, const gchar *artist)
-{
-	return g_strdup_printf ("%s%s/", get_artist_dir (artist), album);
-}
-
-
-// Gibt den Pfad für einen Track zurück
-gchar *get_track_path (const gchar *track, const gchar *album, const gchar *artist)
-{
-	return g_strdup_printf ("%s%s", get_album_dir (album, artist), track);
-}
 
 
 

@@ -9,6 +9,7 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(LIBGPOD_CFLAGS) \
 		   $(LIBIPODDEVICE_CFLAGS) \
 		   $(TOTEMPLPARSE_CFLAGS) \
+		   $(MEDIAPROFILES_CFLAGS) \
 		   -I/usr/include/taglib
 
 AM_CFLAGS = -Wall -g
@@ -47,7 +48,9 @@ tractasono_SOURCES = main.c \
 					 ipod.c \
 					 ipod.h \
 					 strukturen.c \
-					 strukturen.h
+					 strukturen.h \
+					 utils.c \
+					 utils.h
 	
 tractasono_LDFLAGS = -export-dynamic
 
@@ -62,5 +65,6 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(LIBGPOD_LIBS) \
 				   $(LIBIPODDEVICE_LIBS) \
 				   $(TOTEMPLPARSE_LIBS) \
+				   $(MEDIAPROFILES_LIBS) \
 				   -ltag_c
 

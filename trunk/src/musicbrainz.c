@@ -34,7 +34,6 @@ musicbrainz_t *mb;
 // Prototypen
 static int get_duration_from_sectors (int sectors);
 static void convert_encoding (char **str);
-void get_rdf (void);
 static void artist_and_title_from_title (TrackDetails *track, gpointer data);
 AlbumDetails* get_album_offline (void);
 
@@ -50,46 +49,6 @@ void musicbrainz_init (void)
 
 
 
-
-void get_rdf (void)
-{
-	char data[256];
-	char *cdindex = NULL;
-
-	if (mb == NULL) {
-		g_warning ("mb is NULL!");
-		return;
-	}
-
-	/* Get the Table of Contents */
-	if (!mb_Query (mb, MBQ_GetCDTOC)) {
-		mb_GetQueryError (mb, data, sizeof (data));
-		g_warning ("This CD could not be queried: %s", data);
-		return;
-	}
-
-	/* Extract the CD Index */
-	if (!mb_GetResultData(mb, MBE_TOCGetCDIndexId, data, sizeof (data))) {
-		mb_GetQueryError (mb, data, sizeof (data));
-		g_warning ("This CD could not be queried: %s", data);
-		return;
-	}
-	
-	cdindex = g_strdup (data);
-
-	/* Don't re-use the CD Index as that doesn't send enough data to the server.
-	By doing this we also pass track lengths, which can be proxied to FreeDB
-	if required. */
-	if (!mb_Query (mb, MBQ_GetCDInfo)) {
-		mb_GetQueryError (mb, data, sizeof (data));
-		g_warning ("This CD could not be queried: %s", data);
-	}
-	
-	g_free (cdindex);
-}
-
-
-
 AlbumDetails* get_album_offline (void)
 {
 	AlbumDetails *album;
@@ -97,14 +56,15 @@ AlbumDetails* get_album_offline (void)
 	int num_tracks, i;
 	
 	if (mb == NULL) {
-		g_warning ("mb is NULL!");
+		return NULL;
+	}
+	
+	/* Get the Table of Contents */
+	if (!mb_Query (mb, MBQ_GetCDTOC)) {
 		return NULL;
 	}
 
-	if (!mb_Query (mb, MBQ_GetCDTOC)) {
-		char message[255];
-		mb_GetQueryError (mb, message, 255);
-		g_warning ("Konnte CD nicht lesen!");
+	if (!mb_Query (mb, MBQ_GetCDInfo)) {
 		return NULL;
 	}
 	
@@ -139,8 +99,14 @@ AlbumDetails* lookup_cd (void)
 	char data[256];
 	int num_albums, j;
 	
-	// TODO: verbessern
-	get_rdf ();
+	/* Get the Table of Contents */
+	if (!mb_Query (mb, MBQ_GetCDTOC)) {
+		return NULL;
+	}
+
+	if (!mb_Query (mb, MBQ_GetCDInfo)) {
+		return NULL;
+	}
 	
 	num_albums = mb_GetResultInt(mb, MBE_GetNumAlbums);
 	if (num_albums < 1) {
