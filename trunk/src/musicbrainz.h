@@ -23,13 +23,14 @@
 #define MUSICBRAINZ_H
 
 // Includes
+#include "strukturen.h"
+
 #include <glib.h>
-#include <gtk/gtk.h>
+#include <musicbrainz/mb_c.h>
 
 // Prototypen
 void musicbrainz_init (void);
 
-gboolean musicbrainz_lookup_disc (gchar *device, gchar *discid);
-gchar* musicbrainz_get_disctitle (void);
+AlbumDetails* lookup_cd (void);
 
 #endif

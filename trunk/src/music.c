@@ -72,16 +72,6 @@ enum
 	COLS_TRACK
 };
 
-enum
-{
-	STORE_TRACK_NR,
-	STORE_TRACK_TITLE,
-	STORE_TRACK_ARTIST,
-	STORE_TRACK_ALBUM,
-	STORE_TRACK_PATH,
-	STORE_TRACK
-};
-
 
 // Prototypen
 void music_artist_setup_tree (void);
@@ -565,4 +555,7 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	// Musik abspielen
 	track_path = g_strdup_printf ("file://%s", track_path);
 	player_play_uri (track_path);
+	player_play_from_list (model, path);
 }
+
+

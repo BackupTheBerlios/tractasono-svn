@@ -21,6 +21,7 @@
 
 #include "player.h"
 #include "interface.h"
+#include "music.h"
 
 
 // GStreamer Variablen
@@ -30,12 +31,16 @@ GstElement *src;
 GstElement *decoder;
 GstElement *audiosink;
 
+// Playlist Store
+GtkTreeModel *playlist_store;
+GtkTreeIter playlist_iter;
 
 // Prototypen
 void player_handle_tag_message (GstMessage *message);
 static gboolean player_timer_event (GstElement *pipeline);
 gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
-
+const gchar* get_next_uri ();
+const gchar* get_prev_uri ();
 
 
 gint player_test (void)
@@ -170,7 +175,9 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 		case GST_MESSAGE_EOS: {
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
 				g_message ("End Of Stream");
-				interface_set_playing(FALSE);
+				if (!player_play_next ()) {
+					interface_set_playing (STATE_PLAY_NOTHING);
+				}
 			}
 			break;
 		}
@@ -284,6 +291,33 @@ void player_play_uri (const gchar *uri)
 }
 
 
+// Spiele eine Datei oder einen Stream ab
+void player_play_from_list (GtkTreeModel *model, GtkTreePath *path)
+{	
+	if (pipeline) {
+		//player_set_stop();
+		
+		playlist_store = model;
+		gtk_tree_model_get_iter (playlist_store, &playlist_iter, path);
+		
+		
+		gchar *path;
+		
+		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
+		
+		
+		g_debug ("player_play_from_list -> path=%s", path);
+		//g_object_set(G_OBJECT (pipeline), "uri", path, NULL);
+		
+		
+		
+		//player_set_play();
+	} else {
+		g_warning ("pipeline nicht bereit!");
+	}
+}
+
+
 // Konvertiert Nanosekunden in Sekunden
 gint64 ns_to_seconds(gint64 ns)
 {	
@@ -331,3 +365,57 @@ void player_handle_tag_message(GstMessage *message)
 	gst_tag_list_free (tag_list);
 }
 
+const gchar* get_next_uri ()
+{
+	if (!gtk_tree_model_iter_next (playlist_store, &playlist_iter)) {
+		return NULL;
+	} else {
+		gchar *path;
+		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
+		return path;
+	}	
+}
+
+
+gboolean player_play_next ()
+{
+	const gchar *uri = get_next_uri ();
+				
+	if (uri) {
+		uri = g_strdup_printf ("file://%s", uri);
+		player_play_uri (uri);
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+
+
+const gchar* get_prev_uri ()
+{
+	GtkTreePath *path;
+	
+	path = gtk_tree_model_get_path (playlist_store, &playlist_iter);
+	
+	if (!gtk_tree_path_up (path)) {
+		return NULL;
+	} else {
+		gchar *path;
+		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
+		return path;
+	}	
+}
+
+
+gboolean player_play_prev ()
+{
+	const gchar *uri = get_prev_uri ();
+				
+	if (uri) {
+		uri = g_strdup_printf ("file://%s", uri);
+		player_play_uri (uri);
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}

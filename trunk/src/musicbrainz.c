@@ -21,111 +21,324 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <musicbrainz/mb_c.h>
-#include <musicbrainz/browser.h>
+#include <stdlib.h>
 
 #include "musicbrainz.h"
+#include "strukturen.h"
 
+
+// Variablen
+musicbrainz_t *mb;
+
+
+// Prototypen
+static int get_duration_from_sectors (int sectors);
+static void convert_encoding (char **str);
+void get_rdf (void);
+static void artist_and_title_from_title (TrackDetails *track, gpointer data);
+AlbumDetails* get_album_offline (void);
 
 
 void musicbrainz_init (void)
 {
-	g_message ("\tMusicbrainz init");
+	g_message ("Musicbrainz init");
+	
+	// Musicbrainz init
+	mb = mb_New ();
+	
 }
 
 
 
-gboolean musicbrainz_lookup_disc (gchar *device, gchar *discid)
+
+void get_rdf (void)
 {
-	musicbrainz_t o;
-	char error[256], data[256], temp[256], *args[2];
-	int ret, numTracks, albumNum;
+	char data[256];
+	char *cdindex = NULL;
 
-	// Create the musicbrainz object, which will be needed for subsequent calls
-	o = mb_New();
-
-	// enable debug
-	mb_SetDebug(o, TRUE);
-
-	// Tell the client library to return data in ISO8859-1 and not UTF-8
-	mb_UseUTF8(o, 0);
-
-	// Tell the server to only return 4 levels of data, unless the MB_DEPTH env var is set
-	mb_SetDepth(o, 4);
-
-	// Set up the args for the find album query
-	args[0] = discid;
-	args[1] = NULL;
-
-	if (strlen(discid) != MB_CDINDEX_ID_LEN) {
-		// Execute the MB_GetAlbumById query
-		ret = mb_QueryWithArgs(o, MBQ_GetAlbumById, args);
-	} else {
-		// Execute the MBQ_GetCDInfoFromCDIndexId
-		ret = mb_QueryWithArgs(o, MBQ_GetCDInfoFromCDIndexId, args);
+	if (mb == NULL) {
+		g_warning ("mb is NULL!");
+		return;
 	}
 
-	if (!ret) {
-		mb_GetQueryError(o, error, 256);
-		printf("Query failed: %s\n", error);
-		mb_Delete(o);
-		return FALSE;
+	/* Get the Table of Contents */
+	if (!mb_Query (mb, MBQ_GetCDTOC)) {
+		mb_GetQueryError (mb, data, sizeof (data));
+		g_warning ("This CD could not be queried: %s", data);
+		return;
 	}
 
-	return TRUE;
-
-	// Select the first album
-	if (!mb_Select1(o, MBS_SelectAlbum, albumNum)) {
-		return FALSE;
+	/* Extract the CD Index */
+	if (!mb_GetResultData(mb, MBE_TOCGetCDIndexId, data, sizeof (data))) {
+		mb_GetQueryError (mb, data, sizeof (data));
+		g_warning ("This CD could not be queried: %s", data);
+		return;
 	}
 	
-	// Pull back the album id to see if we got the album
-	if (!mb_GetResultData(o, MBE_AlbumGetAlbumId, data, 256)) {
-		printf("Album not found.\n");
-		return FALSE;
+	cdindex = g_strdup (data);
+
+	/* Don't re-use the CD Index as that doesn't send enough data to the server.
+	By doing this we also pass track lengths, which can be proxied to FreeDB
+	if required. */
+	if (!mb_Query (mb, MBQ_GetCDInfo)) {
+		mb_GetQueryError (mb, data, sizeof (data));
+		g_warning ("This CD could not be queried: %s", data);
 	}
-
-	printf("Match #: %d\n-------------------------------------------------\n", albumNum);
-	mb_GetIDFromURL(o, data, temp, 256);
-	printf("    AlbumId: %s\n", temp);
-
-	// Extract the album name
-	if (mb_GetResultData(o, MBE_AlbumGetAlbumName, data, 256)) {
-		printf("       Name: %s\n", data);
-	}
-
-	// Extract the number of tracks
-	numTracks = mb_GetResultInt(o, MBE_AlbumGetNumTracks);
-	if (numTracks > 0 && numTracks < 100) {
-		printf("  NumTracks: %d\n", numTracks);
-	}
-
-	// Extract the artist name from the album
-	if (mb_GetResultData1(o, MBE_AlbumGetArtistName, data, 256, 1)) {
-		printf("AlbumArtist: %s\n", data);
-	}
-
-	// Extract the artist id from the album
-	if (mb_GetResultData1(o, MBE_AlbumGetArtistId, data, 256, 1)) {
-		mb_GetIDFromURL(o, data, temp, 256);
-		printf("   ArtistId: %s\n", temp);
-	}
-
-	// and clean up the musicbrainz object
-	mb_Delete(o);
-
-	return TRUE;
+	
+	g_free (cdindex);
 }
 
 
-gchar* musicbrainz_get_disctitle (void)
-{	
-	/*if (strcmp (m_disc.disctitle, "") == 0) {
-		return m_disc.discid;
-	} else {
-		return m_disc.disctitle;
-	}*/
+
+AlbumDetails* get_album_offline (void)
+{
+	AlbumDetails *album;
+	TrackDetails *track;
+	int num_tracks, i;
 	
-	return "";
+	if (mb == NULL) {
+		g_warning ("mb is NULL!");
+		return NULL;
+	}
+
+	if (!mb_Query (mb, MBQ_GetCDTOC)) {
+		char message[255];
+		mb_GetQueryError (mb, message, 255);
+		g_warning ("Konnte CD nicht lesen!");
+		return NULL;
+	}
+	
+	num_tracks = mb_GetResultInt (mb, MBE_TOCGetLastTrack);
+
+	album = g_new0 (AlbumDetails, 1);
+	album->artist = g_strdup ("Unknown Artist");
+	album->title = g_strdup ("Unknown Title");
+	album->genre = NULL;
+	
+	for (i = 1; i <= num_tracks; i++) {
+		track = g_new0 (TrackDetails, 1);
+		track->album = album;
+		track->number = i;
+		track->title = g_strdup_printf ("Track %d", i);
+		track->artist = g_strdup (album->artist);
+		track->duration = get_duration_from_sectors (mb_GetResultInt1 (mb, MBE_TOCGetTrackNumSectors, i+1));
+		album->tracks = g_list_append (album->tracks, track);
+		album->number++;
+	}
+	
+	return album;
 }
+
+
+
+
+AlbumDetails* lookup_cd (void)
+{
+	AlbumDetails *album; 
+	GList *tl;
+	char data[256];
+	int num_albums, j;
+	
+	// TODO: verbessern
+	get_rdf ();
+	
+	num_albums = mb_GetResultInt(mb, MBE_GetNumAlbums);
+	if (num_albums < 1) {
+		album = get_album_offline ();
+		return album;
+	}
+		
+	int num_tracks;
+	gboolean from_freedb = FALSE;
+
+	mb_Select1(mb, MBS_SelectAlbum, 1);
+	album = g_new0 (AlbumDetails, 1);
+
+	if (mb_GetResultData(mb, MBE_AlbumGetAlbumId, data, sizeof (data))) {
+		from_freedb = strstr(data, "freedb:") == data;
+		mb_GetIDFromURL (mb, data, data, sizeof (data));
+		album->album_id = g_strdup (data);
+	}
+
+	if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistId, data, sizeof (data))) {
+		mb_GetIDFromURL (mb, data, data, sizeof (data));
+		album->artist_id = g_strdup (data);
+
+		if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistName, data, sizeof (data))) {
+			album->artist = g_strdup (data);
+		} else {
+			if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
+				album->artist = g_strdup ("Various");
+			} else {
+				album->artist = g_strdup ("Unknown Artist");
+			}
+		}
+	}
+
+	if (mb_GetResultData(mb, MBE_AlbumGetAlbumName, data, sizeof (data))) {
+		album->title = g_strdup (data);
+	} else {
+		album->title = g_strdup ("Unknown Title");
+	}
+
+	{
+		int num_releases;
+		num_releases = mb_GetResultInt (mb, MBE_AlbumGetNumReleaseDates);
+		if (num_releases > 0) {
+			mb_Select1(mb, MBS_SelectReleaseDate, 1);
+			if (mb_GetResultData(mb, MBE_ReleaseGetDate, data, sizeof (data))) {
+				int matched, year=1, month=1, day=1;
+				matched = sscanf(data, "%u-%u-%u", &year, &month, &day);
+				if (matched >= 1) {
+					album->release_date = g_date_new_dmy ((day == 0) ? 1 : day, (month == 0) ? 1 : month, year);
+				}
+			}
+			mb_Select(mb, MBS_Back);
+		}
+	}
+
+	num_tracks = mb_GetResultInt(mb, MBE_AlbumGetNumTracks);
+	if (num_tracks < 1) {
+		g_free (album->artist);
+		g_free (album->title);
+		g_free (album);
+		g_warning ("Incomplete metadata for this CD");
+		return NULL;
+	}
+
+	for (j = 1; j <= num_tracks; j++) {
+		TrackDetails *track;
+		track = g_new0 (TrackDetails, 1);
+
+		track->album = album;
+		track->number = j; /* replace with number lookup? */
+
+		if (mb_GetResultData1(mb, MBE_AlbumGetTrackId, data, sizeof (data), j)) {
+			mb_GetIDFromURL (mb, data, data, sizeof (data));
+			track->track_id = g_strdup (data);
+		}
+
+		if (mb_GetResultData1(mb, MBE_AlbumGetArtistId, data, sizeof (data), j)) {
+			mb_GetIDFromURL (mb, data, data, sizeof (data));
+			track->artist_id = g_strdup (data);
+		}
+
+		if (mb_GetResultData1(mb, MBE_AlbumGetTrackName, data, sizeof (data), j)) {
+			if (track->artist_id != NULL) {
+				artist_and_title_from_title (track, data);
+			} else {
+				track->title = g_strdup (data);
+			}
+		} else {
+			track->title = g_strdup ("[Untitled]");
+		}
+
+		if (track->artist == NULL && mb_GetResultData1(mb, MBE_AlbumGetArtistName, data, sizeof (data), j)) {
+			track->artist = g_strdup (data);
+		}
+
+		if (mb_GetResultData1(mb, MBE_AlbumGetTrackDuration, data, sizeof (data), j)) {
+			track->duration = atoi (data) / 1000;
+		}
+
+		if (from_freedb) {
+			convert_encoding (&track->title);
+			convert_encoding (&track->artist);
+		}
+  
+		album->tracks = g_list_append (album->tracks, track);
+		album->number++;
+	}
+
+	if (from_freedb) {
+		convert_encoding (&album->title);
+		convert_encoding (&album->artist);
+	}
+
+	mb_Select (mb, MBS_Rewind);
+	
+
+	/* For each album, we need to insert the duration data if necessary
+	* We need to query this here because otherwise we would flush the
+	* data queried from the server */
+	/* TODO: scan for 0 duration before doing the query to avoid another lookup if
+	we don't need to do it */
+	mb_Query (mb, MBQ_GetCDTOC);
+	j = 1;
+	for (tl = album->tracks; tl; tl = tl->next) {
+		TrackDetails *track = tl->data;
+		int sectors;
+
+		if (track->duration == 0) {
+			sectors = mb_GetResultInt1 (mb, MBE_TOCGetTrackNumSectors, j+1);
+			track->duration = get_duration_from_sectors (sectors);
+		}
+		j++;
+	}
+	
+	return album;
+}
+
+
+
+static int get_duration_from_sectors (int sectors)
+{
+	#define BYTES_PER_SECTOR 2352
+	#define BYTES_PER_SECOND (44100 / 8) / 16 / 2
+	
+	return (sectors * BYTES_PER_SECTOR / BYTES_PER_SECOND);
+}
+
+
+/*
+ * Magic character set encoding to try and repair brain-dead FreeDB encoding,
+ * converting it to the current locale's encoding (which is likely to be the
+ * intended encoding).
+ */
+static void convert_encoding (char **str)
+{
+	char *iso8859;
+	char *converted;
+
+	if (str == NULL || *str == NULL) {
+		return;
+	}
+
+	iso8859 = g_convert (*str, -1, "ISO-8859-1", "UTF-8", NULL, NULL, NULL);
+
+	if (iso8859) {
+		converted = g_locale_to_utf8 (iso8859, -1, NULL, NULL, NULL);
+
+		if (converted) {
+	  		g_free (*str);
+	  		*str = converted;
+		}
+	}
+	
+	g_free (iso8859);
+}
+
+
+/* Data imported from FreeDB is horrendeous for compilations,
+ * Try to split the 'Various' artist */
+static void artist_and_title_from_title (TrackDetails *track, gpointer data)
+{
+	char *slash, **split;
+
+	if (g_ascii_strncasecmp (track->album->album_id, "freedb:", 7) != 0 && track->album->artist_id[0] != '\0' && track->artist_id[0] != '\0') {
+		track->title = g_strdup (data);
+		return;
+	}
+
+	slash = strstr (data, " / ");
+	if (slash == NULL) {
+		track->title = g_strdup (data);
+		return;
+	}
+	split = g_strsplit (data, " / ", 2);
+	track->artist = g_strdup (split[0]);
+	track->title = g_strdup (split[1]);
+	g_strfreev (split);
+}
+
 

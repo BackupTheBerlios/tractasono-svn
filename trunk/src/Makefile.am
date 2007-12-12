@@ -45,7 +45,9 @@ tractasono_SOURCES = main.c \
 					 lcd.c \
 					 lcd.h \
 					 ipod.c \
-					 ipod.h
+					 ipod.h \
+					 strukturen.c \
+					 strukturen.h
 	
 tractasono_LDFLAGS = -export-dynamic
 

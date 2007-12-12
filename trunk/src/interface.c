@@ -69,10 +69,14 @@ void interface_init (int argc, char *argv[])
 		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
 	}
 	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
-		g_error("Die Glade Datei konnte nicht geladen werden!\n");
-		exit(0);
+		g_warning ("Die Glade Datei konnte nicht geladen werden!");
+		exit (0);
 	}
 	glade = glade_xml_new(buildfile->str, NULL, NULL);
+	if (glade == NULL) {
+		g_error ("Fehler beim Laden der Glade Datei!");
+		exit (0);
+	}
 	
 	// Verbinde die Signale automatisch mit dem Interface
 	glade_xml_signal_autoconnect(glade);
@@ -488,3 +492,16 @@ void on_trackstopp_clicked (GtkButton *button, gpointer user_data)
 	player_set_stop ();
 }
 
+
+void on_button_next_clicked (GtkButton *button, gpointer user_data)
+{
+	g_debug ("Next wurde gedrückt");
+	player_play_next ();
+}
+
+
+void on_button_prev_clicked (GtkButton *button, gpointer user_data)
+{
+	g_debug ("Prev wurde gedrückt");
+	player_play_prev ();
+}

@@ -1,7 +1,7 @@
 /*
- *      main.c
+ *      strukturen.c
  *      
- *      Copyright 2007 Patrik Obrist <padx@gmx.net>
+ *      Copyright 2007 Patrik Obrist <patrik@gmx.net>
  *      
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,44 +19,38 @@
  *      MA 02110-1301, USA.
  */
 
-#ifdef HAVE_CONFIG_H
-	#include <config.h>
-#endif
+#include "strukturen.h"
 
-// Lokale Includes
-#include "settings.h"
-#include "drives.h"
-#include "interface.h"
-#include "database.h"
-#include "musicbrainz.h"
-#include "player.h"
+#include <glib/glist.h>
 
-// Programmeinstieg
-int main (int argc, char *argv[])
+
+/**
+ * Free a TrackDetails*
+ */
+void track_details_free(TrackDetails *track)
 {
-	// Startmeldung
-	g_message ("<== "PACKAGE" "VERSION" starting ==>");
-	
-	// Databenbank initialisieren
-	//database_init (argc, argv);
-	
-	// Musicbrainz initialisieren
-	musicbrainz_init ();
-	
-	// Drives initialisieren
-	drives_init ();
-	
-	// Player initialisieren
-	player_init (argc, argv);
-	
-	// Interface initialisieren
-	interface_init (argc, argv);
+	g_return_if_fail (track != NULL);
+	g_free (track->title);
+	g_free (track->artist);
+	g_free (track->track_id);
+	g_free (track->artist_id);
+	g_free (track);
+}
 
-	// Programmloop starten
-	gtk_main ();
-
-	// Shutdown Meldung
-	g_message ("<== "PACKAGE" shutting down ==>");
-
-	return 0;
+/**
+ * Free a AlbumDetails*
+ */
+void album_details_free(AlbumDetails *album)
+{
+	g_return_if_fail (album != NULL);
+	g_free (album->title);
+	g_free (album->artist);
+	g_free (album->genre);
+	g_free (album->album_id);
+	if (album->release_date) {
+		g_date_free (album->release_date);
+	}
+	//g_list_deep_free (album->tracks, (GFunc)track_details_free);
+	g_list_free (album->tracks);
+	g_free (album);
 }

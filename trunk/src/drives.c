@@ -33,8 +33,6 @@ void drive_connected (GnomeVFSVolumeMonitor *monitor, GnomeVFSDrive *drive, gpoi
 		name = gnome_vfs_drive_get_display_name(drive);
 		path = gnome_vfs_drive_get_device_path (drive);
 		g_message ("Drive %s, %s connected!", name, path);
-
-		musicbrainz_lookup_disc (path, name);
 	}
 }
 
@@ -58,9 +56,6 @@ int drives_init()
 		g_warning ("Could not initialize GnomeVFS!");
 		return DRIVES_FAIL;
 	}
-
-	// Musicbrainz initialisieren
-	//void musicbrainz_init ();
 
 	GnomeVFSVolumeMonitor* monitor = NULL;
 	monitor = gnome_vfs_get_volume_monitor();
