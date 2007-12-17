@@ -54,3 +54,12 @@ void album_details_free(AlbumDetails *album)
 	g_list_free (album->tracks);
 	g_free (album);
 }
+
+
+/**
+ * Free a ArtistDetails*
+ */
+void artist_details_free(ArtistDetails *artist)
+{
+	g_free (artist->name);
+}

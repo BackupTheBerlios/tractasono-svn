@@ -505,3 +505,45 @@ void on_button_prev_clicked (GtkButton *button, gpointer user_data)
 	g_debug ("Prev wurde gedrückt");
 	player_play_prev ();
 }
+
+
+void interface_update_controls (ControlState state)
+{
+	GtkWidget *prev;
+	GtkWidget *next;
+	
+	prev = glade_xml_get_widget (glade, "button_prev");
+	if (prev == NULL) {
+		g_warning ("Konnte den Previous Button nicht holen!");
+		return;
+	}
+	
+	next = glade_xml_get_widget (glade, "button_next");
+	if (next == NULL) {
+		g_warning ("Konnte den Previous Button nicht holen!");
+		return;
+	}
+	
+	switch (state) {
+		case CONTROL_STATE_FIRST: {
+			g_message ("ControlState: First");
+			gtk_widget_set_sensitive (prev, FALSE);
+			break;
+		}
+		case CONTROL_STATE_MID: {
+			g_message ("ControlState: Mid");
+			gtk_widget_set_sensitive (prev, TRUE);
+			gtk_widget_set_sensitive (next, TRUE);
+			break;
+		}
+		case CONTROL_STATE_LAST: {
+			g_message ("ControlState: Last");
+			gtk_widget_set_sensitive (next, FALSE);
+			break;
+		}
+		default: {
+			g_warning ("ControlState ungültig!");
+		}
+	}
+	
+}

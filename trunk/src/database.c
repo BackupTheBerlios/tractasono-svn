@@ -26,37 +26,45 @@
 #include <string.h>
 
 #include "database.h"
-#include "settings.h"
 
 
 #define DATABASE "tractasono"
 
 
-GdaConnection *connection;
+GdaConnection *conn;
 
 
-void database_init (int argc, char *argv[])
+void db_init (int argc, char *argv[])
 {
 	g_message ("Datenbank init");
 	
 	gda_init (PACKAGE, VERSION, argc, argv);
-	gnome_db_init (PACKAGE, VERSION, argc, argv);
+	//gnome_db_init (PACKAGE, VERSION, argc, argv);
 	
-	//database_list_providers ();
-	//database_list_sources ();
-	database_connect ();
+	//db_list_providers ();
+	//db_list_sources ();
+	db_connect ();
 	
 	// Test Funktionen
-	//database_settings_set_string ("library", "path", "/opt/music/");
-	//database_settings_set_string ("library", "name", "Die geilschti Musig!");
-	//database_settings_set_integer ("library", "filecount", 122);
-	//g_debug ("Pfad: %s", database_settings_get_string ("library", "path"));
-	//g_debug ("Name: %s", database_settings_get_string ("library", "name"));
-	//g_debug ("Filecount: %i", database_settings_get_integer ("library", "filecount"));
+	//db_settings_set_string ("library", "path", "/opt/music/");
+	//db_settings_set_string ("library", "name", "Die geilschti Musig!");
+	//db_settings_set_integer ("library", "filecount", 122);
+	//g_debug ("Pfad: %s", db_settings_get_string ("library", "path"));
+	//g_debug ("Name: %s", db_settings_get_string ("library", "name"));
+	//g_debug ("Filecount: %i", db_settings_get_integer (S_G_LIBRARY, S_K_FILECOUNT));
+	
+	ArtistDetails *artist;
+	
+	artist = g_new0 (ArtistDetails, 1);
+	artist->name = g_strdup ("Sonata Arctica");
+	artist->id = db_artist_add (artist->name);
+	
+	g_message ("artist: id=%d, name=%s", artist->id, artist->name);
+	
 }
 
 
-void database_list_providers (void)
+void db_list_providers (void)
 {
     GList *prov_list;
     GList *node;
@@ -72,7 +80,7 @@ void database_list_providers (void)
 }
 
 
-void database_list_sources (void)
+void db_list_sources (void)
 {
     GList *ds_list;
     GList *node;
@@ -89,7 +97,7 @@ void database_list_sources (void)
 }
 
 
-void database_connect (void)
+void db_connect (void)
 {
 	GError *error = NULL;
 	GdaDataSourceInfo *info = NULL;
@@ -101,14 +109,15 @@ void database_connect (void)
 	if (!info)
 		g_error ("DSN '%s' is not declared", DATABASE);
 	else {
-		connection = gda_client_open_connection (client, info->name, 
+		conn = gda_client_open_connection (client, info->name, 
 												 info->username, info->password,
 												 0, &error);							 								 
-		if (!connection) {
+		if (!conn) {
 			g_warning ("Can't open connection to DSN %s: %s\n", info->name,
 					   error && error->message ? error->message : "???");
 			return;
 		}
+		g_message ("\tsuccessfully connected to: %s", info->name);
 		gda_data_source_info_free (info);
 		g_object_unref (G_OBJECT (client));
 	}
@@ -116,14 +125,14 @@ void database_connect (void)
 }
 
 
-GdaDataModel* database_get_model_from_sql (const gchar * sql)
+GdaDataModel* db_get_model_from_sql (const gchar * sql)
 {
 	GError *error = NULL;
 	GdaDataModel *model;
 	GdaCommand *command;
 	
 	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	model = gda_connection_execute_select_command (connection, command, NULL, &error);
+	model = gda_connection_execute_select_command (conn, command, NULL, &error);
 	gda_command_free (command);
 	if (error) {
 		g_print ("Error: %s", error->message);
@@ -133,71 +142,55 @@ GdaDataModel* database_get_model_from_sql (const gchar * sql)
 
 
 
-GdaDataModel* database_get_album_model (void)
+GdaDataModel* db_get_album_model (void)
 {
-	return database_get_model_from_sql("SELECT * FROM tbl_album");
+	return db_get_model_from_sql("SELECT * FROM tbl_album");
 }
 
-GdaDataModel* database_get_artist_model (void)
+GdaDataModel* db_get_artist_model (void)
 {
-	return database_get_model_from_sql("SELECT * FROM tbl_artist");
+	return db_get_model_from_sql("SELECT * FROM tbl_artist");
 }
 
-GdaDataModel* database_get_genre_model (void)
+GdaDataModel* db_get_genre_model (void)
 {
-	return database_get_model_from_sql("SELECT * FROM tbl_genre");
+	return db_get_model_from_sql("SELECT * FROM tbl_genre");
 }
 
-GdaDataModel* database_get_song_model (void)
+GdaDataModel* db_get_song_model (void)
 {
-	return database_get_model_from_sql("SELECT * FROM view_song_short");
+	return db_get_model_from_sql("SELECT * FROM view_song_short");
 }
 
 
 
-GdaDataModel* database_execute_sql_command (const gchar *sql)
+GdaDataModel* db_execute_sql (const gchar *sql)
 {
 	GdaCommand *command;
 	GError *error = NULL;
 	GdaDataModel *dm;
 
 	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	dm = gda_connection_execute_select_command (connection, command, NULL, &error);
+	dm = gda_connection_execute_select_command (conn, command, NULL, &error);
 	if (error) {
-		g_message (error->message);
+		g_warning (error->message);
 	}
 	gda_command_free (command);
 	
-	//database_dump_dm (dm);
+	//db_dump_dm (dm);
 	
 	return dm;
 }
 
 
-void database_execute_sql (const gchar *sql)
-{
-	GdaCommand *command;
-	GError *error = NULL;
-
-	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL,
-				   GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	gda_connection_execute_select_command (connection, command, NULL, &error);
-	if (error) {
-		g_message (error->message);
-	}
-
-	gda_command_free (command);
-}
-
-
-gint database_execute_sql_non_query (const gchar *sql)
+gint db_execute_sql_non_query (const gchar *sql)
 {
 	GdaCommand *command;
 	GError *error = NULL;
 	gint count;
 
 	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	count  = gda_connection_execute_non_select_command (connection, command, NULL, &error);
+	count  = gda_connection_execute_non_select_command (conn, command, NULL, &error);
 	if (error) {
 		g_message (error->message);
 	}
@@ -208,13 +201,13 @@ gint database_execute_sql_non_query (const gchar *sql)
 }
 
 
-void database_dump_dm (GdaDataModel *dm)
+void db_dump_dm (GdaDataModel *dm)
 {	
 	g_print ("\n%s\n", gda_data_model_dump_as_string (dm));
 }
 
 
-void database_settings_set_boolean (gchar *group, gchar *key, gboolean value)
+void db_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 {
 	GString *sql;
 	GdaDataModel *dm;
@@ -224,7 +217,7 @@ void database_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 	// Schaue ob Eintrag schon existiert
 	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
-	dm = database_execute_sql_command (sql->str);
+	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
@@ -238,11 +231,11 @@ void database_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 		g_string_append_printf (sql, " VALUES ('%s', '%s', '%i')", group, key, value);
 	}
 	
-	database_execute_sql (sql->str);
+	db_execute_sql (sql->str);
 }
 
 
-gboolean database_settings_get_boolean (gchar *group, gchar *key)
+gboolean db_settings_get_boolean (gchar *group, gchar *key)
 {
 	GString *sql;
 	GdaDataModel *dm;
@@ -251,7 +244,7 @@ gboolean database_settings_get_boolean (gchar *group, gchar *key)
 	
 	sql = g_string_new ("SELECT settingsboolean FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
-	dm = database_execute_sql_command (sql->str);
+	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
@@ -264,7 +257,7 @@ gboolean database_settings_get_boolean (gchar *group, gchar *key)
 }
 
 
-void database_settings_set_string (gchar *group, gchar *key, const gchar* value)
+void db_settings_set_string (gchar *group, gchar *key, const gchar* value)
 {
 	GString *sql;
 	GdaDataModel *dm;
@@ -274,7 +267,7 @@ void database_settings_set_string (gchar *group, gchar *key, const gchar* value)
 	// Schaue ob Eintrag schon existiert
 	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
-	dm = database_execute_sql_command (sql->str);
+	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
@@ -288,11 +281,11 @@ void database_settings_set_string (gchar *group, gchar *key, const gchar* value)
 		g_string_append_printf (sql, " VALUES ('%s', '%s', '%s')", group, key, value);
 	}
 	
-	database_execute_sql (sql->str);
+	db_execute_sql (sql->str);
 }
 
 
-gchar* database_settings_get_string (gchar *group, gchar *key)
+gchar* db_settings_get_string (gchar *group, gchar *key)
 {
 	GString *sql;
 	GdaDataModel *dm;
@@ -301,7 +294,7 @@ gchar* database_settings_get_string (gchar *group, gchar *key)
 	
 	sql = g_string_new ("SELECT settingsstring FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
-	dm = database_execute_sql_command (sql->str);
+	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
@@ -312,7 +305,7 @@ gchar* database_settings_get_string (gchar *group, gchar *key)
 }
 
 
-void database_settings_set_integer (gchar *group, gchar *key, gint value)
+void db_settings_set_integer (gchar *group, gchar *key, gint value)
 {
 	GString *sql;
 	GdaDataModel *dm;
@@ -322,7 +315,7 @@ void database_settings_set_integer (gchar *group, gchar *key, gint value)
 	// Schaue ob Eintrag schon existiert
 	sql = g_string_new ("SELECT IDsettings FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
-	dm = database_execute_sql_command (sql->str);
+	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
@@ -336,11 +329,11 @@ void database_settings_set_integer (gchar *group, gchar *key, gint value)
 		g_string_append_printf (sql, " VALUES ('%s', '%s', '%i')", group, key, value);
 	}
 	
-	database_execute_sql (sql->str);
+	db_execute_sql (sql->str);
 }
 
 
-gint database_settings_get_integer (gchar *group, gchar *key)
+gint db_settings_get_integer (gchar *group, gchar *key)
 {
 	GString *sql;
 	GdaDataModel *dm;
@@ -349,7 +342,7 @@ gint database_settings_get_integer (gchar *group, gchar *key)
 	
 	sql = g_string_new ("SELECT settingsinteger FROM tbl_settings");
 	g_string_append_printf (sql, " WHERE settingsgroup = '%s' AND settingskey = '%s'", group, key);
-	dm = database_execute_sql_command (sql->str);
+	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	if (val) {
@@ -359,3 +352,41 @@ gint database_settings_get_integer (gchar *group, gchar *key)
 	return value;
 }
 
+
+
+gint db_artist_add (gchar *name)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	gint id;
+	
+	// Schauen, ob Record schon existiert
+	id = db_artist_get_id (name);
+	if (id) {
+		// Datensatz Record zurückgeben
+		return id;
+	}
+		
+	// Datensatz neu erstellen
+	sql = g_string_new ("INSERT INTO tbl_artist (artistname)");
+	g_string_append_printf (sql, " VALUES ('%s')", name);
+	db_execute_sql (sql->str);
+	
+	return db_artist_get_id (name);
+}
+
+
+gint db_artist_get_id (gchar *name)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	
+	sql = g_string_new ("SELECT IDartist FROM tbl_artist");
+	g_string_append_printf (sql, " WHERE artistname = '%s'", name);
+	dm = db_execute_sql (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	return g_value_get_int (val);
+}

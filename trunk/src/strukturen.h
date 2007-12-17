@@ -27,31 +27,41 @@
 
 typedef struct _AlbumDetails AlbumDetails;
 typedef struct _TrackDetails TrackDetails;
+typedef struct _ArtistDetails ArtistDetails;
 
 
 struct _TrackDetails {
-  AlbumDetails *album;
-  int number; /* track number */
-  char *title;
-  char *artist;
-  int duration; /* seconds */
-  char* track_id;
-  char* artist_id;
-  GtkTreeIter iter; /* Temporary iterator for internal use */
+	gint id;
+	AlbumDetails *album;
+	int number; /* track number */
+	char *title;
+	char *artist;
+	int duration; /* seconds */
+	char* track_id;
+	char* artist_id;
+	GtkTreeIter iter; /* Temporary iterator for internal use */
 };
 
 struct _AlbumDetails {
-  char* title;
-  char* artist;
-  char *genre;
-  int   number; /* number of tracks in the album */
-  GList* tracks;
-  GDate *release_date; /* MusicBrainz support multiple releases per album */
-  char* album_id;
-  char* artist_id;
+	gint id;
+	char* title;
+	char* artist;
+	char *genre;
+	int   number; /* number of tracks in the album */
+	GList* tracks;
+	GDate *release_date; /* MusicBrainz support multiple releases per album */
+	char* album_id;
+	char* artist_id;
+};
+
+
+struct _ArtistDetails {
+	gint id;
+	char* name;
 };
 
 void album_details_free(AlbumDetails *album);
 void track_details_free(TrackDetails *track);
+void artist_details_free(ArtistDetails *artist);
 
 #endif

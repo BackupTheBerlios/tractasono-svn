@@ -38,7 +38,7 @@ int main (int argc, char *argv[])
 	g_message ("<== "PACKAGE" "VERSION" starting ==>");
 	
 	// Databenbank initialisieren
-	//database_init (argc, argv);
+	db_init (argc, argv);
 	
 	// Musicbrainz initialisieren
 	musicbrainz_init ();

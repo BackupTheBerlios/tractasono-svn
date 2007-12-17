@@ -40,6 +40,13 @@ typedef struct {
 } WindowModule;
 
 
+typedef enum {
+  CONTROL_STATE_FIRST,
+  CONTROL_STATE_MID,
+  CONTROL_STATE_LAST
+} ControlState;
+
+
 // Globale Variablen
 GladeXML *glade;
 GtkWidget *mainwindow;
@@ -56,16 +63,14 @@ WindowModule module;
 
 // Public Functions
 void interface_init (int argc, char *argv[]);
-void interface_clean ();
-void interface_clean_all ();
+void interface_clean (void);
+void interface_clean_all (void);
 void interface_show_module (GtkWidget *widget);
-void interface_show_previous_module ();
+void interface_show_previous_module (void);
 void interface_set_songinfo (const gchar *artist, const gchar *title, const gchar *uri);
 void interface_set_song_position (gint64 position);
 void interface_set_song_duration (gint64 duration);
 void interface_set_playing (PlayerState state);
-
-GtkStyle* interface_create_style (GdkColor *fg, GdkColor *bg, gboolean do_grade);
-GdkColor* interface_create_color (int red, int green, int blue);
+void interface_update_controls (ControlState state);
 
 #endif

@@ -160,7 +160,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
 
 			if (newstate == 4) {
-				g_message ("GStreamer is now playing!\n");	
+				g_message ("GStreamer is now playing!\n");
 				interface_set_playing (player_get_state ());
 			}
 			if ((newstate == 2) && (oldstate == 3)) {
@@ -285,6 +285,16 @@ void player_play_uri (const gchar *uri)
 		player_set_stop();
 		g_object_set(G_OBJECT (pipeline), "uri", uri, NULL);
 		player_set_play();
+		
+		if (!get_prev_uri ()) {
+			interface_update_controls (CONTROL_STATE_FIRST);
+		} else if (!get_next_uri ()) {
+			interface_update_controls (CONTROL_STATE_LAST);
+		} else {
+			interface_update_controls (CONTROL_STATE_MID);	
+		}
+		
+		
 	} else {
 		g_warning ("pipeline nicht bereit oder uri nicht angegeben!");
 	}
@@ -393,14 +403,15 @@ gboolean player_play_next ()
 
 const gchar* get_prev_uri ()
 {
-	GtkTreePath *path;
+	GtkTreeIter parent;
 	
-	path = gtk_tree_model_get_path (playlist_store, &playlist_iter);
-	
-	if (!gtk_tree_path_up (path)) {
+	if (!gtk_tree_model_iter_parent (playlist_store, &parent, &playlist_iter)) {
+		g_message ("prev uri is NULL!");
 		return NULL;
 	} else {
+		g_message ("prev uri is %d", parent.stamp);
 		gchar *path;
+		playlist_iter = parent;
 		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
 		return path;
 	}	

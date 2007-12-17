@@ -22,34 +22,48 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+
+// Gruppen Keys
+#define S_G_LIBRARY	"library"
+
+
+// Keys
+#define	S_K_PATH	"path"
+#define	S_K_FILECOUNT	"filecount"
+
+
+#include "strukturen.h"
+
 #include <libgda/libgda.h>
 #include <libgnomedb/libgnomedb.h>
 
 
-void database_init (int argc, char *argv[]);
-void database_list_providers (void);
-void database_list_sources (void);
-void database_connect (void);
+void db_init (int argc, char *argv[]);
+void db_list_providers (void);
+void db_list_sources (void);
+void db_connect (void);
 
-void database_execute_sql (const gchar *sql);
-gint database_execute_sql_non_query (const gchar *sql);
-GdaDataModel* database_execute_sql_command (const gchar *sql);
+GdaDataModel*  db_execute_sql (const gchar *sql);
+gint db_execute_sql_non_query (const gchar *sql);
 
-void database_dump_dm (GdaDataModel *dm);
+void db_dump_dm (GdaDataModel *dm);
 
-GdaDataModel* database_get_model_from_sql (const gchar * sql);
-GdaDataModel* database_get_album_model (void);
-GdaDataModel* database_get_artist_model (void);
-GdaDataModel* database_get_genre_model (void);
-GdaDataModel* database_get_song_model (void);
+GdaDataModel* db_get_model_from_sql (const gchar * sql);
+GdaDataModel* db_get_album_model (void);
+GdaDataModel* db_get_artist_model (void);
+GdaDataModel* db_get_genre_model (void);
+GdaDataModel* db_get_song_model (void);
 
-void database_settings_set_boolean (gchar *group, gchar *key, gboolean value);
-gboolean database_settings_get_boolean (gchar *group, gchar *key);
+void db_settings_set_boolean (gchar *group, gchar *key, gboolean value);
+gboolean db_settings_get_boolean (gchar *group, gchar *key);
 
-void database_settings_set_string (gchar *group, gchar *key, const gchar* value);
-gchar* database_settings_get_string (gchar *group, gchar *key);
+void db_settings_set_string (gchar *group, gchar *key, const gchar* value);
+gchar* db_settings_get_string (gchar *group, gchar *key);
 
-void database_settings_set_integer (gchar *group, gchar *key, gint value);
-gint database_settings_get_integer (gchar *group, gchar *key);
+void db_settings_set_integer (gchar *group, gchar *key, gint value);
+gint db_settings_get_integer (gchar *group, gchar *key);
+
+gint db_artist_add (gchar *name);
+gint db_artist_get_id (gchar *name);
 
 #endif
