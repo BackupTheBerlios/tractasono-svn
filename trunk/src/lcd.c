@@ -28,8 +28,10 @@
 
 #define LCD_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), LCD_TYPE, LcdPrivate))
 
+#define LCD_TIMEOUT_MS 1000
+#define LCD_SPEED_PX 50
 
-#define OFFSETX 2
+#define OFFSETX 1
 #define OFFSETY OFFSETX
 #define OFFSETW 2 * OFFSETX
 #define OFFSETH 2 * OFFSETY
@@ -43,6 +45,8 @@ struct _LcdPrivate {
 	gchar *album;
 	gchar *uri;
 	gchar *duration;
+	gint speed;
+	gint current_x;
 };
 
 enum {
@@ -220,23 +224,35 @@ static void rectangle_round (cairo_t *cr, double x, double y, double w, double h
 
 
 // Den Text zeichnen
-static void draw_message (cairo_t *cr, double w, double h, const gchar *message)
+static void draw_message (cairo_t *cr, Lcd *lcd, double w, double h, const gchar *message)
 {
+	LcdPrivate *priv;
+	GtkWidget *widget;
+	
 	cairo_text_extents_t extents;
 
-	gdouble x = w / 2;
-	gdouble y = h / 2;
+	priv = LCD_GET_PRIVATE (lcd);
+	widget = GTK_WIDGET (lcd);
 
 	cairo_select_font_face (cr, "Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-
 	cairo_set_font_size (cr, 24);
 	cairo_text_extents (cr, message, &extents);
 
-	x = x - (extents.width / 2);
-	y = y + (extents.height / 2) - 2;
-
+	//cairo_move_to (cr, priv->current_x, (widget->allocation.height - (extents.height)) / 2);
+	
+	g_debug ("höhe text: %f | höhe platz: %d | de bär: %f", extents.height, widget->allocation.height, extents.y_bearing);
+	
+	gdouble x, y;
+	
+	x = priv->current_x;
+	//y = (widget->allocation.height / 2) + (extents.height / 2);
+	y = (widget->allocation.height / 2) + (extents.height / 2) - (extents.height + extents.y_bearing);
+	
+	g_debug ("text move to: x=%f y=%f", x, y);
+	
 	cairo_move_to (cr, x, y);
 	cairo_show_text (cr, message);
+	
 }
 
 
@@ -260,8 +276,8 @@ static void draw (GtkWidget *lcd, cairo_t *cr)
 	cairo_set_line_width (cr, 2);
 	
 	// Rahmen zeichnen
-	//cairo_rectangle (cr, x, y, w, h);
-	rectangle_round (cr, x, y, w, h, 12);
+	cairo_rectangle (cr, x, y, w, h);
+	//rectangle_round (cr, x, y, w, h, 12);
 	
 	// Farben setzen
 	cairo_set_source_rgb (cr, 0.7, 0.8, 0.8);
@@ -270,7 +286,7 @@ static void draw (GtkWidget *lcd, cairo_t *cr)
 	
 	// Text zeichnen
 	message = construct_message (LCD (lcd));
-	draw_message (cr, w, h, message);
+	draw_message (cr, LCD (lcd), w, h, message);
 	
 	// Alles zeichnen
 	cairo_stroke (cr);
@@ -280,6 +296,8 @@ static void draw (GtkWidget *lcd, cairo_t *cr)
 static gboolean lcd_expose (GtkWidget *lcd, GdkEventExpose *event)
 {
 	cairo_t *cr;
+	
+	g_debug ("expose event");
 
 	/* get a cairo_t */
 	cr = gdk_cairo_create (lcd->window);
@@ -301,8 +319,14 @@ static void lcd_init (Lcd *lcd)
 {
 	g_message ("\tLCD Widget init");
 	
-	/* update the LCD once a half second */
-	//g_timeout_add (500, lcd_redraw_canvas, lcd);
+	LcdPrivate *priv;
+	priv = LCD_GET_PRIVATE (lcd);
+	
+	priv->current_x = 0;
+	priv->speed = LCD_SPEED_PX;
+	
+	/* update the LCD */
+	g_timeout_add (LCD_TIMEOUT_MS, (GSourceFunc) lcd_slide, (gpointer) lcd);
 }
 
 
@@ -460,5 +484,62 @@ static gboolean lcd_redraw_canvas (gpointer data)
 	gdk_region_destroy (region);
 	
 	return TRUE; /* keep running this event */
+}
+
+
+void lcd_set_speed (Lcd *lcd, gint speed)
+{
+	LcdPrivate *priv = LCD_GET_PRIVATE (lcd);
+	priv->speed = speed;
+}
+
+
+gint lcd_get_speed (Lcd *lcd)
+{
+	return LCD_GET_PRIVATE (lcd)->speed;
+}
+
+
+void lcd_slide (Lcd *lcd)
+{
+	LcdPrivate *priv;
+	GtkWidget *widget;
+	gchar *message;
+	
+	cairo_t *cr;
+	cairo_text_extents_t extents;
+
+	priv = LCD_GET_PRIVATE (lcd);
+	widget = GTK_WIDGET (lcd);
+	
+	/* get a cairo_t */
+	cr = gdk_cairo_create (widget->window);
+	
+
+	message = construct_message (LCD (lcd));
+
+	cairo_select_font_face (cr, "Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr, 24);
+	cairo_text_extents (cr, message, &extents);
+	
+	g_debug ("width text: %f | width platz: %d", extents.width, widget->allocation.width);
+	
+	// Nur sliden wenn Text grösser als Platz ist
+	if (extents.width > widget->allocation.width) {
+		/* Scroll the message "speed" pixels to the left or wrap around. */
+		priv->current_x = priv->current_x - priv->speed;
+		
+		if ((priv->current_x + (extents.width)) <= 0) {
+			priv->current_x = widget->allocation.width;
+		}
+	} else {
+		priv->current_x = (widget->allocation.width / 2) - (extents.width / 2);
+	}
+	
+	
+	draw (widget, cr);
+
+	cairo_destroy (cr);
+
 }
 

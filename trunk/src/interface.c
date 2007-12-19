@@ -138,6 +138,11 @@ void interface_init (int argc, char *argv[])
 	// LCD Text initial setzen
 	lcd_set_title (LCD (lcd), "Willkommen beim tractasono!");
 	
+	// LCD Speed setzen
+	//lcd_set_speed ( LCD (lcd), 2);
+	
+	//g_timeout_add (150, (GSourceFunc) lcd_slide, (gpointer) lcd);
+	
 	// Einzelne GUI Module initialisieren
 	
 	// Disc Modul init

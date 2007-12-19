@@ -71,6 +71,16 @@ gchar* lcd_get_uri (Lcd *lcd);
 void lcd_set_duration (Lcd *lcd, const gchar *duration);
 gchar* lcd_get_duration (Lcd *lcd);
 
+// Need for Spped
+void lcd_set_speed (Lcd *lcd, gint speed);
+gint lcd_get_speed (Lcd *lcd);
+
+// Sliders - Das Tor in eine andere Dimension!
+void lcd_slide (Lcd *lcd);
+
+// Test, muss wieder raus
+void lcd_slide (Lcd *lcd);
+
 G_END_DECLS
 
 #endif
