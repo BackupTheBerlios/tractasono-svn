@@ -299,7 +299,7 @@ void music_artist_insert (const gchar *artist)
 	GtkTreeIter iter;
 	
 	//g_debug ("music_artist_insert: artist=%s", artist);
-	g_message ("artist insert: %s, id=%d", artist, db_artist_add (artist));
+	//g_message ("artist insert: %s, id=%d", artist, db_artist_add (artist));
 	
 	artist_store = (GtkListStore*) gtk_tree_view_get_model (artist_tree);
 	

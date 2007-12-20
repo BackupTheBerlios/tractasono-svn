@@ -367,7 +367,7 @@ void player_handle_tag_message(GstMessage *message)
 
 	g_message ("DiscID: %s", discid);
 	
-	interface_set_songinfo (artist, title, uri);
+	interface_set_songinfo (artist, title);
 	
 	g_free (artist);
 	g_free (title);

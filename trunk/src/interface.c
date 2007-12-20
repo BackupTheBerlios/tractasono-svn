@@ -134,14 +134,12 @@ void interface_init (int argc, char *argv[])
 	}
 	lcd = lcd_new ();
 	gtk_container_add (GTK_CONTAINER (lcdspace), GTK_WIDGET (lcd));
-	gtk_widget_show (GTK_WIDGET (lcd));
+	
 	// LCD Text initial setzen
 	lcd_set_title (LCD (lcd), "Willkommen beim tractasono!");
 	
-	// LCD Speed setzen
-	//lcd_set_speed ( LCD (lcd), 2);
-	
-	//g_timeout_add (150, (GSourceFunc) lcd_slide, (gpointer) lcd);
+	// Widget anzeigen
+	gtk_widget_show (GTK_WIDGET (lcd));
 	
 	// Einzelne GUI Module initialisieren
 	
@@ -319,17 +317,14 @@ void interface_set_song_position(gint64 position)
 
 
 // Setze die Song Informationen
-void interface_set_songinfo(const gchar *artist, const gchar *title, const gchar *uri)
+void interface_set_songinfo (const gchar *artist, const gchar *title)
 {
-	g_debug ("artist: %s, title: %s, uri: %s", artist, title, uri);
+	g_message ("interface_set_songinfo: %s, title: %s", artist, title);
 	if (title) {
 		lcd_set_title (LCD (lcd), title);
 	}
 	if (artist) {
 		lcd_set_artist (LCD (lcd), artist);
-	}
-	if (uri) {
-		lcd_set_uri (LCD (lcd), uri);
 	}
 }
 

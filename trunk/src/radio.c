@@ -502,7 +502,6 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	lcd_set_title (LCD(lcd), NULL);
 	lcd_set_artist (LCD(lcd), NULL);
 	lcd_set_album (LCD(lcd), NULL);
-	lcd_set_uri (LCD(lcd), NULL);
 
 	// Stream abspielen
 	player_play_uri(url);

@@ -97,7 +97,7 @@ void disc_init()
 
 void ripper_setup (void)
 {
-	g_message ("\t\tSetup ripper pipeline...");
+	g_message ("\t\tSetup ripper pipeline");
 	
 	/* elements */
 	GstElement *queue;
@@ -165,11 +165,11 @@ void ripper_test (void)
 // Callback Behandlung
 gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 {
-	g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
+	//g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
 	
 	if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_TAG) {
 		/* Musik Tags */
-		g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
+		//g_message ("GStreamer -> Got \"%s\" message from \"%s\"", GST_MESSAGE_TYPE_NAME(message), GST_ELEMENT_NAME (GST_MESSAGE_SRC (message)));
 		//player_handle_tag_message (message);
 	}
 	
@@ -210,7 +210,7 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 		}
 		default: {
 			/* unhandled message */
-			g_debug ("Unhandled Message %i", GST_MESSAGE_TYPE (message));
+			//g_debug ("Unhandled Message %i", GST_MESSAGE_TYPE (message));
 			break;
 		}
 	}
@@ -629,7 +629,7 @@ void play_track (TrackDetails *track)
 	player_play_uri (uri);
 	
 	// Muss manuell gesetzt werden
-	interface_set_songinfo (track->artist, track->title, NULL);
+	interface_set_songinfo (track->artist, track->title);
 }
 
 

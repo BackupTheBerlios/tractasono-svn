@@ -67,7 +67,7 @@ void interface_clean (void);
 void interface_clean_all (void);
 void interface_show_module (GtkWidget *widget);
 void interface_show_previous_module (void);
-void interface_set_songinfo (const gchar *artist, const gchar *title, const gchar *uri);
+void interface_set_songinfo (const gchar *artist, const gchar *title);
 void interface_set_song_position (gint64 position);
 void interface_set_song_duration (gint64 duration);
 void interface_set_playing (PlayerState state);

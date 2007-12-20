@@ -36,7 +36,7 @@ GdaConnection *conn;
 
 void db_init (int argc, char *argv[])
 {
-	g_message ("Datenbank init");
+	g_message ("Database init");
 	
 	gda_init (PACKAGE, VERSION, argc, argv);
 	//gnome_db_init (PACKAGE, VERSION, argc, argv);
@@ -53,13 +53,13 @@ void db_init (int argc, char *argv[])
 	//g_debug ("Name: %s", db_settings_get_string ("library", "name"));
 	//g_debug ("Filecount: %i", db_settings_get_integer (S_G_LIBRARY, S_K_FILECOUNT));
 	
-	ArtistDetails *artist;
+	//ArtistDetails *artist;
 	
-	artist = g_new0 (ArtistDetails, 1);
-	artist->name = g_strdup ("Sonata Arctica");
-	artist->id = db_artist_add (artist->name);
+	//artist = g_new0 (ArtistDetails, 1);
+	//artist->name = g_strdup ("Sonata Arctica");
+	//artist->id = db_artist_add (artist->name);
 	
-	g_message ("artist: id=%d, name=%s", artist->id, artist->name);
+	//g_message ("artist: id=%d, name=%s", artist->id, artist->name);
 	
 }
 
@@ -357,8 +357,6 @@ gint db_settings_get_integer (gchar *group, gchar *key)
 gint db_artist_add (gchar *name)
 {
 	GString *sql;
-	GdaDataModel *dm;
-	GValue *val;
 	gint id;
 	
 	// Schauen, ob Record schon existiert

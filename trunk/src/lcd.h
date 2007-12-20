@@ -23,7 +23,8 @@
 #define LCD_H
 
 // Includes
-#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include <gtk/gtkwidget.h>
 
 
 G_BEGIN_DECLS
@@ -40,11 +41,11 @@ typedef struct _Lcd			Lcd;
 typedef struct _LcdClass	LcdClass;
 
 struct _Lcd {
-	GtkDrawingArea parent;
+	GtkWidget parent;
 };
 
 struct _LcdClass {
-	GtkDrawingAreaClass parent_class;
+	GtkWidgetClass parent_class;
 };
 
 // Konstruktion
@@ -63,23 +64,13 @@ gchar* lcd_get_artist (Lcd *lcd);
 void lcd_set_album (Lcd *lcd, const gchar *album);
 gchar* lcd_get_album (Lcd *lcd);
 
-// URI
-void lcd_set_uri (Lcd *lcd, const gchar *uri);
-gchar* lcd_get_uri (Lcd *lcd);
-
-// Duration
-void lcd_set_duration (Lcd *lcd, const gchar *duration);
-gchar* lcd_get_duration (Lcd *lcd);
-
 // Need for Spped
 void lcd_set_speed (Lcd *lcd, gint speed);
 gint lcd_get_speed (Lcd *lcd);
 
-// Sliders - Das Tor in eine andere Dimension!
-void lcd_slide (Lcd *lcd);
-
-// Test, muss wieder raus
-void lcd_slide (Lcd *lcd);
+// Need for Spped
+void lcd_set_frequency (Lcd *lcd, gint frequency);
+gint lcd_get_frequency (Lcd *lcd);
 
 G_END_DECLS
 
