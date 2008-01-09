@@ -36,6 +36,11 @@ GstElement *sink;
 
 gint track_extracting;
 
+static int total_extracting;
+
+
+static GtkTreeIter current;
+
 // TreeView
 GtkTreeView *disc_tree;
 
@@ -72,7 +77,10 @@ void play_track (TrackDetails *track);
 gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 static GstElement* build_encoder (void);
 void display_track_state (gint track, TrackState state);
-
+static gboolean find_next (void);
+static void on_error_cb (GstBus *bus, GError *error, gpointer data);
+static void on_completion_cb (GstBus *bus, GError *error, gpointer data);
+static void on_progress_cb (GstBus *bus, GError *error, gpointer data);
 
 
 // Initialisation
@@ -149,6 +157,11 @@ void ripper_setup (void)
 	GstBus *bus;
 	bus = gst_pipeline_get_bus (GST_PIPELINE (ripper));
 	gst_bus_add_watch (bus, ripper_bus_callback, NULL);
+	
+	//g_signal_connect (bus, "progress", G_CALLBACK (on_progress_cb), NULL);
+    //g_signal_connect (bus, "completion", G_CALLBACK (on_completion_cb), NULL);
+    //g_signal_connect (bus, "error", G_CALLBACK (on_error_cb), NULL);
+	
 	gst_object_unref (bus);
 }
 
@@ -189,22 +202,37 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			GstState oldstate, newstate, pending;
 			
 			gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
-			g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
+			//g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
 
 			if (newstate == 4) {
-				g_message ("GStreamer is now playing!\n");	
+				g_message ("Ripper is now ripping! :)");	
 			}
 			if ((newstate == 2) && (oldstate == 3)) {
-				g_message ("GStreamer is now ready(stoped)!\n");
+				g_message ("Ripper is now ready!");
 			}
 			if ((newstate == 3) && (oldstate == 4)) {
-				g_message ("GStreamer is now paused!\n");
+				g_message ("Ripper is now paused!");
 			}
 		}
 		case GST_MESSAGE_EOS: {
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
-				g_message ("End Of Stream");
-				display_track_state (track_extracting, STATE_IMPORTED);
+				
+				
+				g_message ("Track fertig importiert!");
+				
+				
+				GtkListStore *store;
+				TrackDetails *track;
+				
+				if (find_next ()) {
+					store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+					gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
+					extract_track (track);
+				} else {
+					g_message ("Disc komplett importiert!");
+				}
+				
+				
 			}
 			break;
 		}
@@ -549,13 +577,11 @@ static gboolean extract_track_cb (GtkTreeModel *model, GtkTreePath *path,
 
 	gtk_tree_model_get (model, iter, COLUMN_EXTRACT, &extract,
 									 COLUMN_DETAILS, &track, -1);
+	
 	if (extract) {
-		gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_STATE, STATE_EXTRACTING, -1);
-		track_extracting = track->number;
-		extract_track (track);
-		//gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_STATE, STATE_IMPORTED, -1);
-		gtk_list_store_set (GTK_LIST_STORE (model), iter, COLUMN_EXTRACT, FALSE, -1);
+		++total_extracting;
 	}
+	
 
 	return FALSE;
 }
@@ -564,7 +590,7 @@ static gboolean extract_track_cb (GtkTreeModel *model, GtkTreePath *path,
 
 void extract_track (TrackDetails *track)
 {
-	g_message ("Rippe Track: %d", track->number);
+	g_message ("<extract_track> Rippe Track: %d", track->number);
 	
 	gchar *filename;
 	gchar *filepath;
@@ -575,7 +601,7 @@ void extract_track (TrackDetails *track)
 	filename = get_track_name (track->title, track->artist, track->number, ".ogg");
 	filepath = get_track_path (filename, track->album->title, track->artist);
 	
-	g_message ("filepath: %s", filepath);
+	//g_message ("filepath: %s", filepath);
 	
 	gst_element_set_state (ripper, GST_STATE_NULL);
 	g_object_set (source, "track", track->number, NULL);
@@ -588,12 +614,20 @@ void extract_track (TrackDetails *track)
 void extract_disc (void)
 {
 	GtkListStore *store;
+	TrackDetails *track = NULL;
 	
 	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+	
+	// Alle zu rippende Tracks zählen
 	gtk_tree_model_foreach (GTK_TREE_MODEL (store), extract_track_cb, NULL);
 	
+	// Mit dem ersten Track beginnen
+	gtk_tree_model_get_iter_first (GTK_TREE_MODEL (store), &current);
 	
 	
+	
+	gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
+	extract_track (track);
 }
 
 
@@ -652,7 +686,7 @@ static GstElement* build_encoder (void)
 	pipe = gm_audio_profile_get_pipeline (profile);
 	ext = gm_audio_profile_get_extension (profile);
 	
-	//g_message ("current media profile (name=%s | pipe=%s | ext=%s)", name, pipe, ext);
+	g_message ("current media profile (name=%s | pipe=%s | ext=%s)", name, pipe, ext);
 	
 	pipeline = g_strdup_printf ("audioresample ! audioconvert ! %s", pipe);
 	encoder = gst_parse_bin_from_description (pipeline, TRUE, NULL); /* TODO: return error */
@@ -676,3 +710,37 @@ void display_track_state (gint track, TrackState state)
 	
 	gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_STATE, state, -1);
 }
+
+
+static gboolean find_next (void)
+{
+	GtkListStore *store;
+	
+	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+	
+	return gtk_tree_model_iter_next (GTK_TREE_MODEL (store), &current);;
+}
+
+
+
+
+
+// Ripper Callbacks
+
+static void on_error_cb (GstBus *bus, GError *error, gpointer data)
+{
+	g_warning ("Ripper Error!");
+}
+
+static void on_completion_cb (GstBus *bus, GError *error, gpointer data)
+{
+	g_message ("Ripper Completed!");
+}
+
+static void on_progress_cb (GstBus *bus, GError *error, gpointer data)
+{
+	g_message ("Ripper progress!");
+}
+
+
+
