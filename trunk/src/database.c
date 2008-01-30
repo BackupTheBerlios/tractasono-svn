@@ -28,6 +28,10 @@
 #include "database.h"
 
 
+// Prototypen
+void db_testfunc (void);
+
+
 #define DATABASE "tractasono"
 
 
@@ -45,6 +49,13 @@ void db_init (int argc, char *argv[])
 	//db_list_sources ();
 	db_connect ();
 	
+	db_testfunc ();
+	
+}
+
+
+void db_testfunc (void)
+{
 	// Test Funktionen
 	//db_settings_set_string ("library", "path", "/opt/music/");
 	//db_settings_set_string ("library", "name", "Die geilschti Musig!");
@@ -61,7 +72,19 @@ void db_init (int argc, char *argv[])
 	
 	//g_message ("artist: id=%d, name=%s", artist->id, artist->name);
 	
+	
+	//g_message ("genre: name=%s", db_genre_get (db_genre_get_id ("Rock")));
+	//g_message ("artist: name=%s", db_artist_get (db_artist_get_id ("Hammerfall")));
+	
+	//ArtistDetails *test;
+	//test = db_artist_add ("Bratney Spears");
+	//g_message ("Artist: %s, Id: %d", test->name, test->id);
+	//test->name = g_strdup ("Brät Wurst");
+	//db_artist_update (test);
+	//g_free (test);
+	
 }
+
 
 
 void db_list_providers (void)
@@ -354,13 +377,152 @@ gint db_settings_get_integer (gchar *group, gchar *key)
 
 
 
-gint db_artist_add (gchar *name)
+gint db_genre_add (gchar *genre)
 {
 	GString *sql;
 	gint id;
 	
 	// Schauen, ob Record schon existiert
-	id = db_artist_get_id (name);
+	id = db_genre_get_id (genre);
+	if (id) {
+		// Datensatz Record zurückgeben
+		return id;
+	}
+		
+	// Datensatz neu erstellen
+	sql = g_string_new ("INSERT INTO tbl_genre (genrename)");
+	g_string_append_printf (sql, " VALUES ('%s')", genre);
+	db_execute_sql (sql->str);
+	
+	return db_artist_get_id (genre);
+}
+
+
+
+gint db_genre_get_id (gchar *genre)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	
+	sql = g_string_new ("SELECT IDgenre FROM tbl_genre");
+	g_string_append_printf (sql, " WHERE genrename = '%s'", genre);
+	dm = db_execute_sql (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	return g_value_get_int (val);
+}
+
+
+const gchar* db_genre_get (gint id)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	
+	sql = g_string_new ("SELECT genrename FROM tbl_genre");
+	g_string_append_printf (sql, " WHERE IDgenre = '%d'", id);
+	dm = db_execute_sql (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	return g_value_get_string (val);
+}
+
+
+
+
+ArtistDetails* db_artist_add (gchar *artist)
+{
+	GString *sql;
+	gint id;
+	ArtistDetails* details;
+	
+	details = g_new0 (ArtistDetails, 1);
+	details->name = g_strdup (artist);
+	
+	// Schauen, ob Record schon existiert
+	id = db_artist_get_id (artist);
+	if (id) {
+		// Datensatz Record zurückgeben
+		details->id = id;
+		
+		return details;
+	}
+		
+	// Datensatz neu erstellen
+	sql = g_string_new ("INSERT INTO tbl_artist (artistname)");
+	g_string_append_printf (sql, " VALUES ('%s')", artist);
+	db_execute_sql (sql->str);
+	
+	details->id = db_artist_get_id (artist);
+	
+	return details;
+}
+
+
+
+gboolean db_artist_update (ArtistDetails* details)
+{
+	GString *sql;
+	
+	sql = g_string_new ("UPDATE tbl_artist SET ");
+	g_string_append_printf (sql, "artistname = '%s'", details->name);
+	g_string_append_printf (sql, " WHERE IDartist = %d", details->id);
+	
+	//g_message ("SQL: %s", sql->str);
+	
+	return db_execute_sql_non_query (sql->str);
+}
+
+
+
+
+
+
+gint db_artist_get_id (gchar *artist)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	
+	sql = g_string_new ("SELECT IDartist FROM tbl_artist");
+	g_string_append_printf (sql, " WHERE artistname = '%s'", artist);
+	dm = db_execute_sql (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	if (val) {
+		return g_value_get_int (val);
+	} else {
+		return FALSE;	
+	}
+}
+
+
+
+const gchar* db_artist_get (gint id)
+{
+	GString *sql;
+	GdaDataModel *dm;
+	GValue *val;
+	
+	sql = g_string_new ("SELECT artistname FROM tbl_artist");
+	g_string_append_printf (sql, " WHERE IDartist = '%d'", id);
+	dm = db_execute_sql (sql->str);
+	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
+	
+	return g_value_get_string (val);
+}
+
+
+
+
+gint db_album_add (gchar *album, gchar *artist)
+{
+	GString *sql;
+	gint id;
+	
+	// Schauen, ob Record schon existiert
+	id = db_artist_get_id (artist);
 	if (id) {
 		// Datensatz Record zurückgeben
 		return id;
@@ -368,23 +530,30 @@ gint db_artist_add (gchar *name)
 		
 	// Datensatz neu erstellen
 	sql = g_string_new ("INSERT INTO tbl_artist (artistname)");
-	g_string_append_printf (sql, " VALUES ('%s')", name);
+	g_string_append_printf (sql, " VALUES ('%s')", artist);
 	db_execute_sql (sql->str);
 	
-	return db_artist_get_id (name);
+	return db_artist_get_id (artist);
 }
 
 
-gint db_artist_get_id (gchar *name)
+gint db_album_get_id (gchar *album, gchar *artist)
 {
 	GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	
 	sql = g_string_new ("SELECT IDartist FROM tbl_artist");
-	g_string_append_printf (sql, " WHERE artistname = '%s'", name);
+	g_string_append_printf (sql, " WHERE artistname = '%s'", artist);
 	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
 	return g_value_get_int (val);
 }
+
+
+
+
+
+
+

@@ -34,7 +34,7 @@
 #include "player.h"
 #include "interface.h"
 #include "lcd.h"
-
+#include "gtk-circle.h"
 
 
 const gchar url_genre[] = "http://www.shoutcast.com/sbin/newxml.phtml";
@@ -135,6 +135,24 @@ void radio_init(void)
 	g_signal_connect (pl_parser, "playlist-start", G_CALLBACK(cb_parser_start), NULL);
 	g_signal_connect (pl_parser, "playlist-end", G_CALLBACK(cb_parser_end), NULL);
 	g_signal_connect (pl_parser, "entry-parsed", G_CALLBACK(cb_parser_entry), NULL);
+
+
+
+
+	// Circle
+	GtkCircle *circle;
+	GtkWidget *vbox;
+	vbox = glade_xml_get_widget(glade, "vbox_circle");
+	if (vbox == NULL) {
+		g_error("Konnte vbox_circle nicht holen!\n");
+	}
+	circle = gtk_circle_new ();
+	gtk_container_add (GTK_CONTAINER (vbox), GTK_WIDGET (circle));
+	
+	// Widget anzeigen
+	gtk_widget_show (GTK_WIDGET (circle));
+
+
 }
 
 

@@ -24,6 +24,7 @@
 
 // Defines
 #define FRAME_ABSTAND 10
+#define RAHMEN_DICKE 2
 
 
 #define LCD_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), LCD_TYPE, LcdPrivate))
@@ -253,6 +254,13 @@ static void draw_text (Lcd *lcd, cairo_t *cr)
 	
 	cairo_move_to (cr, x, y);
 	cairo_show_text (cr, text);
+	
+	// Debug Rechteck zeichnen
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgb (cr, 1, 0, 0);
+	cairo_rectangle (cr, x, y-extents.height, extents.width, extents.height);
+	//cairo_stroke (cr);
+
 }
 
 
@@ -264,22 +272,27 @@ static void draw_frame (Lcd *lcd, cairo_t *cr)
 	widget = GTK_WIDGET (lcd);
 
 	// Koordinaten setzen
-	x = 0;
-	y = 0;
-	w = widget->allocation.width;
-	h = widget->allocation.height;
+	x = 0 + RAHMEN_DICKE / 2;
+	y = 0 + RAHMEN_DICKE / 2;
+	w = widget->allocation.width - RAHMEN_DICKE;
+	h = widget->allocation.height - RAHMEN_DICKE;
 	
 	//g_debug ("LCD frame position: x=%.1f y=%.1f w=%.1f h=%.1f", x, y, w, h);
 	
-	// Liniendicke setzen
-	cairo_set_line_width (cr, 2);
-	
-	// Rahmen zeichnen
-	cairo_rectangle (cr, x, y, w, h);
-	
-	// Farben setzen
+	// Hintergrund
 	cairo_set_source_rgb (cr, 0.7, 0.8, 0.8);
+	cairo_rectangle (cr, x, y, w, h);
 	cairo_fill_preserve (cr);
+	//cairo_fill (cr);
+	//cairo_stroke (cr);
+	
+	// Rahmen
+	cairo_set_line_width (cr, RAHMEN_DICKE);
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	//cairo_set_line_width (cr, 3);
+	//cairo_rectangle (cr, x, y, w, h);
+	cairo_stroke (cr);
+	
 }
 
 
@@ -335,6 +348,33 @@ static gboolean lcd_expose (GtkWidget *widget, GdkEventExpose *event)
 
 	/* get a cairo_t */
 	cr = gdk_cairo_create (widget->window);
+	
+	cairo_set_antialias (cr, CAIRO_ANTIALIAS_NONE);
+	
+	// Antialiasing
+	switch (cairo_get_antialias (cr)) {
+		case CAIRO_ANTIALIAS_DEFAULT:
+			g_message ("Antialiasing: Default");
+			break;
+		case CAIRO_ANTIALIAS_GRAY:
+			g_message ("Antialiasing: GRAY");
+			break;
+		case CAIRO_ANTIALIAS_NONE:
+			g_message ("Antialiasing: NONE");
+			break;
+		case CAIRO_ANTIALIAS_SUBPIXEL:
+			g_message ("Antialiasing: SUBPIXEL");
+			break;
+	}
+	
+	cairo_font_options_t *font_options;
+	
+	font_options = cairo_font_options_create ();
+	cairo_get_font_options (cr, font_options);
+	
+	cairo_font_options_set_antialias (font_options, CAIRO_ANTIALIAS_NONE);
+
+	cairo_set_font_options (cr, font_options);
 
 	/* set a clip region for the expose event */
 	cairo_rectangle (cr, event->area.x, event->area.y,
@@ -345,7 +385,7 @@ static gboolean lcd_expose (GtkWidget *widget, GdkEventExpose *event)
 	draw_text (lcd, cr);
 	
 	// Alles zeichnen
-	cairo_stroke (cr);
+	//cairo_stroke (cr);
 
 	// free cairo_t *
 	cairo_destroy (cr);

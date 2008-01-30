@@ -23,6 +23,8 @@
 #define DATABASE_H
 
 
+#include "strukturen.h"
+
 // Gruppen Keys
 #define S_G_LIBRARY	"library"
 
@@ -63,7 +65,24 @@ gchar* db_settings_get_string (gchar *group, gchar *key);
 void db_settings_set_integer (gchar *group, gchar *key, gint value);
 gint db_settings_get_integer (gchar *group, gchar *key);
 
-gint db_artist_add (gchar *name);
-gint db_artist_get_id (gchar *name);
+
+// Genre Funktionen
+gint db_genre_add (gchar *genre);
+gint db_genre_get_id (gchar *genre);
+const gchar* db_genre_get_name (gint id);
+gboolean db_genre_remove (gint id);
+gboolean db_genre_rename (gint id, gchar *newname);
+
+
+
+// Artist Funktionen
+ArtistDetails* db_artist_add (gchar *artist);
+gboolean db_artist_update (ArtistDetails* details);
+
+gint db_artist_get_id (gchar *artist);
+const gchar* db_artist_get (gint id);
+
+gint db_album_add (gchar *album, gchar *artist);
+
 
 #endif
