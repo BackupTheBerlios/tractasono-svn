@@ -152,6 +152,9 @@ void radio_init(void)
 	// Widget anzeigen
 	gtk_widget_show (GTK_WIDGET (circle));
 
+	// Widget zerstören
+	//gtk_widget_destroy(circle);
+	//g_free(circle);
 
 }
 

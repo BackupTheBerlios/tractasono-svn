@@ -20,6 +20,7 @@
  */
 
 #include "gtk-circle.h"
+#include <math.h>
 
 
 #define GTK_CIRCLE_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_CIRCLE_TYPE, GtkCirclePrivate))
@@ -43,6 +44,7 @@ static void gtk_circle_init (GtkCircle *gtk_circle);
 static void gtk_circle_set_property (GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
 static void gtk_circle_get_property (GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
 static void gtk_circle_realize (GtkWidget *widget);
+static void gtk_circle_paint (GtkCircle *gtk_circle);
 static gboolean gtk_circle_expose (GtkWidget *widget, GdkEventExpose *event);
 static gboolean gtk_circle_redraw_canvas (GtkCircle *gtk_circle);
 
@@ -193,26 +195,117 @@ static void gtk_circle_realize (GtkWidget *widget)
 static gboolean gtk_circle_expose (GtkWidget *widget, GdkEventExpose *event)
 {
 	GtkCircle *gtk_circle;
-	cairo_t *cr;
 	
 	//g_debug ("expose event");
 
 	gtk_circle = GTK_CIRCLE (widget);
 
-	/* get a cairo_t */
-	cr = gdk_cairo_create (widget->window);
-
-	/* set a clip region for the expose event */
-	cairo_rectangle (cr, event->area.x, event->area.y,
-					 event->area.width, event->area.height);
-	cairo_clip (cr);
-
 	// Hier zeichnen!!!
+	gtk_circle_paint(gtk_circle);
 
-	// free cairo_t *
-	cairo_destroy (cr);
 
 	return FALSE;
+}
+
+
+static void gtk_circle_paint (GtkCircle *gtk_circle)
+{
+	cairo_t*  cr = NULL;
+	gdouble   fWidth   = (gdouble) GTK_WIDGET(gtk_circle)->allocation.width;
+	gdouble   fHeight  = (gdouble) GTK_WIDGET(gtk_circle)->allocation.height;
+//	gdouble   fSeconds;
+//	gulong    ulMicroSeconds;
+
+
+	/* deal with the timing stuff 
+	fSeconds = g_timer_elapsed (pPassAround->pTimer, &ulMicroSeconds);
+	g_message("timer: %f", fSeconds);
+	*/
+	/*
+	if (fSeconds >= 4.0f)
+		g_timer_reset (pPassAround->pTimer);
+	*/
+	/* clear drawing-context */
+	cr = gdk_cairo_create (GTK_WIDGET(gtk_circle)->window);
+	
+	/* set the clipping-rectangle */
+	cairo_rectangle (cr, 0.0f, 0.0f, fWidth, fHeight);
+	cairo_clip (cr);
+
+	gint i;
+	gdouble angle1;
+	gdouble angle2;
+	gdouble x, y;
+	gdouble pos_x, pos_y;
+	gdouble kreisgroesse;
+	gdouble punktegroesse;
+
+	x = fWidth / 2.0f;
+	y = fHeight / 2.0f;
+	if (fWidth < fHeight){
+		kreisgroesse = fWidth / 2.0f * 0.6; 	
+	} else {
+		kreisgroesse = fHeight / 2.0f * 0.6;
+	}
+	punktegroesse = kreisgroesse / 4.5;
+	// g_message ("kreisgroesse : %f", kreisgroesse);
+	static gint aktiverpunkt = 0;
+	if (aktiverpunkt >= 315) {
+		aktiverpunkt = 0;
+	} else {
+		aktiverpunkt = aktiverpunkt + 45;
+	} 
+	
+	// gint drehung_max = drehung + 315;
+
+	for (i = aktiverpunkt; i <= aktiverpunkt + 315; i = i + 45) {
+		/*
+		g_message ("i : %d", i);
+		g_message ("aktiverpunkt : %d", aktiverpunkt);
+		*/
+		angle1 = i * (M_PI / 180.0);
+		angle2 = angle1 + (45 * (M_PI / 180.0));
+
+		cairo_set_line_width (cr, 0.0);
+		cairo_arc (cr, x, y, kreisgroesse, angle1, angle2);
+		
+		cairo_get_current_point (cr, &pos_x, &pos_y);
+
+		cairo_stroke (cr);
+
+		//g_message ("x : %f, y : %f  /  pos_x : %f, pos_y : %f", x, y, pos_x, pos_y);
+
+		cairo_set_line_width (cr, 2.0);
+		cairo_arc (cr, pos_x, pos_y, punktegroesse, 0, 2 * M_PI);
+		if(aktiverpunkt == i) {
+			cairo_set_source_rgba (cr, 0.074509804, 0.074509804, 0.905882353, 1.0f);
+		} else {
+			cairo_set_source_rgba (cr, 0.074509804, 0.074509804, 0.905882353, 0.3); // 0.792156863, 0.792156863, 1
+		}
+		
+		cairo_fill_preserve (cr);
+		if(aktiverpunkt == i) {
+			cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0f);
+		} else {
+			cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.6);
+		}
+		cairo_stroke(cr);
+		
+	}
+	
+	cairo_destroy (cr);
+}
+
+gboolean redraw_handler (gpointer data)
+{
+	g_message("redraw handler aufgerufen...");
+	
+	if(IS_GTK_CIRCLE(data)) {
+		gtk_widget_queue_draw (GTK_WIDGET(data));
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }
 
 
@@ -222,6 +315,8 @@ static void gtk_circle_init (GtkCircle *gtk_circle)
 	
 	GtkCirclePrivate *priv;
 	priv = GTK_CIRCLE_GET_PRIVATE (gtk_circle);
+	
+	g_timeout_add (250, redraw_handler, (gpointer) gtk_circle);
 	
 	// default speed
 	priv->speed = 50;
