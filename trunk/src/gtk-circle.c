@@ -1,7 +1,7 @@
 /*
  *      gtk-circle.c
  *      
- *      Copyright 2007 Patrik Obrist <padx@gmx.net>
+ *      Copyright 2007 Patrik Obrist <padx@gmx.net>, Robin Ratcliff
  *      
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -298,7 +298,7 @@ static void gtk_circle_paint (GtkCircle *gtk_circle)
 
 gboolean redraw_handler (gpointer data)
 {
-	g_message("redraw handler aufgerufen...");
+	// g_message("redraw handler aufgerufen...");
 	
 	if(IS_GTK_CIRCLE(data)) {
 		gtk_widget_queue_draw (GTK_WIDGET(data));

@@ -1,4 +1,4 @@
-/*
+ /*
  *      lcd.c
  *      
  *      Copyright 2007 Patrik Obrist <padx@gmx.net>
@@ -349,9 +349,10 @@ static gboolean lcd_expose (GtkWidget *widget, GdkEventExpose *event)
 	/* get a cairo_t */
 	cr = gdk_cairo_create (widget->window);
 	
-	cairo_set_antialias (cr, CAIRO_ANTIALIAS_NONE);
+	cairo_set_antialias (cr, CAIRO_ANTIALIAS_DEFAULT);
 	
 	// Antialiasing
+	/*
 	switch (cairo_get_antialias (cr)) {
 		case CAIRO_ANTIALIAS_DEFAULT:
 			g_message ("Antialiasing: Default");
@@ -366,13 +367,11 @@ static gboolean lcd_expose (GtkWidget *widget, GdkEventExpose *event)
 			g_message ("Antialiasing: SUBPIXEL");
 			break;
 	}
-	
+	*/
 	cairo_font_options_t *font_options;
 	
 	font_options = cairo_font_options_create ();
 	cairo_get_font_options (cr, font_options);
-	
-	cairo_font_options_set_antialias (font_options, CAIRO_ANTIALIAS_NONE);
 
 	cairo_set_font_options (cr, font_options);
 
