@@ -41,10 +41,10 @@ void recursive_dir (const gchar *path);
 void export_file (const gchar *import_path);
 void create_dir (const gchar *path, gboolean with_parents);
 gchar *get_export_dir (void);
-gchar *get_artist_dir (const gchar *artist);
-void create_artist_dir (const gchar *artist);
-gchar *get_album_dir (const gchar *album, const gchar *artist);
-void create_album_dir (const gchar *album, const gchar *artist);
+gchar *get_artist_dir (gchar *artist);
+void create_artist_dir (gchar *artist);
+gchar *get_album_dir (gchar *album, gchar *artist);
+void create_album_dir (gchar *album, gchar *artist);
 gchar *get_song_path (TagLib_Tag *tag, gchar *extension);
 gchar *get_file_extension (gchar *path);
 gboolean copy_file (const gchar *source, const gchar *target);
@@ -161,6 +161,7 @@ void export_file (const gchar *import_path)
 	
 	// Export Pfad bestimmen
 	export_path = get_song_path (tag, get_file_extension (filename));
+	g_debug("export-Pfad: %s", export_path);
 	
 	// Datei kopieren
 	if (!copy_file (import_path, export_path)) {
@@ -179,6 +180,7 @@ void create_dir (const gchar *path, gboolean with_parents)
 	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
 		gint ret;
 		if (with_parents) {
+			// g_debug("Ordnername: %s", path);
 			ret = g_mkdir_with_parents (path, 493);
 		} else {
 			ret = g_mkdir (path, 493);
@@ -196,25 +198,25 @@ gchar *get_export_dir (void)
 }
 
 // Gibt den Verzeichnisname für einen Artist zurück
-gchar *get_artist_dir (const gchar *artist)
+gchar *get_artist_dir (gchar *artist)
 {
-	return g_strdup_printf ("%s%s/", get_export_dir (), artist);
+	return g_strdup_printf ("%s%s/", get_export_dir (), g_strdelimit(artist, "/", '-'));
 }
 
 // Erstellt ein Verzeichnis für einen Artist
-void create_artist_dir (const gchar *artist)
+void create_artist_dir (gchar *artist)
 {
 	create_dir (get_artist_dir (artist), FALSE);
 }
 
 // Gibt den Verzeichnisname für einen Album zurück
-gchar *get_album_dir (const gchar *album, const gchar *artist)
+gchar *get_album_dir (gchar *album, gchar *artist)
 {
-	return g_strdup_printf ("%s%s/", get_artist_dir (artist), album);
+	return g_strdup_printf ("%s%s/", get_artist_dir (artist), g_strdelimit(album, "/", '-'));
 }
 
 // Erstellt ein Verzeichnis für einen Album
-void create_album_dir (const gchar *album, const gchar *artist)
+void create_album_dir (gchar *album, gchar *artist)
 {
 	create_artist_dir (artist);
 	create_dir (get_album_dir (album, artist), FALSE);
@@ -228,13 +230,14 @@ gchar *get_song_path (TagLib_Tag *tag, gchar *extension)
 	gint track;
 	
 	// Tags holen
-	artist = taglib_tag_artist (tag);
-	title = taglib_tag_title (tag);
+	artist = g_strdelimit(taglib_tag_artist (tag), "/", '-');
+	title = g_strdelimit(taglib_tag_title (tag), "/", '-');
 	album = taglib_tag_album (tag);
 	track = taglib_tag_track (tag); // Gibt Track-Nr oder 0 zurück
 	
 	// Starte mit Album Pfad
 	path = g_string_new (get_album_dir (album, artist));
+	
 	
 	// Dateiname entsprechend den vorhanden Infos formatieren
 	if (track > 0) {

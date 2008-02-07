@@ -200,7 +200,7 @@ gboolean player_get_playing(void)
 {
 	GstState state;
 	
-	gst_element_get_state(GST_ELEMENT(pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
+	gst_element_get_state(GST_ELEMENT(pipeline), &state, NULL, GST_MSECOND);
 	
 	if (state != GST_STATE_PLAYING) {
 		return FALSE;
@@ -214,7 +214,7 @@ PlayerState player_get_state(void)
 {
 	GstState state;
 	
-	gst_element_get_state(GST_ELEMENT(pipeline), &state, NULL, GST_CLOCK_TIME_NONE);
+	gst_element_get_state(GST_ELEMENT(pipeline), &state, NULL, GST_MSECOND);
 	
 	if (state != GST_STATE_PLAYING) {
 		return STATE_PLAY_NOTHING;
