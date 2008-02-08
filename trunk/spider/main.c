@@ -161,7 +161,7 @@ void export_file (const gchar *import_path)
 	
 	// Export Pfad bestimmen
 	export_path = get_song_path (tag, get_file_extension (filename));
-	g_debug("export-Pfad: %s", export_path);
+	//g_debug("export-Pfad: %s", export_path);
 	
 	// Datei kopieren
 	if (!copy_file (import_path, export_path)) {
@@ -279,10 +279,10 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	
 	// Prüfen, ob die Datei bereits vorhanden ist
 	if (exist_target (source, target)) {
-		g_message ("Existiert bereits -> %s", source);
+		//g_message ("Existiert bereits -> %s", source);
 		return TRUE;
 	} else {
-		g_message ("Wird importiert -> %s", source);
+		g_message ("Importiere %s\n", source);
 	}
 
 	// Neue Datei zum befüllen anlegen
@@ -336,20 +336,37 @@ gboolean check_tags (TagLib_Tag *tag)
 
 
 // Prüfen, ob die Ziel-Datei bereits vorhanden ist
+// Vegleicht auch die Dateigrössen
 gboolean exist_target (const gchar *source, const gchar *target)
 {
 	if (g_file_test(target, G_FILE_TEST_EXISTS)) {
 		
 		GnomeVFSFileInfo *info_source, *info_target;
+		GnomeVFSResult res;
+		GnomeVFSURI *uri_source, *uri_target;
 		
 		info_source = gnome_vfs_file_info_new ();
 		info_target = gnome_vfs_file_info_new ();
-		
-		if (gnome_vfs_get_file_info (source, info_source, 0) != GNOME_VFS_OK) {
+
+		// Dateiinformationen der Quelldatei holen
+		uri_source = gnome_vfs_uri_new (gnome_vfs_make_uri_from_input (source));
+		if (uri_source == NULL) {
+			g_error ("URI %s is NULL", source);
+		}
+		res = gnome_vfs_get_file_info_uri (uri_source, info_source, GNOME_VFS_FILE_INFO_DEFAULT);
+		if (res != GNOME_VFS_OK) {
+			g_warning ("'%s' in Quelldatei %s", gnome_vfs_result_to_string (res), source);
 			return FALSE;
 		}
 		
-		if (gnome_vfs_get_file_info (target, info_target, 0) != GNOME_VFS_OK) {
+		// Dateiinformationen der Zieldatei holen
+		uri_target = gnome_vfs_uri_new (gnome_vfs_get_uri_from_local_path (target));
+		if (uri_target == NULL) {
+			g_error ("URI %s is NULL", target);
+		}
+		res = gnome_vfs_get_file_info_uri (uri_target, info_target, GNOME_VFS_FILE_INFO_DEFAULT);
+		if (res != GNOME_VFS_OK) {
+			g_warning ("'%s' in Zieldatei %s", gnome_vfs_result_to_string (res), target);
 			return FALSE;
 		}
 		
