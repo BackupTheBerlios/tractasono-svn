@@ -73,4 +73,6 @@ void interface_set_song_duration (gint64 duration);
 void interface_set_playing (PlayerState state);
 void interface_update_controls (ControlState state);
 
+GtkWidget* interface_get_widget (gchar *name);
+
 #endif

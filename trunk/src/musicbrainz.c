@@ -73,7 +73,7 @@ AlbumDetails* get_album_offline (void)
 	album = g_new0 (AlbumDetails, 1);
 	album->artist = g_strdup ("Unknown Artist");
 	album->title = g_strdup ("Unknown Title");
-	album->genre = NULL;
+	album->genre = g_strdup ("Unknown Genre");
 	
 	for (i = 1; i <= num_tracks; i++) {
 		track = g_new0 (TrackDetails, 1);
@@ -141,11 +141,20 @@ AlbumDetails* lookup_cd (void)
 		}
 	}
 
+	// Disc title
 	if (mb_GetResultData(mb, MBE_AlbumGetAlbumName, data, sizeof (data))) {
 		album->title = g_strdup (data);
 	} else {
 		album->title = g_strdup ("Unknown Title");
 	}
+	
+	// Disc genre
+	/*if (mb_GetResultData(mb, MBE_AlbumGetAlbumGenre, data, sizeof (data))) {
+		album->genre = g_strdup (data);
+	} else {
+		album->title = g_strdup ("Unknown Genre");
+	}*/
+	album->genre = g_strdup ("Unbekannt");
 
 	{
 		int num_releases;

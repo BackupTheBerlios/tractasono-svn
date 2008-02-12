@@ -547,3 +547,16 @@ void interface_update_controls (ControlState state)
 	}
 	
 }
+
+
+GtkWidget* interface_get_widget (gchar *name)
+{
+	GtkWidget *widget;
+	
+	widget = glade_xml_get_widget(glade, name);
+	if (widget == NULL) {
+		g_error ("Das Widget '%s' konnte nicht geholt werden!", name);
+	}
+	
+	return widget;
+}

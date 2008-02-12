@@ -375,17 +375,23 @@ void duration_cell_data_cb (GtkTreeViewColumn *tree_column,
 
 void display_disctitle (AlbumDetails *album)
 {
-	GtkWidget *label;
-	gchar *text;
+	GtkWidget *widget;
 	
-	label = glade_xml_get_widget (glade, "label_disctitle");
-	if (!label) {
-		g_error ("Konnte label_disctitle nicht holen!");
-	}
+	// CD Titel
+	widget = interface_get_widget ("entry_disc_title");
+	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->title));
 	
-	text = g_strdup_printf ("%s - %s", album->artist, album->title);
+	// CD Artist
+	widget = interface_get_widget ("entry_disc_artist");
+	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->artist));
 	
-	gtk_label_set_text (GTK_LABEL (label), text);
+	// CD Genre
+	widget = interface_get_widget ("entry_disc_genre");
+	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->genre));
+	
+	// Album Release
+	widget = interface_get_widget ("spinbutton_disc_year");
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON (widget), (gdouble)g_date_get_year (album->release_date));
 }
 
 
