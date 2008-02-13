@@ -400,26 +400,29 @@ void interface_show_module_fullscreen (GtkWidget *widget)
 // Handler für seeking
 gboolean on_range_song_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-	g_debug("Progress Button pressed!");
+	g_debug ("Progress Button pressed!");
 	
 	gint x, y, breite, hoehe, tiefe;
 	gint64 position;
 	gint64 duration;
 	gdouble barpos;
 	
-	gdk_window_get_geometry(GDK_WINDOW(event->window), &x, &y, &breite, &hoehe, &tiefe);                   
+	gdk_window_get_geometry (GDK_WINDOW(event->window), &x, &y, &breite, &hoehe, &tiefe);                   
     barpos = (gdouble) event->x / breite;
     
-    g_debug("\tbreite=%i, position=%f, barpos=%f", breite, event->x, barpos);
+    //g_debug("\tbreite=%i, position=%f, barpos=%f", breite, event->x, barpos);
 	
 	duration = player_get_duration();
 	
 	// seekposition berechnen
 	position = duration * barpos;
 	
-	g_debug("\tduration=%"G_GINT64_FORMAT", position=%"G_GINT64_FORMAT"", duration, position);
+	// Slider Position temporär setzen
+	interface_set_song_position (position);
 	
-	player_seek_to_position(position);
+	//g_debug("\tduration=%"G_GINT64_FORMAT", position=%"G_GINT64_FORMAT"", duration, position);
+	
+	player_seek_to_position (position);
 
 	return FALSE;
 }

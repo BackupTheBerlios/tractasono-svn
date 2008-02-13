@@ -48,6 +48,7 @@ struct _AlbumDetails {
 	char* artist;
 	char *genre;
 	int   number; /* number of tracks in the album */
+	gboolean compilation;
 	GList* tracks;
 	GDate *release_date; /* MusicBrainz support multiple releases per album */
 	char* album_id;
@@ -60,8 +61,8 @@ struct _ArtistDetails {
 	char* name;
 };
 
-void album_details_free(AlbumDetails *album);
-void track_details_free(TrackDetails *track);
-void artist_details_free(ArtistDetails *artist);
+void album_details_free (AlbumDetails *album);
+void track_details_free (TrackDetails *track);
+void artist_details_free (ArtistDetails *artist);
 
 #endif

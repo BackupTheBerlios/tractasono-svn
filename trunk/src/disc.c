@@ -32,7 +32,11 @@
 // GStreamer Variablen
 GstElement *ripper;
 GstElement *source;
+GstElement *encoder;
 GstElement *sink;
+
+
+AlbumDetails *the_album;
 
 gint track_extracting;
 
@@ -81,6 +85,8 @@ static gboolean find_next (void);
 static void on_error_cb (GstBus *bus, GError *error, gpointer data);
 static void on_completion_cb (GstBus *bus, GError *error, gpointer data);
 static void on_progress_cb (GstBus *bus, GError *error, gpointer data);
+gboolean get_compilation (void);
+void set_compilation (gboolean active);
 
 
 // Initialisation
@@ -97,6 +103,9 @@ void disc_init()
 	// Ripper Pipeline aufsetzen
 	ripper_setup ();
 
+	// Variablen initialisieren
+	the_album = NULL;
+
 	// Testfunktion
 	//ripper_test ();
 	
@@ -107,9 +116,14 @@ void ripper_setup (void)
 {
 	g_message ("\t\tSetup ripper pipeline");
 	
-	/* elements */
+	// Elemente
 	GstElement *queue;
-	GstElement *encoder;
+	GstElement *converter;
+	GstElement *muxer;
+	GstElement *tagger;
+	
+	// Bus
+	GstBus *bus;
 
 	/* create ripper pipeline */
 	ripper = gst_pipeline_new ("ripper");
@@ -117,46 +131,66 @@ void ripper_setup (void)
 		g_warning ("Konnte ripper pipeline nicht erstellen!");
 	}
 	
-	// Source (CD)
-	source = gst_element_make_from_uri (GST_URI_SRC, "cdda://", "source");
+	// Source (Audio-CD)
+	source = gst_element_factory_make ("cdparanoiasrc", "ripper-source");
 	if (source == NULL) {
 		g_warning ("Konnte source element nicht erstellen!");
 	}
 	
 	// Warteschlange (grosser Buffer)
-	queue = gst_element_factory_make ("queue", "queue");
+	queue = gst_element_factory_make ("queue", "ripper-queue");
 	if (queue == NULL) {
 		g_warning ("Konnte queue element nicht erstellen!");
 	} else {
 		g_object_set (queue, "max-size-time", 120 * GST_SECOND, NULL);
 	}
 	
-	// Encoder (GNOME media profile)
-	encoder = build_encoder ();
-	if (encoder == NULL) {
-		g_warning ("Konnte encoder element nicht erstellen!");
+	// Audio converter
+	converter = gst_element_factory_make ("audioconvert", "ripper-converter");
+	if (converter == NULL) {
+		g_warning ("Konnte converter element nicht erstellen!");
 	}
 	
-	// Sink (File)
-	sink = gst_element_factory_make ("filesink", "sink");
+	// Encoder (Ogg Vorbis)
+	encoder = gst_element_factory_make ("vorbisenc", "ripper-encoder");
+	if (encoder == NULL) {
+		g_warning ("Konnte encoder element nicht erstellen!");
+	} else {
+		g_object_set (encoder, "quality", 0.5, NULL);
+	}
+	
+	// Muxer (Ogg Muxer)
+	muxer = gst_element_factory_make ("oggmux", "ripper-muxer");
+	if (muxer == NULL) {
+		g_warning ("Konnte muxer element nicht erstellen!");
+	}
+	
+	// Tagger (Vorbistag)
+	tagger = gst_element_factory_make ("vorbistag", "ripper-tagger");
+	if (tagger == NULL) {
+		g_warning ("Konnte tagger element nicht erstellen!");
+	}
+	
+	// Sink (Datei)
+	sink = gst_element_factory_make ("filesink", "ripper-sink");
 	if (sink == NULL) {
 		g_warning ("Konnte sink element nicht erstellen!");
 	} else {
-		g_object_set (sink, "location", "/home/patrik/test.ogg", NULL);
+		// location muss zwingend später überschrieben werden
+		g_object_set (sink, "location", "/tmp/test.ogg", NULL);
 	}
 
-	/* must add elements to pipeline before linking them */
-	gst_bin_add_many (GST_BIN (ripper), source, queue, encoder, sink, NULL);
+	// Alle Elemente zur Pipeline hinzufügen
+	gst_bin_add_many (GST_BIN (ripper), source, queue, converter, encoder, muxer, sink, NULL);
 
-	/* link all elements together */
-	if (!gst_element_link_many (source, queue, encoder, sink, NULL)) {
+	// Alle Elemente zusammenlinken
+	if (!gst_element_link_many (source, queue, converter, encoder, muxer, sink, NULL)) {
 		g_warning ("Konnte ripper elemente nicht linken!");
 	}
 	
 	// Bus Callback anbinden
-	GstBus *bus;
 	bus = gst_pipeline_get_bus (GST_PIPELINE (ripper));
-	gst_bus_add_watch (bus, ripper_bus_callback, NULL);
+	gst_bus_add_watch (GST_BUS (bus), ripper_bus_callback, NULL);
 	
 	//g_signal_connect (bus, "progress", G_CALLBACK (on_progress_cb), NULL);
     //g_signal_connect (bus, "completion", G_CALLBACK (on_completion_cb), NULL);
@@ -389,36 +423,43 @@ void display_disctitle (AlbumDetails *album)
 	widget = interface_get_widget ("entry_disc_genre");
 	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->genre));
 	
-	// Album Release
+	// Release Jahr
 	widget = interface_get_widget ("spinbutton_disc_year");
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON (widget), (gdouble)g_date_get_year (album->release_date));
+	
+	// CD Nummer
+	widget = interface_get_widget ("spinbutton_disc_discno");
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON (widget), (gdouble)1);
+	
+	// Compilation
+	set_compilation (album->compilation);
 }
 
 
 
 void on_button_reread_clicked (GtkWidget *widget, gpointer user_data)
-{
-	AlbumDetails *album;
-	
+{	
 	GtkListStore *store;
 	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
 	
 	// Vorhandene Tracks zuerst löschen
 	gtk_list_store_clear (store);
 	
-	album = lookup_cd ();
-	if (album == NULL) {
+	
+	// FIXME: hier muss zuerst Speicher freigegeben werden
+	the_album = musicbrainz_lookup_cd ();
+	if (the_album == NULL) {
 		g_warning ("CD konnte nich eingelesen werden!");
 	} else {
-		g_message ("CD einlesen (title: %s | artist: %s | tracks: %d)", album->title,
-														  album->artist,
-														  album->number);
+		g_message ("CD einlesen (title: %s | artist: %s | tracks: %d)", the_album->title,
+														  the_album->artist,
+														  the_album->number);
 
 		// CD Namen anzeigen
-		display_disctitle (album);
+		display_disctitle (the_album);
 
 		// Tracks ins Grid einfüllen
-		GList *tracks = g_list_first(album->tracks);
+		GList *tracks = g_list_first(the_album->tracks);
 		while (tracks != NULL) {
 			track_insert (tracks->data);
 			tracks = tracks->next;
@@ -610,8 +651,27 @@ void extract_track (TrackDetails *track)
 	//g_message ("filepath: %s", filepath);
 	
 	gst_element_set_state (ripper, GST_STATE_NULL);
+	
+	// Track von Source holen
 	g_object_set (source, "track", track->number, NULL);
+	
+	// Dateipfad auf Sink setzen
 	g_object_set (sink, "location", filepath, NULL);
+	
+	// Tags setzen
+	GstTagList *taglist;
+	taglist = gst_tag_list_new ();
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TITLE, track->title, NULL);
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ARTIST, track->artist, NULL);
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ALBUM, track->album->title, NULL);
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TRACK_NUMBER, track->number, NULL);
+	if (track->album->release_date) {
+		gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_DATE, track->album->release_date, NULL);
+	}
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_COMMENT, "ripped by tractasono", NULL);
+	gst_tag_setter_merge_tags  (GST_TAG_SETTER (encoder), taglist, GST_TAG_MERGE_REPLACE_ALL);
+	gst_tag_list_free (taglist);
+	
 	gst_element_set_state (ripper, GST_STATE_PLAYING);
 }
 
@@ -692,7 +752,7 @@ static GstElement* build_encoder (void)
 	pipe = gm_audio_profile_get_pipeline (profile);
 	ext = gm_audio_profile_get_extension (profile);
 	
-	g_message ("current media profile (name=%s | pipe=%s | ext=%s)", name, pipe, ext);
+	//g_message ("current media profile (name=%s | pipe=%s | ext=%s)", name, pipe, ext);
 	
 	pipeline = g_strdup_printf ("audioresample ! audioconvert ! %s", pipe);
 	encoder = gst_parse_bin_from_description (pipeline, TRUE, NULL); /* TODO: return error */
@@ -750,3 +810,38 @@ static void on_progress_cb (GstBus *bus, GError *error, gpointer data)
 
 
 
+
+gboolean get_compilation (void)
+{
+	GtkWidget *widget = interface_get_widget ("checkbutton_disc_compilation");
+	return gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+}
+
+
+void set_compilation (gboolean active)
+{
+	GtkWidget *widget = interface_get_widget ("checkbutton_disc_compilation");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), active);
+}
+
+
+void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
+{
+	if (!get_compilation ()) {
+		// Alle Artists ändern
+		gchar *text;
+		GtkWidget *widget;
+		GtkTreeModel *model;
+		GtkTreeIter iter;
+		
+		widget = interface_get_widget ("entry_disc_artist");
+		text = gtk_entry_get_text (GTK_ENTRY (widget));
+	
+		model = gtk_tree_view_get_model (disc_tree);
+		if (gtk_tree_model_get_iter_first (model, &iter)) {
+			do {
+				gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_ARTIST, text, -1);
+			} while (gtk_tree_model_iter_next (model, &iter));
+		}
+	}
+}

@@ -31,6 +31,6 @@
 // Prototypen
 void musicbrainz_init (void);
 
-AlbumDetails* lookup_cd (void);
+AlbumDetails* musicbrainz_lookup_cd (void);
 
 #endif

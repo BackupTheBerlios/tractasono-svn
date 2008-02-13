@@ -49,7 +49,7 @@ void musicbrainz_init (void)
 
 
 
-AlbumDetails* get_album_offline (void)
+AlbumDetails* musicbrainz_lookup_offline (void)
 {
 	AlbumDetails *album;
 	TrackDetails *track;
@@ -92,7 +92,7 @@ AlbumDetails* get_album_offline (void)
 
 
 
-AlbumDetails* lookup_cd (void)
+AlbumDetails* musicbrainz_lookup_cd (void)
 {
 	AlbumDetails *album; 
 	GList *tl;
@@ -110,7 +110,7 @@ AlbumDetails* lookup_cd (void)
 	
 	num_albums = mb_GetResultInt(mb, MBE_GetNumAlbums);
 	if (num_albums < 1) {
-		album = get_album_offline ();
+		album = musicbrainz_lookup_offline ();
 		return album;
 	}
 		
@@ -119,6 +119,11 @@ AlbumDetails* lookup_cd (void)
 
 	mb_Select1(mb, MBS_SelectAlbum, 1);
 	album = g_new0 (AlbumDetails, 1);
+	
+	// default values
+	album->genre = g_strdup ("Unbekannt");
+	album->compilation = FALSE;
+	album->release_date = g_date_new_dmy (0, 0, 2009);
 
 	if (mb_GetResultData(mb, MBE_AlbumGetAlbumId, data, sizeof (data))) {
 		from_freedb = strstr(data, "freedb:") == data;
@@ -127,17 +132,36 @@ AlbumDetails* lookup_cd (void)
 	}
 
 	if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistId, data, sizeof (data))) {
+		g_message ("1");
 		mb_GetIDFromURL (mb, data, data, sizeof (data));
 		album->artist_id = g_strdup (data);
 
 		if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistName, data, sizeof (data))) {
+			g_message ("2");
 			album->artist = g_strdup (data);
 		} else {
+			g_message ("3");
 			if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
-				album->artist = g_strdup ("Various");
+				g_message ("4");
+				album->artist = g_strdup ("Various Artist");
+				album->compilation = TRUE;
 			} else {
+				g_message ("5");
 				album->artist = g_strdup ("Unknown Artist");
 			}
+		}
+		g_message ("id: %s", album->artist_id);
+		if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
+			g_message ("6");
+			album->compilation = TRUE;
+		}
+		if (g_ascii_strcasecmp (album->artist, "Various Artist") == 0) {
+			g_message ("7");
+			album->compilation = TRUE;
+		}
+		if (g_ascii_strcasecmp (album->artist, "Various Artists") == 0) {
+			g_message ("8");
+			album->compilation = TRUE;
 		}
 	}
 
@@ -147,14 +171,6 @@ AlbumDetails* lookup_cd (void)
 	} else {
 		album->title = g_strdup ("Unknown Title");
 	}
-	
-	// Disc genre
-	/*if (mb_GetResultData(mb, MBE_AlbumGetAlbumGenre, data, sizeof (data))) {
-		album->genre = g_strdup (data);
-	} else {
-		album->title = g_strdup ("Unknown Genre");
-	}*/
-	album->genre = g_strdup ("Unbekannt");
 
 	{
 		int num_releases;
