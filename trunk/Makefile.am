@@ -1,7 +1,9 @@
 SUBDIRS =	doc \
-			spider \
-			src \
-			src/data
+			tools/cdlookup \
+			tools/spider \
+			src/data \
+			src
+			
 
 docdir = $(prefix)/share/doc/tractasono
 

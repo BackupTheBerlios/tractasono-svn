@@ -71,9 +71,10 @@ AC_SUBST(TAGLIB_CFLAGS)
 # Makefile output
 AC_OUTPUT([ Makefile \
 			doc/Makefile \
-			spider/Makefile \
-			src/Makefile \
-			src/data/Makefile ])
+			tools/cdlookup/Makefile \
+			tools/spider/Makefile \
+			src/data/Makefile \
+			src/Makefile ])
 
 # Nette Ausgabe
 AC_MSG_RESULT([
