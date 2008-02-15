@@ -123,7 +123,7 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 	// default values
 	album->genre = g_strdup ("Unbekannt");
 	album->compilation = FALSE;
-	album->release_date = g_date_new_dmy (0, 0, 2009);
+	album->release_date = NULL;
 
 	if (mb_GetResultData(mb, MBE_AlbumGetAlbumId, data, sizeof (data))) {
 		from_freedb = strstr(data, "freedb:") == data;

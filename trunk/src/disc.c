@@ -79,7 +79,6 @@ void extract_disc (void);
 void extract_track (TrackDetails *track);
 void play_track (TrackDetails *track);
 gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
-static GstElement* build_encoder (void);
 void display_track_state (gint track, TrackState state);
 static gboolean find_next (void);
 static void on_error_cb (GstBus *bus, GError *error, gpointer data);
@@ -664,6 +663,8 @@ void extract_track (TrackDetails *track)
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TITLE, track->title, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ARTIST, track->artist, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ALBUM, track->album->title, NULL);
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_GENRE, track->album->genre, NULL);
+	g_debug ("Adding genre %s to the tag list", track->album->genre);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TRACK_NUMBER, track->number, NULL);
 	if (track->album->release_date) {
 		gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_DATE, track->album->release_date, NULL);
@@ -730,35 +731,6 @@ void play_track (TrackDetails *track)
 	
 	// Muss manuell gesetzt werden
 	interface_set_songinfo (track->artist, track->title);
-}
-
-
-
-static GstElement* build_encoder (void)
-{
-	GstElement *encoder = NULL;
-	GMAudioProfile *profile;
-	gchar *pipeline;
-	
-	const gchar *name;
-	const gchar *desc;
-	const gchar *pipe;
-	const gchar *ext;
-	
-	profile = gm_audio_profile_lookup ("cdlossy");
-	
-	name = gm_audio_profile_get_name (profile);
-	desc = gm_audio_profile_get_description (profile);
-	pipe = gm_audio_profile_get_pipeline (profile);
-	ext = gm_audio_profile_get_extension (profile);
-	
-	//g_message ("current media profile (name=%s | pipe=%s | ext=%s)", name, pipe, ext);
-	
-	pipeline = g_strdup_printf ("audioresample ! audioconvert ! %s", pipe);
-	encoder = gst_parse_bin_from_description (pipeline, TRUE, NULL); /* TODO: return error */
-	g_free(pipeline);
-	
-	return encoder;
 }
 
 
@@ -830,12 +802,10 @@ void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
 	if (!get_compilation ()) {
 		// Alle Artists ändern
 		gchar *text;
-		GtkWidget *widget;
 		GtkTreeModel *model;
 		GtkTreeIter iter;
 		
-		widget = interface_get_widget ("entry_disc_artist");
-		text = gtk_entry_get_text (GTK_ENTRY (widget));
+		text = gtk_entry_get_text (GTK_ENTRY (editable));
 	
 		model = gtk_tree_view_get_model (disc_tree);
 		if (gtk_tree_model_get_iter_first (model, &iter)) {
@@ -845,3 +815,15 @@ void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
 		}
 	}
 }
+
+
+
+void on_entry_disc_genre_changed (GtkEditable *editable, gpointer user_data)
+{
+	gchar *genre;
+	
+	genre = gtk_entry_get_text (GTK_ENTRY (editable));
+	the_album->genre = g_strdup (genre);
+	g_message ("New Album Genre: %s", the_album->genre);
+}
+
