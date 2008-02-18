@@ -4,13 +4,11 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(GCONF_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
 		   $(MUSICBRAINZ_CFLAGS) \
-		   $(LIBGDA_CFLAGS) \
-		   $(LIBGNOMEDB_CFLAGS) \
+		   $(SQLITE_CFLAGS) \
 		   $(LIBGPOD_CFLAGS) \
 		   $(LIBIPODDEVICE_CFLAGS) \
 		   $(TOTEMPLPARSE_CFLAGS) \
-		   $(MEDIAPROFILES_CFLAGS) \
-		   -I/usr/include/taglib
+		   $(TAGLIB_CFLAGS)
 
 AM_CFLAGS = -Wall -g
 
@@ -62,11 +60,10 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(GCONF_LIBS) \
 				   $(GSTREAMER_LIBS) \
 				   $(MUSICBRAINZ_LIBS) \
-				   $(LIBGDA_LIBS) \
-				   $(LIBGNOMEDB_LIBS) \
+				   $(SQLITE_LIBS) \
 				   $(LIBGPOD_LIBS) \
 				   $(LIBIPODDEVICE_LIBS) \
 				   $(TOTEMPLPARSE_LIBS) \
-				   $(MEDIAPROFILES_LIBS) \
+				   $(TAGLIB_LIBS) \
 				   -ltag_c
 

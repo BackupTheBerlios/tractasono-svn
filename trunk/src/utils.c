@@ -23,10 +23,16 @@
 #include "utils.h"
 
 
-// Gibt Default Musik Vezeichnis zurück
+// Gibt das tractasono Vezeichnis zurück (~/tractasono/)
+gchar *get_tractasono_dir (void)
+{
+	return g_strdup_printf ("%s/tractasono/", g_get_home_dir ());
+}
+
+// Gibt das Musik Vezeichnis zurück
 gchar *get_music_dir (void)
 {
-	return g_strdup_printf ("%s/tractasono/music/", g_get_home_dir());
+	return g_strdup_printf ("%s/music/", get_tractasono_dir ());
 }
 
 // Gibt den Verzeichnisname für einen Artist zurück

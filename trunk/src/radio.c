@@ -140,7 +140,7 @@ void radio_init(void)
 
 
 	// Circle
-	GtkCircle *circle;
+	GtkWidget *circle;
 	GtkWidget *vbox;
 	vbox = glade_xml_get_widget(glade, "vbox_circle");
 	if (vbox == NULL) {

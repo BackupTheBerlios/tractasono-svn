@@ -26,7 +26,6 @@
 #include "utils.h"
 
 #include <gconf/gconf-client.h>
-#include <profiles/gnome-media-profiles.h>
 
 
 // GStreamer Variablen
@@ -81,11 +80,13 @@ void play_track (TrackDetails *track);
 gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data);
 void display_track_state (gint track, TrackState state);
 static gboolean find_next (void);
+gboolean get_compilation (void);
+void set_compilation (gboolean active);
+/*
 static void on_error_cb (GstBus *bus, GError *error, gpointer data);
 static void on_completion_cb (GstBus *bus, GError *error, gpointer data);
 static void on_progress_cb (GstBus *bus, GError *error, gpointer data);
-gboolean get_compilation (void);
-void set_compilation (gboolean active);
+* */
 
 
 // Initialisation
@@ -95,9 +96,6 @@ void disc_init()
 	
 	// TreeView initialisieren
 	track_setup_tree ();
-	
-	// GConf & Media Profile initialisieren
-	gnome_media_profiles_init (gconf_client_get_default ());
 	
 	// Ripper Pipeline aufsetzen
 	ripper_setup ();
@@ -765,7 +763,7 @@ static gboolean find_next (void)
 
 // Ripper Callbacks
 
-static void on_error_cb (GstBus *bus, GError *error, gpointer data)
+/*static void on_error_cb (GstBus *bus, GError *error, gpointer data)
 {
 	g_warning ("Ripper Error!");
 }
@@ -778,7 +776,7 @@ static void on_completion_cb (GstBus *bus, GError *error, gpointer data)
 static void on_progress_cb (GstBus *bus, GError *error, gpointer data)
 {
 	g_message ("Ripper progress!");
-}
+}*/
 
 
 
@@ -801,7 +799,7 @@ void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
 {
 	if (!get_compilation ()) {
 		// Alle Artists ändern
-		gchar *text;
+		const gchar *text;
 		GtkTreeModel *model;
 		GtkTreeIter iter;
 		
@@ -820,7 +818,7 @@ void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
 
 void on_entry_disc_genre_changed (GtkEditable *editable, gpointer user_data)
 {
-	gchar *genre;
+	const gchar *genre;
 	
 	genre = gtk_entry_get_text (GTK_ENTRY (editable));
 	the_album->genre = g_strdup (genre);

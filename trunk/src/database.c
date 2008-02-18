@@ -23,39 +23,59 @@
 	#include <config.h>
 #endif
 
-#include <string.h>
 
 #include "database.h"
+#include "utils.h"
+#include <string.h>
+
+
+// Globale tractasono Datenbank
+sqlite3 *db;
 
 
 // Prototypen
 void db_testfunc (void);
-
-
-#define DATABASE "tractasono"
-
-
-GdaConnection *conn;
+static gint callback (void *NotUsed, gint argc, gchar **argv, gchar **azColName);
 
 
 void db_init (int argc, char *argv[])
 {
+	const gchar *db_file;
+	
 	g_message ("Database init");
 	
-	gda_init (PACKAGE, VERSION, argc, argv);
-	//gnome_db_init (PACKAGE, VERSION, argc, argv);
+	// Mit Datenbank verbinden
+	db_file = g_strdup_printf ("%stractasono.db", get_tractasono_dir ());
+	if (sqlite3_open (db_file, &db)) {
+		g_error ("Can't open database: %s", sqlite3_errmsg (db));
+	}
 	
-	//db_list_providers ();
-	//db_list_sources ();
-	db_connect ();
+	// Testfunktion
+	//db_testfunc ();
+}
+
+
+void db_close (void)
+{
+	g_message ("Database close");
 	
-	db_testfunc ();
-	
+	// Datenbank wieder schliessen
+	sqlite3_close (db);
 }
 
 
 void db_testfunc (void)
 {
+	gint rc;
+	gchar *msg = NULL;
+
+	rc = sqlite3_exec (db, "SELECT COUNT(*) AS AnzahlArtists FROM tbl_artist", callback, 0, &msg);
+	if( rc != SQLITE_OK ){
+		g_warning ("SQL error: %s", msg);
+		sqlite3_free (msg);
+	}
+	
+	
 	// Test Funktionen
 	//db_settings_set_string ("library", "path", "/opt/music/");
 	//db_settings_set_string ("library", "name", "Die geilschti Musig!");
@@ -87,152 +107,49 @@ void db_testfunc (void)
 
 
 
-void db_list_providers (void)
+void db_execute_sql (const gchar *sql, gint (*callback)(void*,gint,gchar**,gchar**))
 {
-    GList *prov_list;
-    GList *node;
-    GdaProviderInfo *info;
+	gint rc;
+	gchar *msg = NULL;
 
-    prov_list = gda_config_get_provider_list ();
-
-    for (node = g_list_first (prov_list); node != NULL; node = node->next) {
-        info = (GdaProviderInfo *) node->data;
-        g_debug ("database providers: ID=%s Location=%s\n", info->id, info->location);
-    }
-    gda_config_free_provider_list (prov_list);
+	rc = sqlite3_exec (db, sql, callback, 0, &msg);
+	if( rc != SQLITE_OK ){
+		g_warning ("SQL error: %s", msg);
+		sqlite3_free (msg);
+	}
 }
 
 
-void db_list_sources (void)
+
+static gint callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
 {
-    GList *ds_list;
-    GList *node;
-    GdaDataSourceInfo *info;
-
-    ds_list = gda_config_get_data_source_list ();
-    for (node = g_list_first (ds_list); node != NULL; node = g_list_next (node)) {
-        info = (GdaDataSourceInfo *) node->data;
-        g_debug ("NAME: %s PROVIDER: %s CNC: %s DESC: %s USER: %s PASSWORD: %s",
-                 info->name, info->provider, info->cnc_string, info->description,
-                 info->username, info->password);
-    }
-    gda_config_free_data_source_list (ds_list);
-}
-
-
-void db_connect (void)
-{
-	GError *error = NULL;
-	GdaDataSourceInfo *info = NULL;
-	GdaClient *client;
-      
-	client = gda_client_new ();
- 
-	info = gda_config_find_data_source (DATABASE);
-	if (!info)
-		g_error ("DSN '%s' is not declared", DATABASE);
-	else {
-		conn = gda_client_open_connection (client, info->name, 
-												 info->username, info->password,
-												 0, &error);							 								 
-		if (!conn) {
-			g_warning ("Can't open connection to DSN %s: %s\n", info->name,
-					   error && error->message ? error->message : "???");
-			return;
-		}
-		g_message ("\tsuccessfully connected to: %s", info->name);
-		gda_data_source_info_free (info);
-		g_object_unref (G_OBJECT (client));
+	gint row;
+	
+	for(row = 0; row < rows; row++){
+		g_print ("%s = %s\n", titles[row], cols[row] ? cols[row] : "NULL");
 	}
 	
-}
-
-
-GdaDataModel* db_get_model_from_sql (const gchar * sql)
-{
-	GError *error = NULL;
-	GdaDataModel *model;
-	GdaCommand *command;
-	
-	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	model = gda_connection_execute_select_command (conn, command, NULL, &error);
-	gda_command_free (command);
-	if (error) {
-		g_print ("Error: %s", error->message);
-	}
-	return model;
+	g_print ("\n");
+	return 0;
 }
 
 
 
-GdaDataModel* db_get_album_model (void)
-{
-	return db_get_model_from_sql("SELECT * FROM tbl_album");
-}
-
-GdaDataModel* db_get_artist_model (void)
-{
-	return db_get_model_from_sql("SELECT * FROM tbl_artist");
-}
-
-GdaDataModel* db_get_genre_model (void)
-{
-	return db_get_model_from_sql("SELECT * FROM tbl_genre");
-}
-
-GdaDataModel* db_get_song_model (void)
-{
-	return db_get_model_from_sql("SELECT * FROM view_song_short");
-}
-
-
-
-GdaDataModel* db_execute_sql (const gchar *sql)
-{
-	GdaCommand *command;
-	GError *error = NULL;
-	GdaDataModel *dm;
-
-	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	dm = gda_connection_execute_select_command (conn, command, NULL, &error);
-	if (error) {
-		g_warning (error->message);
-	}
-	gda_command_free (command);
-	
-	//db_dump_dm (dm);
-	
-	return dm;
-}
 
 
 gint db_execute_sql_non_query (const gchar *sql)
 {
-	GdaCommand *command;
-	GError *error = NULL;
-	gint count;
 
-	command = gda_command_new (sql, GDA_COMMAND_TYPE_SQL, GDA_COMMAND_OPTION_STOP_ON_ERRORS);
-	count  = gda_connection_execute_non_select_command (conn, command, NULL, &error);
-	if (error) {
-		g_message (error->message);
-	}
 
-	gda_command_free (command);
-
-	return count;
+	return 0;
 }
 
 
-void db_dump_dm (GdaDataModel *dm)
-{	
-	g_print ("\n%s\n", gda_data_model_dump_as_string (dm));
-}
 
 
 void db_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	gint id = 0;
 	GValue *val;
@@ -254,13 +171,13 @@ void db_settings_set_boolean (gchar *group, gchar *key, gboolean value)
 		g_string_append_printf (sql, " VALUES ('%s', '%s', '%i')", group, key, value);
 	}
 	
-	db_execute_sql (sql->str);
+	db_execute_sql (sql->str);*/
 }
 
 
 gboolean db_settings_get_boolean (gchar *group, gchar *key)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	gboolean value = FALSE;
@@ -276,13 +193,15 @@ gboolean db_settings_get_boolean (gchar *group, gchar *key)
 		}
 	}
 	
-	return value;
+	return value;*/
+	
+	return TRUE;
 }
 
 
 void db_settings_set_string (gchar *group, gchar *key, const gchar* value)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	gint id = 0;
 	GValue *val;
@@ -304,13 +223,13 @@ void db_settings_set_string (gchar *group, gchar *key, const gchar* value)
 		g_string_append_printf (sql, " VALUES ('%s', '%s', '%s')", group, key, value);
 	}
 	
-	db_execute_sql (sql->str);
+	db_execute_sql (sql->str);*/
 }
 
 
 gchar* db_settings_get_string (gchar *group, gchar *key)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	gchar* value = NULL;
@@ -324,13 +243,15 @@ gchar* db_settings_get_string (gchar *group, gchar *key)
 		value = gda_value_stringify (val);
 	}
 	
-	return value;
+	return value;*/
+	
+	return NULL;
 }
 
 
 void db_settings_set_integer (gchar *group, gchar *key, gint value)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	gint id = 0;
 	GValue *val;
@@ -352,13 +273,13 @@ void db_settings_set_integer (gchar *group, gchar *key, gint value)
 		g_string_append_printf (sql, " VALUES ('%s', '%s', '%i')", group, key, value);
 	}
 	
-	db_execute_sql (sql->str);
+	db_execute_sql (sql->str);*/
 }
 
 
 gint db_settings_get_integer (gchar *group, gchar *key)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	gint value = 0;
@@ -372,14 +293,16 @@ gint db_settings_get_integer (gchar *group, gchar *key)
 		value = g_value_get_int (val);
 	}
 	
-	return value;
+	return value;*/
+	
+	return 0;
 }
 
 
 
 gint db_genre_add (gchar *genre)
 {
-	GString *sql;
+	/*GString *sql;
 	gint id;
 	
 	// Schauen, ob Record schon existiert
@@ -394,14 +317,16 @@ gint db_genre_add (gchar *genre)
 	g_string_append_printf (sql, " VALUES ('%s')", genre);
 	db_execute_sql (sql->str);
 	
-	return db_artist_get_id (genre);
+	return db_artist_get_id (genre);*/
+	
+	return 0;
 }
 
 
 
 gint db_genre_get_id (gchar *genre)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	
@@ -410,13 +335,15 @@ gint db_genre_get_id (gchar *genre)
 	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
-	return g_value_get_int (val);
+	return g_value_get_int (val);*/
+	
+	return 0;
 }
 
 
 const gchar* db_genre_get (gint id)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	
@@ -425,7 +352,9 @@ const gchar* db_genre_get (gint id)
 	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
-	return g_value_get_string (val);
+	return g_value_get_string (val);*/
+	
+	return NULL;
 }
 
 
@@ -433,7 +362,7 @@ const gchar* db_genre_get (gint id)
 
 ArtistDetails* db_artist_add (gchar *artist)
 {
-	GString *sql;
+	/*GString *sql;
 	gint id;
 	ArtistDetails* details;
 	
@@ -456,14 +385,16 @@ ArtistDetails* db_artist_add (gchar *artist)
 	
 	details->id = db_artist_get_id (artist);
 	
-	return details;
+	return details;*/
+	
+	return NULL;
 }
 
 
 
 gboolean db_artist_update (ArtistDetails* details)
 {
-	GString *sql;
+	/*GString *sql;
 	
 	sql = g_string_new ("UPDATE tbl_artist SET ");
 	g_string_append_printf (sql, "artistname = '%s'", details->name);
@@ -471,7 +402,9 @@ gboolean db_artist_update (ArtistDetails* details)
 	
 	//g_message ("SQL: %s", sql->str);
 	
-	return db_execute_sql_non_query (sql->str);
+	return db_execute_sql_non_query (sql->str);*/
+	
+	return TRUE;
 }
 
 
@@ -481,7 +414,7 @@ gboolean db_artist_update (ArtistDetails* details)
 
 gint db_artist_get_id (gchar *artist)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	
@@ -494,14 +427,16 @@ gint db_artist_get_id (gchar *artist)
 		return g_value_get_int (val);
 	} else {
 		return FALSE;	
-	}
+	}*/
+	
+	return TRUE;
 }
 
 
 
 const gchar* db_artist_get (gint id)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	
@@ -510,7 +445,9 @@ const gchar* db_artist_get (gint id)
 	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
-	return g_value_get_string (val);
+	return g_value_get_string (val);*/
+	
+	return NULL;
 }
 
 
@@ -518,7 +455,7 @@ const gchar* db_artist_get (gint id)
 
 gint db_album_add (gchar *album, gchar *artist)
 {
-	GString *sql;
+	/*GString *sql;
 	gint id;
 	
 	// Schauen, ob Record schon existiert
@@ -533,13 +470,15 @@ gint db_album_add (gchar *album, gchar *artist)
 	g_string_append_printf (sql, " VALUES ('%s')", artist);
 	db_execute_sql (sql->str);
 	
-	return db_artist_get_id (artist);
+	return db_artist_get_id (artist);*/
+	
+	return 0;
 }
 
 
 gint db_album_get_id (gchar *album, gchar *artist)
 {
-	GString *sql;
+	/*GString *sql;
 	GdaDataModel *dm;
 	GValue *val;
 	
@@ -548,7 +487,9 @@ gint db_album_get_id (gchar *album, gchar *artist)
 	dm = db_execute_sql (sql->str);
 	val = (GValue*) gda_data_model_get_value_at (dm, 0, 0);
 	
-	return g_value_get_int (val);
+	return g_value_get_int (val);*/
+	
+	return 0;
 }
 
 

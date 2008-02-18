@@ -54,6 +54,9 @@ int main (int argc, char *argv[])
 
 	// Programmloop starten
 	gtk_main ();
+	
+	// Ressourcen wieder freigeben
+	db_close ();
 
 	// Shutdown Meldung
 	g_message ("<== "PACKAGE" shutting down ==>");

@@ -24,37 +24,15 @@
 
 
 #include "strukturen.h"
-
-// Gruppen Keys
-#define S_G_LIBRARY	"library"
-
-
-// Keys
-#define	S_K_PATH	"path"
-#define	S_K_FILECOUNT	"filecount"
-
-
-#include "strukturen.h"
-
-#include <libgda/libgda.h>
-#include <libgnomedb/libgnomedb.h>
+#include <sqlite3.h>
 
 
 void db_init (int argc, char *argv[]);
-void db_list_providers (void);
-void db_list_sources (void);
-void db_connect (void);
+void db_close (void);
 
-GdaDataModel*  db_execute_sql (const gchar *sql);
+
+void db_execute_sql (const gchar *sql, gint (*callback)(void*,gint,gchar**,gchar**));
 gint db_execute_sql_non_query (const gchar *sql);
-
-void db_dump_dm (GdaDataModel *dm);
-
-GdaDataModel* db_get_model_from_sql (const gchar * sql);
-GdaDataModel* db_get_album_model (void);
-GdaDataModel* db_get_artist_model (void);
-GdaDataModel* db_get_genre_model (void);
-GdaDataModel* db_get_song_model (void);
 
 void db_settings_set_boolean (gchar *group, gchar *key, gboolean value);
 gboolean db_settings_get_boolean (gchar *group, gchar *key);

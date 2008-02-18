@@ -39,6 +39,7 @@
 
 // Prototypen
 void create_dir (const gchar *path, gboolean with_parents);
+gchar *get_tractasono_dir (void);
 gchar *get_music_dir (void);
 gchar *get_artist_dir (const gchar *artist);
 void create_artist_dir (const gchar *artist);

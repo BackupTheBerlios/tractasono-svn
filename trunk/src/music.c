@@ -40,13 +40,8 @@ GtkListStore *track_store;
 enum 
 { 
 	COL_ARTIST_NAME,
+	COL_ARTIST_DETAILS,
 	COLS_ARTIST
-};
-
-enum
-{
-	STORE_ARTIST_NAME,
-	STORE_ARTIST_PATH
 };
 
 
@@ -85,9 +80,15 @@ gint sort_artist_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 gint sort_album_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   GtkTreeIter *b, gpointer userdata);
 							   
-void music_artist_insert (const gchar *artist);
+void music_artist_insert (const ArtistDetails *artist);
 void music_album_insert (const gchar *album, const gchar *artist);
 void music_track_insert (const gchar *track, const gchar *album, const gchar *artist);
+
+void artistname_cell_data_cb (GtkTreeViewColumn *tree_column,
+							GtkCellRenderer *cell,
+							GtkTreeModel *tree_model,
+							GtkTreeIter *iter,
+							gpointer data);
 
 void music_artist_fill (void);
 
@@ -125,10 +126,11 @@ void music_artist_setup_tree (void)
 	column = gtk_tree_view_column_new_with_attributes ("Interpret", renderer,
 													   "text", COL_ARTIST_NAME, NULL);
 	gtk_tree_view_column_set_sort_column_id (column, COL_ARTIST_NAME);
+	gtk_tree_view_column_set_cell_data_func (column, renderer, artistname_cell_data_cb, NULL, NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (artist_tree), column);
 											
 	// Store erstellen
-	artist_store = gtk_list_store_new (COLS_ARTIST, G_TYPE_STRING);
+	artist_store = gtk_list_store_new (COLS_ARTIST, G_TYPE_STRING, G_TYPE_POINTER);
 	
 	// Sortierung
 	sortable = GTK_TREE_SORTABLE (artist_store);
@@ -138,7 +140,7 @@ void music_artist_setup_tree (void)
 											
 	// Store dem Tree anhängen				
 	gtk_tree_view_set_model (GTK_TREE_VIEW (artist_tree),
-							 GTK_TREE_MODEL (artist_store));					 
+							 GTK_TREE_MODEL (artist_store));				 
 }
 
 
@@ -294,17 +296,12 @@ gint sort_album_compare_func (GtkTreeModel *model,
 }
 
 
-void music_artist_insert (const gchar *artist)
+void music_artist_insert (const ArtistDetails *artist)
 {
 	GtkTreeIter iter;
 	
-	//g_debug ("music_artist_insert: artist=%s", artist);
-	//g_message ("artist insert: %s, id=%d", artist, db_artist_add (artist));
-	
-	artist_store = (GtkListStore*) gtk_tree_view_get_model (artist_tree);
-	
 	gtk_list_store_append (artist_store, &iter);
-	gtk_list_store_set (artist_store, &iter, STORE_ARTIST_NAME, artist, -1);		
+	gtk_list_store_set (artist_store, &iter, COL_ARTIST_DETAILS, artist, -1);
 }
 
 
@@ -364,15 +361,58 @@ void music_track_insert (const gchar *track, const gchar *album, const gchar *ar
 }
 
 
+
+static gint artist_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
+{
+	g_debug ("DB Artist: Id=%i / Name=%s", atoi(cols[0]), cols[1]);
+	
+	ArtistDetails *artist = g_new0 (ArtistDetails, 1);
+	
+	artist->id = atoi(cols[0]);
+	artist->name = g_strdup (cols[1]);
+	
+	g_debug ("ArtistDetails id=%d / name=%s", artist->id, artist->name);
+	
+	music_artist_insert (artist);
+
+	return 0;
+}
+
+
+
+static gint album_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
+{
+	
+	music_album_insert (cols[3], cols[1]);
+
+	return 0;
+}
+
+
+
+// GtkTreeView cell renderer callback to render artist name
+void artistname_cell_data_cb (GtkTreeViewColumn *tree_column,
+							GtkCellRenderer *cell,
+							GtkTreeModel *tree_model,
+							GtkTreeIter *iter,
+							gpointer data)
+{	
+	ArtistDetails *artist = NULL;
+
+	gtk_tree_model_get (tree_model, iter, COL_ARTIST_DETAILS, &artist, -1);	
+	g_object_set (G_OBJECT (cell), "text", artist->name, NULL);
+}
+
+
+
 // Fülle alle Artisten ein
 void music_artist_fill (void)
 {
-	GDir *dir;
+	/*GDir *dir;
 	const gchar *dirname;
 
 	if ((dir = g_dir_open (get_music_dir (), 0, NULL))) {
 		while ((dirname = g_dir_read_name (dir))) {
-			/* This should be useless, but we'd better keep it for security */
 			g_assert (strcmp (dirname, ".") != 0);
 			g_assert (strcmp (dirname, "..") != 0);
 			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0) {
@@ -382,7 +422,12 @@ void music_artist_fill (void)
 			music_artist_insert (dirname);
 		}
 		g_dir_close (dir);
-	}
+	}*/
+	
+	
+	// Datenbankzugriff
+	db_execute_sql ("SELECT * FROM tbl_artist", artist_callback);
+	
 	
 }
 
@@ -441,32 +486,41 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *artist;
+
+	ArtistDetails *artist = NULL;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
-	gtk_tree_model_get (model, &iter, COL_ARTIST_NAME, &artist, -1);
+	gtk_tree_model_get (model, &iter, COL_ARTIST_DETAILS, &artist, -1);
+	
+	g_debug ("Id Artist %d", artist->id);
+	
+	
+	gchar *sql;
+	sql = g_strdup_printf ("SELECT * FROM view_artist_album WHERE IDartist = '%d'", artist->id);
+	
+	db_execute_sql (sql , album_callback);
+	
 	
 	// Vorhandene Alben zuerst löschen
 	gtk_list_store_clear (album_store);
 	
-	GDir *dir;
+	/*GDir *dir;
 	const gchar *dirname;
 
-	if ((dir = g_dir_open (get_artist_dir (artist), 0, NULL))) {
+	if ((dir = g_dir_open (get_artist_dir (artist->name), 0, NULL))) {
 		while ((dirname = g_dir_read_name (dir))) {
-			/* This should be useless, but we'd better keep it for security */
 			g_assert (strcmp (dirname, ".") != 0);
 			g_assert (strcmp (dirname, "..") != 0);
 			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0) {
 				continue;
 			}
 
-			music_album_insert (dirname, artist);
+			music_album_insert (dirname, artist->name);
 		}
 		g_dir_close (dir);
-	}
+	}*/
 }
 
 
