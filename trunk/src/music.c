@@ -82,7 +82,7 @@ gint sort_album_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   
 void music_artist_insert (const ArtistDetails *artist);
 void music_album_insert (const gchar *album, const gchar *artist);
-void music_track_insert (const gchar *track, const gchar *album, const gchar *artist);
+void music_track_insert (gchar *track, gchar *album, gchar *artist);
 
 void artistname_cell_data_cb (GtkTreeViewColumn *tree_column,
 							GtkCellRenderer *cell,
@@ -318,7 +318,7 @@ void music_album_insert (const gchar *album, const gchar *artist)
 }
 
 
-void music_track_insert (const gchar *track, const gchar *album, const gchar *artist)
+void music_track_insert (gchar *track, gchar *album, gchar *artist)
 {
 	TagLib_File *file;
 	TagLib_Tag *tag;
@@ -544,7 +544,7 @@ void on_treeview_albums_row_activated (GtkTreeView *tree,
 	gtk_list_store_clear (track_store);
 	
 	GDir *dir;
-	const gchar *dirname;
+	gchar *dirname;
 
 	if ((dir = g_dir_open (get_album_dir (album, artist), 0, NULL))) {
 		while ((dirname = g_dir_read_name (dir))) {

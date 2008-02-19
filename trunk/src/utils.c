@@ -32,58 +32,52 @@ gchar *get_tractasono_dir (void)
 // Gibt das Musik Vezeichnis zurück
 gchar *get_music_dir (void)
 {
-	return g_strdup_printf ("%s/music/", get_tractasono_dir ());
+	return g_strdup_printf ("%smusic/", get_tractasono_dir ());
 }
 
 // Gibt den Verzeichnisname für einen Artist zurück
-gchar *get_artist_dir (const gchar *artist)
+gchar *get_artist_dir (gchar *artist)
 {
-	return g_strdup_printf ("%s%s/", get_music_dir (), artist);
+	return g_strdup_printf ("%s%s/", get_music_dir (), g_strdelimit(artist, "/", '-'));
 }
 
 // Erstellt ein Verzeichnis für einen Artist
-void create_artist_dir (const gchar *artist)
+void create_artist_dir (gchar *artist)
 {
-	create_dir (get_artist_dir (artist), FALSE);
+	create_dir (get_artist_dir (artist));
 }
 
 // Gibt den Verzeichnisname für einen Album zurück
-gchar *get_album_dir (const gchar *album, const gchar *artist)
+gchar *get_album_dir (gchar *album, gchar *artist)
 {
-	return g_strdup_printf ("%s%s/", get_artist_dir (artist), album);
+	return g_strdup_printf ("%s%s/", get_artist_dir (artist), g_strdelimit(album, "/", '-'));
 }
 
 // Erstellt ein Verzeichnis für einen Album
-void create_album_dir (const gchar *album, const gchar *artist)
+void create_album_dir (gchar *album, gchar *artist)
 {
 	create_artist_dir (artist);
-	create_dir (get_album_dir (album, artist), FALSE);
+	create_dir (get_album_dir (album, artist));
 }
 
 
 // Gibt den Pfad für einen Track zurück
-gchar *get_track_path (const gchar *track, const gchar *album, const gchar *artist)
+gchar *get_track_path (gchar *track, gchar *album, gchar *artist)
 {
-	return g_strdup_printf ("%s%s", get_album_dir (album, artist), track);
+	return g_strdup_printf ("%s%s", get_album_dir (album, artist), g_strdelimit(track, "/", '-'));
 }
 
 // Gibt den Dateiname eines Tracks ohne Pfad zurück
-gchar *get_track_name (const gchar *title, const gchar *artist, gint tracknr, gchar *extension)
+gchar *get_track_name (gchar *title, gchar *artist, gint tracknr, gchar *extension)
 {
-	return g_strdup_printf ("%.2d %s - %s%s", tracknr, artist, title, extension);
+	return g_strdup_printf ("%.2d %s - %s%s", tracknr, g_strdelimit(artist, "/", '-'), g_strdelimit(title, "/", '-'), extension);
 }
 
 // Vezeichnis mit oder ohne Parent-Vereichnissen erstellen
-void create_dir (const gchar *path, gboolean with_parents)
+void create_dir (const gchar *path)
 {
 	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
-		gint ret;
-		if (with_parents) {
-			ret = g_mkdir_with_parents (path, 493);
-		} else {
-			ret = g_mkdir (path, 493);
-		}
-		if (ret != 0) {
+		if (g_mkdir_with_parents (path, 493) != 0) {
 			g_warning ("Konnte Verzeichnis nicht erstellen -> %s", path);
 		}
 	}

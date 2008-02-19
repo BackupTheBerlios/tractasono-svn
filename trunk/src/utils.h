@@ -38,15 +38,15 @@
 #define BUFFER_SIZE		9216
 
 // Prototypen
-void create_dir (const gchar *path, gboolean with_parents);
+void create_dir (const gchar *path);
 gchar *get_tractasono_dir (void);
 gchar *get_music_dir (void);
-gchar *get_artist_dir (const gchar *artist);
-void create_artist_dir (const gchar *artist);
-gchar *get_album_dir (const gchar *album, const gchar *artist);
-void create_album_dir (const gchar *album, const gchar *artist);
-gchar *get_track_path (const gchar *track, const gchar *album, const gchar *artist);
-gchar *get_track_name (const gchar *title, const gchar *artist, gint tracknr, gchar *extension);
+gchar *get_artist_dir (gchar *artist);
+void create_artist_dir (gchar *artist);
+gchar *get_album_dir (gchar *album, gchar *artist);
+void create_album_dir (gchar *album, gchar *artist);
+gchar *get_track_path (gchar *track, gchar *album, gchar *artist);
+gchar *get_track_name (gchar *title, gchar *artist, gint tracknr, gchar *extension);
 gchar *get_file_extension (gchar *path);
 gboolean copy_file (const gchar *source, const gchar *target);
 gboolean exist_target (const gchar *source, const gchar *target);
