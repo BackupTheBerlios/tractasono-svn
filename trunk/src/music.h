@@ -23,16 +23,6 @@
 #define MUSIC_H
 
 
-enum
-{
-	STORE_TRACK_NR,
-	STORE_TRACK_TITLE,
-	STORE_TRACK_ARTIST,
-	STORE_TRACK_ALBUM,
-	STORE_TRACK_PATH,
-	STORE_TRACK
-};
-
 // Prototypen
 void music_init (void);
 

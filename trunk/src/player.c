@@ -313,7 +313,7 @@ void player_play_from_list (GtkTreeModel *model, GtkTreePath *path)
 		
 		gchar *path;
 		
-		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
+		//gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
 		
 		
 		g_debug ("player_play_from_list -> path=%s", path);
@@ -381,7 +381,7 @@ const gchar* get_next_uri ()
 		return NULL;
 	} else {
 		gchar *path;
-		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
+		//gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
 		return path;
 	}	
 }
@@ -412,7 +412,7 @@ const gchar* get_prev_uri ()
 		g_message ("prev uri is %d", parent.stamp);
 		gchar *path;
 		playlist_iter = parent;
-		gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
+		//gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
 		return path;
 	}	
 }

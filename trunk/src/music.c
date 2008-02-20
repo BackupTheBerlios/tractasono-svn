@@ -38,24 +38,18 @@ GtkTreeView *track_tree;
 GtkListStore *track_store;
 
 enum 
-{ 
+{
 	COL_ARTIST_NAME,
-	COL_ARTIST_DETAILS,
+	COL_ARTIST_ID,
 	COLS_ARTIST
 };
 
 
 enum 
-{ 
-	COL_ALBUM_NAME,
-	COLS_ALBUM
-};
-
-enum
 {
-	STORE_ALBUM_NAME,
-	STORE_ALBUM_ARTIST,
-	STORE_ALBUM_TOT
+	COL_ALBUM_NAME,
+	COL_ALBUM_ID,
+	COLS_ALBUM
 };
 
 
@@ -65,6 +59,7 @@ enum
 	COL_TRACK_TITLE,
 	COL_TRACK_ARTIST,
 	COL_TRACK_ALBUM,
+	COL_TRACK_ID,
 	COLS_TRACK
 };
 
@@ -80,8 +75,8 @@ gint sort_artist_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 gint sort_album_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   GtkTreeIter *b, gpointer userdata);
 							   
-void music_artist_insert (const ArtistDetails *artist);
-void music_album_insert (const gchar *album, const gchar *artist);
+void music_artist_insert (const gint id, const gchar *artist);
+void music_album_insert (const gint id, const gchar *album);
 void music_track_insert (gchar *track, gchar *album, gchar *artist);
 
 void artistname_cell_data_cb (GtkTreeViewColumn *tree_column,
@@ -119,18 +114,16 @@ void music_artist_setup_tree (void)
 	if (artist_tree == NULL) {
 		g_warning ("Fehler: Konnte treeview_artists nicht holen!");
 	}
-	//gtk_tree_view_set_headers_visible (artist_tree, FALSE);
 
 	// Name
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes ("Interpret", renderer,
 													   "text", COL_ARTIST_NAME, NULL);
 	gtk_tree_view_column_set_sort_column_id (column, COL_ARTIST_NAME);
-	gtk_tree_view_column_set_cell_data_func (column, renderer, artistname_cell_data_cb, NULL, NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (artist_tree), column);
 											
 	// Store erstellen
-	artist_store = gtk_list_store_new (COLS_ARTIST, G_TYPE_STRING, G_TYPE_POINTER);
+	artist_store = gtk_list_store_new (COLS_ARTIST, G_TYPE_STRING, G_TYPE_INT);
 	
 	// Sortierung
 	sortable = GTK_TREE_SORTABLE (artist_store);
@@ -165,7 +158,7 @@ void music_album_setup_tree (void)
 	gtk_tree_view_append_column (GTK_TREE_VIEW (album_tree), column);
 											
 	// Store erstellen
-	album_store = gtk_list_store_new (STORE_ALBUM_TOT, G_TYPE_STRING, G_TYPE_STRING);
+	album_store = gtk_list_store_new (COLS_ALBUM, G_TYPE_STRING, G_TYPE_INT);
 	
 	// Sortierung
 	sortable = GTK_TREE_SORTABLE (album_store);
@@ -223,11 +216,11 @@ void music_track_setup_tree (void)
 	
 											
 	// Store erstellen
-	track_store = gtk_list_store_new (STORE_TRACK, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	track_store = gtk_list_store_new (COLS_TRACK, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 	
 	// Sortierung
 	sortable = GTK_TREE_SORTABLE (track_store);
-    gtk_tree_sortable_set_sort_column_id (sortable, STORE_TRACK_NR, GTK_SORT_ASCENDING);
+    gtk_tree_sortable_set_sort_column_id (sortable, COL_TRACK_NR, GTK_SORT_ASCENDING);
 											
 	// Store dem Tree anhängen				
 	gtk_tree_view_set_model (GTK_TREE_VIEW (track_tree),
@@ -296,84 +289,31 @@ gint sort_album_compare_func (GtkTreeModel *model,
 }
 
 
-void music_artist_insert (const ArtistDetails *artist)
+void music_artist_insert (const gint id, const gchar *artist)
 {
 	GtkTreeIter iter;
 	
 	gtk_list_store_append (artist_store, &iter);
-	gtk_list_store_set (artist_store, &iter, COL_ARTIST_DETAILS, artist, -1);
+	gtk_list_store_set (artist_store, &iter, COL_ARTIST_ID, id,
+											 COL_ARTIST_NAME, artist, -1);
 }
 
 
-void music_album_insert (const gchar *album, const gchar *artist)
+void music_album_insert (const gint id, const gchar *album)
 {
 	GtkTreeIter iter;
-	
-	//g_debug ("music_album_insert: album=%s", album);
-	
-	album_store = (GtkListStore*) gtk_tree_view_get_model (album_tree);
 	
 	gtk_list_store_append (album_store, &iter);
-	gtk_list_store_set (album_store, &iter, STORE_ALBUM_NAME, album, STORE_ALBUM_ARTIST, artist, -1);		
+	gtk_list_store_set (album_store, &iter, COL_ALBUM_ID, id,
+											COL_ALBUM_NAME, album, -1);		
 }
-
-
-void music_track_insert (gchar *track, gchar *album, gchar *artist)
-{
-	TagLib_File *file;
-	TagLib_Tag *tag;
-	GtkTreeIter iter;
-	gchar *track_path;
-	gchar *tag_title;
-	gint tag_track;
-	
-	// Hole Pfad des Tracks
-	track_path = get_track_path (track, album, artist);
-	
-	// Prüfen ob die Datei gültig ist
-	file = taglib_file_new (track_path);
-	if (file == NULL) {
-		g_warning ("%s konnte von TagLib nicht geöffnet werden!", track_path);
-		return;
-	}
-	
-	// Prüfen ob wir Tags haben
-	tag = taglib_file_tag (file);
-	if (tag == NULL) {
-		g_warning ("TagLib konnte keine Tags finden in: %s ", track_path);
-		return;
-	}
-	
-	// Die einzelnen Tags holen
-	tag_title = taglib_tag_title(tag);
-	tag_track = taglib_tag_track (tag);
-	
-	//g_debug ("music_track_insert: track=%s , album=%s , artist=%s", track, album, artist);
-	
-	track_store = (GtkListStore*) gtk_tree_view_get_model (track_tree);
-	
-	gtk_list_store_append (track_store, &iter);
-	gtk_list_store_set (track_store, &iter, STORE_TRACK_NR, tag_track,
-											STORE_TRACK_TITLE, tag_title,
-											STORE_TRACK_ARTIST, artist,
-											STORE_TRACK_ALBUM, album,
-											STORE_TRACK_PATH, track_path, -1);		
-}
-
 
 
 static gint artist_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
 {
-	g_debug ("DB Artist: Id=%i / Name=%s", atoi(cols[0]), cols[1]);
+	g_debug ("DB Artist Insert: Id=%i / Name=%s", atoi(cols[0]), cols[1]);
 	
-	ArtistDetails *artist = g_new0 (ArtistDetails, 1);
-	
-	artist->id = atoi(cols[0]);
-	artist->name = g_strdup (cols[1]);
-	
-	g_debug ("ArtistDetails id=%d / name=%s", artist->id, artist->name);
-	
-	music_artist_insert (artist);
+	music_artist_insert (atoi (cols[0]), cols[1]);
 
 	return 0;
 }
@@ -382,26 +322,30 @@ static gint artist_callback (void *NotUsed, gint rows, gchar **cols, gchar **tit
 
 static gint album_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
 {
+	g_debug ("DB Album Insert: Id=%i / Name=%s", atoi(cols[2]), cols[3]);
 	
-	music_album_insert (cols[3], cols[1]);
+	music_album_insert (atoi (cols[2]), cols[3]);
 
 	return 0;
 }
 
 
 
-// GtkTreeView cell renderer callback to render artist name
-void artistname_cell_data_cb (GtkTreeViewColumn *tree_column,
-							GtkCellRenderer *cell,
-							GtkTreeModel *tree_model,
-							GtkTreeIter *iter,
-							gpointer data)
-{	
-	ArtistDetails *artist = NULL;
+static gint track_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
+{
+	g_debug ("DB Track Insert: Id=%i / Name=%s", atoi(cols[0]), cols[4]);
+	
+	GtkTreeIter iter;
 
-	gtk_tree_model_get (tree_model, iter, COL_ARTIST_DETAILS, &artist, -1);	
-	g_object_set (G_OBJECT (cell), "text", artist->name, NULL);
+	gtk_list_store_append (track_store, &iter);
+	gtk_list_store_set (track_store, &iter, COL_TRACK_NR, 1,
+											COL_TRACK_TITLE, cols[4],
+											COL_TRACK_ARTIST, cols[5],
+											COL_TRACK_ALBUM, cols[6], -1);
+
+	return 0;
 }
+
 
 
 
@@ -470,9 +414,9 @@ void on_treeview_albums_cursor_changed (GtkTreeView *tree, gpointer user_data)
 	model = gtk_tree_view_get_model (tree);
 	
 	gtk_tree_model_get_iter (model, &iter, path);
-	gtk_tree_model_get (model, &iter, STORE_ALBUM_NAME, &album, -1);
+	gtk_tree_model_get (model, &iter, COL_ALBUM_NAME, &album, -1);
 	
-	//g_debug ("Album cursor changed: row=%s", album);
+	g_debug ("Album cursor changed: row=%s", album);
 	
 	gtk_tree_view_row_activated (tree, path, col);
 }
@@ -486,41 +430,25 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-
-	ArtistDetails *artist = NULL;
+	gint id;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
-	gtk_tree_model_get (model, &iter, COL_ARTIST_DETAILS, &artist, -1);
+	gtk_tree_model_get (model, &iter, COL_ARTIST_ID, &id, -1);
 	
-	g_debug ("Id Artist %d", artist->id);
-	
-	
-	gchar *sql;
-	sql = g_strdup_printf ("SELECT * FROM view_artist_album WHERE IDartist = '%d'", artist->id);
-	
-	db_execute_sql (sql , album_callback);
+	g_debug ("Id Artist %d", id);
 	
 	
 	// Vorhandene Alben zuerst löschen
 	gtk_list_store_clear (album_store);
 	
-	/*GDir *dir;
-	const gchar *dirname;
-
-	if ((dir = g_dir_open (get_artist_dir (artist->name), 0, NULL))) {
-		while ((dirname = g_dir_read_name (dir))) {
-			g_assert (strcmp (dirname, ".") != 0);
-			g_assert (strcmp (dirname, "..") != 0);
-			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0) {
-				continue;
-			}
-
-			music_album_insert (dirname, artist->name);
-		}
-		g_dir_close (dir);
-	}*/
+	
+	gchar *sql;
+	sql = g_strdup_printf ("SELECT * FROM view_artist_album WHERE IDartist = %d", id);
+	
+	db_execute_sql (sql , album_callback);
+	
 }
 
 
@@ -532,32 +460,21 @@ void on_treeview_albums_row_activated (GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *album;
-	gchar *artist;
+	gint id;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
-	gtk_tree_model_get (model, &iter, STORE_ALBUM_NAME, &album, STORE_ALBUM_ARTIST, &artist, -1);
+	gtk_tree_model_get (model, &iter, COL_ALBUM_ID, &id, -1);
 	
 	// Vorhandene Tracks zuerst löschen
 	gtk_list_store_clear (track_store);
 	
-	GDir *dir;
-	gchar *dirname;
-
-	if ((dir = g_dir_open (get_album_dir (album, artist), 0, NULL))) {
-		while ((dirname = g_dir_read_name (dir))) {
-			/* This should be useless, but we'd better keep it for security */
-			g_assert (strcmp (dirname, ".") != 0);
-			g_assert (strcmp (dirname, "..") != 0);
-			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0) {
-				continue;
-			}
-			music_track_insert (dirname, album, artist);
-		}
-		g_dir_close (dir);
-	}	
+	// Hier Tracks abfüllen	
+	gchar *sql;
+	sql = g_strdup_printf ("SELECT * FROM view_track_tree WHERE IDalbum = %d", id);
+	
+	db_execute_sql (sql , track_callback);
 }
 
 
@@ -574,7 +491,13 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
-	gtk_tree_model_get (model, &iter, STORE_TRACK_PATH, &track_path, -1);
+	
+	// Hier Track-Details holen
+	
+	
+	
+	
+	//gtk_tree_model_get (model, &iter, STORE_TRACK_PATH, &track_path, -1);
 	
 	// Musik abspielen
 	track_path = g_strdup_printf ("file://%s", track_path);
