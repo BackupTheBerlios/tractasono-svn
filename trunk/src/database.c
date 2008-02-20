@@ -36,19 +36,23 @@ sqlite3 *db;
 // Prototypen
 void db_testfunc (void);
 static gint callback (void *NotUsed, gint argc, gchar **argv, gchar **azColName);
+void update_callback (void * data, int operation_code,
+					  char const *db_name, char const *table_name,
+					  sqlite_int64 rowid);
 
 
 void db_init (int argc, char *argv[])
 {
-	const gchar *db_file;
-	
 	g_message ("Database init");
 	
 	// Mit Datenbank verbinden
-	db_file = g_strdup_printf ("%stractasono.db", get_tractasono_dir ());
-	if (sqlite3_open (db_file, &db)) {
+	if (sqlite3_open (get_database_file (), &db)) {
 		g_error ("Can't open database: %s", sqlite3_errmsg (db));
 	}
+	
+	// UPDATE callback registrieren
+	sqlite3_update_hook(db, update_callback, NULL);
+
 	
 	// Testfunktion
 	//db_testfunc ();
@@ -117,6 +121,16 @@ void db_execute_sql (const gchar *sql, gint (*callback)(void*,gint,gchar**,gchar
 		g_warning ("SQL error: %s", msg);
 		sqlite3_free (msg);
 	}
+}
+
+
+gint db_get_table (	const char *sql,       /* SQL to be executed */
+					char ***resultp,       /* Result written to a char *[]  that this points to */
+					int *nrow,             /* Number of result rows written here */
+					int *ncolumn,          /* Number of result columns written here */
+					char **errmsg          /* Error msg written here */)
+{
+	return sqlite3_get_table (db, sql, resultp, nrow, ncolumn, errmsg);
 }
 
 
@@ -495,6 +509,13 @@ gint db_album_get_id (gchar *album, gchar *artist)
 
 
 
-
+void update_callback (void * data, int operation_code,
+					  char const *db_name, char const *table_name,
+					  sqlite_int64 rowid)
+{
+	g_message ("Ein UPDATE trat ein!");
+	
+	
+}
 
 

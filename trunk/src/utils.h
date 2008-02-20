@@ -41,6 +41,7 @@
 void create_dir (const gchar *path);
 gchar *get_tractasono_dir (void);
 gchar *get_music_dir (void);
+gchar *get_database_file (void);
 gchar *get_artist_dir (gchar *artist);
 void create_artist_dir (gchar *artist);
 gchar *get_album_dir (gchar *album, gchar *artist);

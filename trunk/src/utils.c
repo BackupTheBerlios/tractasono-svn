@@ -35,6 +35,12 @@ gchar *get_music_dir (void)
 	return g_strdup_printf ("%smusic/", get_tractasono_dir ());
 }
 
+// Gibt den Datenbank Dateipfad zurück
+gchar *get_database_file (void)
+{
+	return g_strdup_printf ("%stractasono.db", get_tractasono_dir ());
+}
+
 // Gibt den Verzeichnisname für einen Artist zurück
 gchar *get_artist_dir (gchar *artist)
 {

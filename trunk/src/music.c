@@ -216,7 +216,7 @@ void music_track_setup_tree (void)
 	
 											
 	// Store erstellen
-	track_store = gtk_list_store_new (COLS_TRACK, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+	track_store = gtk_list_store_new (COLS_TRACK, G_TYPE_INT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 	
 	// Sortierung
 	sortable = GTK_TREE_SORTABLE (track_store);
@@ -333,12 +333,13 @@ static gint album_callback (void *NotUsed, gint rows, gchar **cols, gchar **titl
 
 static gint track_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
 {
-	g_debug ("DB Track Insert: Id=%i / Name=%s", atoi(cols[0]), cols[4]);
+	g_debug ("DB Track: Id=%i / Name=%s", atoi(cols[0]), cols[4]);
 	
 	GtkTreeIter iter;
 
 	gtk_list_store_append (track_store, &iter);
-	gtk_list_store_set (track_store, &iter, COL_TRACK_NR, 1,
+	gtk_list_store_set (track_store, &iter, COL_TRACK_NR, atoi (cols[2]),
+											COL_TRACK_ID, atoi (cols[0]),
 											COL_TRACK_TITLE, cols[4],
 											COL_TRACK_ARTIST, cols[5],
 											COL_TRACK_ALBUM, cols[6], -1);
@@ -352,22 +353,6 @@ static gint track_callback (void *NotUsed, gint rows, gchar **cols, gchar **titl
 // Fülle alle Artisten ein
 void music_artist_fill (void)
 {
-	/*GDir *dir;
-	const gchar *dirname;
-
-	if ((dir = g_dir_open (get_music_dir (), 0, NULL))) {
-		while ((dirname = g_dir_read_name (dir))) {
-			g_assert (strcmp (dirname, ".") != 0);
-			g_assert (strcmp (dirname, "..") != 0);
-			if (strcmp (dirname, ".") == 0 || strcmp (dirname, "..") == 0) {
-				continue;
-			}
-
-			music_artist_insert (dirname);
-		}
-		g_dir_close (dir);
-	}*/
-	
 	
 	// Datenbankzugriff
 	db_execute_sql ("SELECT * FROM tbl_artist", artist_callback);
@@ -486,23 +471,33 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gchar *track_path;
+	gint id;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
+	// Track Id holen
+	gtk_tree_model_get (model, &iter, COL_TRACK_ID, &id, -1);
 	
 	// Hier Track-Details holen
+	gchar *sql;
+	sql = g_strdup_printf ("SELECT trackpath FROM tbl_track WHERE IDtrack = %d", id);
+	g_message (sql);
 	
+	gchar **results;
+	gint rows;
+	gint cols;
+	gchar *err;
 	
+	if (db_get_table (sql, &results, &rows, &cols, &err)) {
+		g_warning (err);
+		return;
+	}
 	
-	
-	//gtk_tree_model_get (model, &iter, STORE_TRACK_PATH, &track_path, -1);
 	
 	// Musik abspielen
-	track_path = g_strdup_printf ("file://%s", track_path);
+	gchar *track_path = g_strdup_printf ("file://%s", results[1]);
 	player_play_uri (track_path);
 	player_play_from_list (model, path);
 }
-
 

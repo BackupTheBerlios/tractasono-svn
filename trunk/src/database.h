@@ -32,6 +32,14 @@ void db_close (void);
 
 
 void db_execute_sql (const gchar *sql, gint (*callback)(void*,gint,gchar**,gchar**));
+
+gint db_get_table (	const char *sql,       /* SQL to be executed */
+					char ***resultp,       /* Result written to a char *[]  that this points to */
+					int *nrow,             /* Number of result rows written here */
+					int *ncolumn,          /* Number of result columns written here */
+					char **errmsg          /* Error msg written here */);
+
+
 gint db_execute_sql_non_query (const gchar *sql);
 
 void db_settings_set_boolean (gchar *group, gchar *key, gboolean value);
