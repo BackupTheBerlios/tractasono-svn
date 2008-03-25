@@ -137,6 +137,12 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	// Daten kopieren
 	while (!feof(fp_in)) {
 		anz = fread (buffer, sizeof(char), sizeof(buffer), fp_in);	
+		
+		// Update UI
+		while (gtk_events_pending()) {
+			gtk_main_iteration();
+		}
+		
 		fwrite (buffer, sizeof(char), anz, fp_out);
 	}
 	

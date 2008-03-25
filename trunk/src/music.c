@@ -75,16 +75,6 @@ gint sort_artist_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 gint sort_album_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   GtkTreeIter *b, gpointer userdata);
 							   
-void music_artist_insert (const gint id, const gchar *artist);
-void music_album_insert (const gint id, const gchar *album);
-void music_track_insert (gchar *track, gchar *album, gchar *artist);
-
-void artistname_cell_data_cb (GtkTreeViewColumn *tree_column,
-							GtkCellRenderer *cell,
-							GtkTreeModel *tree_model,
-							GtkTreeIter *iter,
-							gpointer data);
-
 void music_artist_fill (void);
 
 
@@ -289,33 +279,12 @@ gint sort_album_compare_func (GtkTreeModel *model,
 }
 
 
-void music_artist_insert (const gint id, const gchar *artist)
-{
-	GtkTreeIter iter;
-	
-	gtk_list_store_append (artist_store, &iter);
-	gtk_list_store_set (artist_store, &iter, COL_ARTIST_ID, id,
-											 COL_ARTIST_NAME, artist, -1);
-}
-
-
-void music_album_insert (const gint id, const gchar *album)
-{
-	GtkTreeIter iter;
-	
-	gtk_list_store_append (album_store, &iter);
-	gtk_list_store_set (album_store, &iter, COL_ALBUM_ID, id,
-											COL_ALBUM_NAME, album, -1);		
-}
-
-
 
 
 // Fülle alle Artisten ein
 void music_artist_fill (void)
 {
-	gint id;
-	gchar *artist;
+	GtkTreeIter iter;
 	gint rc;
 	gchar *sql;
 	sqlite3_stmt *stmt;
@@ -329,11 +298,10 @@ void music_artist_fill (void)
 	
 	rc = sqlite3_step (stmt);
 	while (rc == SQLITE_ROW) {
-		id = sqlite3_column_int (stmt, 0);
-		artist = (gchar*) sqlite3_column_text (stmt, 1);
-		
-		//g_debug ("ID: %d, Name: %s", id, artist);
-		music_artist_insert (id, artist);
+
+		gtk_list_store_append (artist_store, &iter);
+		gtk_list_store_set (artist_store, &iter, COL_ARTIST_ID, sqlite3_column_int (stmt, 0),
+												 COL_ARTIST_NAME, sqlite3_column_text (stmt, 1), -1);
 		
 		rc = sqlite3_step (stmt);
 	}
@@ -409,9 +377,6 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 	// Vorhandene Alben zuerst löschen
 	gtk_list_store_clear (album_store);
 	
-	
-	gint idalbum;
-	gchar *album;
 	gint rc;
 	gchar *sql;
 	sqlite3_stmt *stmt;
@@ -425,12 +390,11 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 	
 	rc = sqlite3_step (stmt);
 	while (rc == SQLITE_ROW) {
-		idalbum = sqlite3_column_int (stmt, 0);
-		album = (gchar*) sqlite3_column_text (stmt, 1);
 		
-		//g_debug ("ID: %d, Name: %s", idalbum, album);
-		music_album_insert (idalbum, album);
-		
+		gtk_list_store_append (album_store, &iter);
+		gtk_list_store_set (album_store, &iter, COL_ALBUM_ID, sqlite3_column_int (stmt, 0),
+												COL_ALBUM_NAME, sqlite3_column_text (stmt, 1), -1);
+												
 		rc = sqlite3_step (stmt);
 	}
 	
