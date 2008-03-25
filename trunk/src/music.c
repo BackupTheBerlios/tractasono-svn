@@ -309,55 +309,36 @@ void music_album_insert (const gint id, const gchar *album)
 }
 
 
-static gint artist_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
-{
-	g_debug ("DB Artist Insert: Id=%i / Name=%s", atoi(cols[0]), cols[1]);
-	
-	music_artist_insert (atoi (cols[0]), cols[1]);
-
-	return 0;
-}
-
-
-
-static gint album_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
-{
-	g_debug ("DB Album Insert: Id=%i / Name=%s", atoi(cols[2]), cols[3]);
-	
-	music_album_insert (atoi (cols[2]), cols[3]);
-
-	return 0;
-}
-
-
-
-static gint track_callback (void *NotUsed, gint rows, gchar **cols, gchar **titles)
-{
-	g_debug ("DB Track: Id=%i / Name=%s", atoi(cols[0]), cols[4]);
-	
-	GtkTreeIter iter;
-
-	gtk_list_store_append (track_store, &iter);
-	gtk_list_store_set (track_store, &iter, COL_TRACK_NR, atoi (cols[2]),
-											COL_TRACK_ID, atoi (cols[0]),
-											COL_TRACK_TITLE, cols[4],
-											COL_TRACK_ARTIST, cols[5],
-											COL_TRACK_ALBUM, cols[6], -1);
-
-	return 0;
-}
-
-
 
 
 // Fülle alle Artisten ein
 void music_artist_fill (void)
 {
+	gint id;
+	gchar *artist;
+	gint rc;
+	gchar *sql;
+	sqlite3_stmt *stmt;
 	
-	// Datenbankzugriff
-	db_execute_sql ("SELECT * FROM tbl_artist", artist_callback);
+	sql = g_strdup ("SELECT IDartist, artistname FROM tbl_artist");
 	
+	rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
+	if (rc != SQLITE_OK) {
+		g_error ("SQL error: %s", sqlite3_errmsg (db));
+	}
 	
+	rc = sqlite3_step (stmt);
+	while (rc == SQLITE_ROW) {
+		id = sqlite3_column_int (stmt, 0);
+		artist = (gchar*) sqlite3_column_text (stmt, 1);
+		
+		//g_debug ("ID: %d, Name: %s", id, artist);
+		music_artist_insert (id, artist);
+		
+		rc = sqlite3_step (stmt);
+	}
+	
+	sqlite3_finalize (stmt);	
 }
 
 
@@ -401,7 +382,7 @@ void on_treeview_albums_cursor_changed (GtkTreeView *tree, gpointer user_data)
 	gtk_tree_model_get_iter (model, &iter, path);
 	gtk_tree_model_get (model, &iter, COL_ALBUM_NAME, &album, -1);
 	
-	g_debug ("Album cursor changed: row=%s", album);
+	//g_debug ("Album cursor changed: row=%s", album);
 	
 	gtk_tree_view_row_activated (tree, path, col);
 }
@@ -415,24 +396,45 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
-	gint id;
+	gint idartist;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
 	
-	gtk_tree_model_get (model, &iter, COL_ARTIST_ID, &id, -1);
+	gtk_tree_model_get (model, &iter, COL_ARTIST_ID, &idartist, -1);
 	
-	g_debug ("Id Artist %d", id);
+	//g_debug ("Id Artist %d", idartist);
 	
 	
 	// Vorhandene Alben zuerst löschen
 	gtk_list_store_clear (album_store);
 	
 	
+	gint idalbum;
+	gchar *album;
+	gint rc;
 	gchar *sql;
-	sql = g_strdup_printf ("SELECT * FROM view_artist_album WHERE IDartist = %d", id);
+	sqlite3_stmt *stmt;
 	
-	db_execute_sql (sql , album_callback);
+	sql = g_strdup_printf ("SELECT IDalbum, albumname FROM view_artist_album WHERE IDartist = %d", idartist);
+	
+	rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
+	if (rc != SQLITE_OK) {
+		g_error ("SQL error: %s", sqlite3_errmsg (db));
+	}
+	
+	rc = sqlite3_step (stmt);
+	while (rc == SQLITE_ROW) {
+		idalbum = sqlite3_column_int (stmt, 0);
+		album = (gchar*) sqlite3_column_text (stmt, 1);
+		
+		//g_debug ("ID: %d, Name: %s", idalbum, album);
+		music_album_insert (idalbum, album);
+		
+		rc = sqlite3_step (stmt);
+	}
+	
+	sqlite3_finalize (stmt);
 	
 }
 
@@ -456,10 +458,31 @@ void on_treeview_albums_row_activated (GtkTreeView *tree,
 	gtk_list_store_clear (track_store);
 	
 	// Hier Tracks abfüllen	
+	gint rc;
 	gchar *sql;
+	sqlite3_stmt *stmt;
+	
 	sql = g_strdup_printf ("SELECT * FROM view_track_tree WHERE IDalbum = %d", id);
 	
-	db_execute_sql (sql , track_callback);
+	rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
+	if (rc != SQLITE_OK) {
+		g_error ("SQL error: %s", sqlite3_errmsg (db));
+	}
+	
+	rc = sqlite3_step (stmt);
+	while (rc == SQLITE_ROW) {
+		
+		gtk_list_store_append (track_store, &iter);
+		gtk_list_store_set (track_store, &iter, COL_TRACK_NR, sqlite3_column_int (stmt, 2),
+												COL_TRACK_ID, sqlite3_column_int (stmt, 0),
+												COL_TRACK_TITLE, sqlite3_column_text (stmt, 4),
+												COL_TRACK_ARTIST, sqlite3_column_text (stmt, 5),
+												COL_TRACK_ALBUM, sqlite3_column_text (stmt, 6), -1);
+												
+		rc = sqlite3_step (stmt);
+	}
+	
+	sqlite3_finalize (stmt);
 }
 
 
@@ -484,11 +507,9 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	sql = g_strdup_printf ("SELECT trackpath FROM tbl_track WHERE IDtrack = %d", id);
 	g_message (sql);
 	
-	gchar **results;
-	gint rows;
-	gint cols;
-	gchar *err;
+	return;
 	
+	/*
 	if (db_get_table (sql, &results, &rows, &cols, &err)) {
 		g_warning (err);
 		return;
@@ -499,5 +520,6 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	gchar *track_path = g_strdup_printf ("file://%s", results[1]);
 	player_play_uri (track_path);
 	player_play_from_list (model, path);
+	*/
 }
 

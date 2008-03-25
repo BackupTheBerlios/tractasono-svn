@@ -27,48 +27,32 @@
 #include <sqlite3.h>
 
 
+// Globale tractasono Datenbank
+sqlite3 *db;
+
+
+// Allgemeines
+
 void db_init (int argc, char *argv[]);
 void db_close (void);
 
 
-void db_execute_sql (const gchar *sql, gint (*callback)(void*,gint,gchar**,gchar**));
 
-gint db_get_table (	const char *sql,       /* SQL to be executed */
-					char ***resultp,       /* Result written to a char *[]  that this points to */
-					int *nrow,             /* Number of result rows written here */
-					int *ncolumn,          /* Number of result columns written here */
-					char **errmsg          /* Error msg written here */);
+// Settings
 
+#define SETTINGS_TYPE_UNDEFINED	0
+#define SETTINGS_TYPE_TEXT		1
+#define SETTINGS_TYPE_NUMBER	2
+#define SETTINGS_TYPE_BOOL		3
 
-gint db_execute_sql_non_query (const gchar *sql);
+void db_settings_set_bool (gchar *group, gchar *key, gboolean value);
+gboolean db_settings_get_bool (gchar *group, gchar *key);
 
-void db_settings_set_boolean (gchar *group, gchar *key, gboolean value);
-gboolean db_settings_get_boolean (gchar *group, gchar *key);
+void db_settings_set_text (gchar *group, gchar *key, const gchar* value);
+gchar* db_settings_get_text (gchar *group, gchar *key);
 
-void db_settings_set_string (gchar *group, gchar *key, const gchar* value);
-gchar* db_settings_get_string (gchar *group, gchar *key);
-
-void db_settings_set_integer (gchar *group, gchar *key, gint value);
-gint db_settings_get_integer (gchar *group, gchar *key);
-
-
-// Genre Funktionen
-gint db_genre_add (gchar *genre);
-gint db_genre_get_id (gchar *genre);
-const gchar* db_genre_get_name (gint id);
-gboolean db_genre_remove (gint id);
-gboolean db_genre_rename (gint id, gchar *newname);
-
-
-
-// Artist Funktionen
-ArtistDetails* db_artist_add (gchar *artist);
-gboolean db_artist_update (ArtistDetails* details);
-
-gint db_artist_get_id (gchar *artist);
-const gchar* db_artist_get (gint id);
-
-gint db_album_add (gchar *album, gchar *artist);
+void db_settings_set_number (gchar *group, gchar *key, gint value);
+gint db_settings_get_number (gchar *group, gchar *key);
 
 
 #endif

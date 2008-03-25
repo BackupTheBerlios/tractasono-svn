@@ -27,6 +27,7 @@
 #include "settings.h"
 #include "lcd.h"
 #include "ipod.h"
+#include "database.h"
 
 
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
@@ -136,7 +137,8 @@ void interface_init (int argc, char *argv[])
 	gtk_container_add (GTK_CONTAINER (lcdspace), GTK_WIDGET (lcd));
 	
 	// LCD Text initial setzen
-	lcd_set_title (LCD (lcd), "Willkommen beim tractasono!");
+	gchar *title = db_settings_get_text ("LCD", "StartText");
+	lcd_set_title (LCD (lcd), title);
 	
 	// Widget anzeigen
 	gtk_widget_show (GTK_WIDGET (lcd));
