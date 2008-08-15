@@ -132,35 +132,35 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 	}
 
 	if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistId, data, sizeof (data))) {
-		g_message ("1");
+		//g_message ("1");
 		mb_GetIDFromURL (mb, data, data, sizeof (data));
 		album->artist_id = g_strdup (data);
 
 		if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistName, data, sizeof (data))) {
-			g_message ("2");
+			//g_message ("2");
 			album->artist = g_strdup (data);
 		} else {
-			g_message ("3");
+			//g_message ("3");
 			if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
-				g_message ("4");
+				//g_message ("4");
 				album->artist = g_strdup ("Various Artist");
 				album->compilation = TRUE;
 			} else {
-				g_message ("5");
+				//g_message ("5");
 				album->artist = g_strdup ("Unknown Artist");
 			}
 		}
-		g_message ("id: %s", album->artist_id);
+		//g_message ("id: %s", album->artist_id);
 		if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
-			g_message ("6");
+			//g_message ("6");
 			album->compilation = TRUE;
 		}
 		if (g_ascii_strcasecmp (album->artist, "Various Artist") == 0) {
-			g_message ("7");
+			//g_message ("7");
 			album->compilation = TRUE;
 		}
 		if (g_ascii_strcasecmp (album->artist, "Various Artists") == 0) {
-			g_message ("8");
+			//g_message ("8");
 			album->compilation = TRUE;
 		}
 	}

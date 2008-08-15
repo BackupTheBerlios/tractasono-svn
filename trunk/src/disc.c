@@ -442,22 +442,20 @@ void display_disctitle (AlbumDetails *album)
 }
 
 
-
-void on_button_reread_clicked (GtkWidget *widget, gpointer user_data)
-{	
+void disc_reread (void)
+{
 	GtkListStore *store;
 	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
 	
 	// Vorhandene Tracks zuerst löschen
 	gtk_list_store_clear (store);
 	
-	
 	// FIXME: hier muss zuerst Speicher freigegeben werden
 	the_album = musicbrainz_lookup_cd ();
 	if (the_album == NULL) {
 		g_warning ("CD konnte nich eingelesen werden!");
 	} else {
-		g_message ("CD einlesen (title: %s | artist: %s | tracks: %d)", the_album->title,
+		g_message ("CD wurde eingelesen (title: %s | artist: %s | tracks: %d)", the_album->title,
 														  the_album->artist,
 														  the_album->number);
 
@@ -471,8 +469,13 @@ void on_button_reread_clicked (GtkWidget *widget, gpointer user_data)
 			tracks = tracks->next;
 		}											  
 		
-	}
-	
+	}	
+}
+
+
+void on_button_reread_clicked (GtkWidget *widget, gpointer user_data)
+{	
+	disc_reread ();
 }
 
 
@@ -643,7 +646,7 @@ static gboolean extract_track_cb (GtkTreeModel *model, GtkTreePath *path,
 
 void extract_track (TrackDetails *track)
 {
-	g_message ("<extract_track> Rippe Track: %d", track->number);
+	g_message ("Beginne mit Rippen von Track %d", track->number);
 	
 	gchar *filename;
 	gchar *filepath;
@@ -665,7 +668,7 @@ void extract_track (TrackDetails *track)
 	g_object_set (sink, "location", filepath, NULL);
 	
 	// Pfad in der Struktur aktualisieren
-	track->path = g_strdup_printf ("%s/%s", filepath, filename);
+	track->path = g_strdup (filepath);
 	
 	// Tags setzen
 	GstTagList *taglist;
@@ -674,7 +677,6 @@ void extract_track (TrackDetails *track)
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ARTIST, track->artist, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ALBUM, track->album->title, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_GENRE, track->album->genre, NULL);
-	g_debug ("Adding genre %s to the tag list", track->album->genre);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TRACK_NUMBER, track->number, NULL);
 	if (track->album->release_date) {
 		gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_DATE, track->album->release_date, NULL);
@@ -834,6 +836,6 @@ void on_entry_disc_genre_changed (GtkEditable *editable, gpointer user_data)
 	
 	genre = gtk_entry_get_text (GTK_ENTRY (editable));
 	the_album->genre = g_strdup (genre);
-	g_message ("New Album Genre: %s", the_album->genre);
+	//g_message ("New Album Genre: %s", the_album->genre);
 }
 

@@ -213,7 +213,7 @@ void update_callback (void * data,
 					  char const *table_name,
 					  sqlite_int64 rowid)
 {
-	g_message ("Ein UPDATE auf der Tabelle \'%s\'trat ein!", table_name);
+	g_message ("Ein UPDATE auf der Tabelle \'%s\' trat ein!", table_name);
 	
 	
 }
@@ -366,7 +366,7 @@ gint db_genre_add (gchar *genre)
 	char *err;
 	gchar *sql;
 	
-	id = db_artist_id (genre);
+	id = db_genre_id (genre);
 	if (id != 0) {
 		return id;
 	}
@@ -378,7 +378,7 @@ gint db_genre_add (gchar *genre)
 		return id;
 	}
 	
-	id = db_artist_id (genre);
+	id = db_genre_id (genre);
 	if (id != 0) {
 		return id;
 	}
@@ -401,7 +401,7 @@ gint db_album_add (AlbumDetails *album)
 		return id;
 	}
 	
-	sql = g_strdup_printf ("INSERT INTO tbl_album (albumname, IDgenre) VALUES ('%s', %i)", album->title, genre);
+	sql = g_strdup_printf ("INSERT INTO tbl_album (IDgenre, albumname) VALUES (%i, '%s')",  genre, album->title);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);

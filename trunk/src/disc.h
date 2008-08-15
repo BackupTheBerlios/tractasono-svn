@@ -29,6 +29,8 @@
 
 void disc_init(void);
 
+void disc_reread (void);
+
 void on_extract_toggled (GtkCellRendererToggle *cellrenderertoggle,
                                 gchar *path,
                                 gpointer user_data);
