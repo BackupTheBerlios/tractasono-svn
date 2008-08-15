@@ -76,6 +76,7 @@ gint sort_album_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   GtkTreeIter *b, gpointer userdata);
 							   
 void music_artist_fill (void);
+void music_track_fill (gint artist, gint album);
 
 
 // Initialisierung
@@ -289,6 +290,9 @@ void music_artist_fill (void)
 	gchar *sql;
 	sqlite3_stmt *stmt;
 	
+	// Vorhandene Artisten zuerst löschen
+	gtk_list_store_clear (artist_store);
+	
 	sql = g_strdup ("SELECT IDartist, artistname FROM tbl_artist");
 	
 	rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
@@ -400,6 +404,8 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 	
 	sqlite3_finalize (stmt);
 	
+	
+	music_track_fill (idartist, 0);
 }
 
 
@@ -418,6 +424,14 @@ void on_treeview_albums_row_activated (GtkTreeView *tree,
 	
 	gtk_tree_model_get (model, &iter, COL_ALBUM_ID, &id, -1);
 	
+	music_track_fill (0, id);
+}
+
+
+void music_track_fill (gint artist, gint album)
+{
+	GtkTreeIter iter;
+	
 	// Vorhandene Tracks zuerst löschen
 	gtk_list_store_clear (track_store);
 	
@@ -426,7 +440,16 @@ void on_treeview_albums_row_activated (GtkTreeView *tree,
 	gchar *sql;
 	sqlite3_stmt *stmt;
 	
-	sql = g_strdup_printf ("SELECT * FROM view_track_tree WHERE IDalbum = %d", id);
+	if (album != 0) {
+		// Liste Tracks eines Albums auf
+		sql = g_strdup_printf ("SELECT * FROM view_track_tree WHERE IDalbum = %d", album);
+	} else if (artist != 0) {
+		// Liste Tracks eines Artisten auf
+		sql = g_strdup_printf ("SELECT * FROM view_track_tree WHERE IDartist = %d", artist);
+	} else {
+		// Liste alle Tracks auf
+		sql = g_strdup_printf ("SELECT * FROM view_track_tree");
+	}
 	
 	rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
 	if (rc != SQLITE_OK) {
@@ -450,6 +473,7 @@ void on_treeview_albums_row_activated (GtkTreeView *tree,
 }
 
 
+
 // Tritt ein, wenn auf dem Track TreeView eine Zeile aktiviert wird
 void on_treeview_tracks_row_activated (GtkTreeView *tree,
 										 GtkTreePath *path,
@@ -459,6 +483,10 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	GtkTreeModel *model;
 	GtkTreeIter iter;
 	gint id;
+	char **results;
+	gint rows;
+	gint cols;
+	char *err;
 	
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_get_iter (model, &iter, path);
@@ -471,19 +499,14 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	sql = g_strdup_printf ("SELECT trackpath FROM tbl_track WHERE IDtrack = %d", id);
 	g_message (sql);
 	
-	return;
-	
-	/*
-	if (db_get_table (sql, &results, &rows, &cols, &err)) {
+	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
 		g_warning (err);
 		return;
 	}
 	
-	
 	// Musik abspielen
 	gchar *track_path = g_strdup_printf ("file://%s", results[1]);
 	player_play_uri (track_path);
-	player_play_from_list (model, path);
-	*/
+	//player_play_from_list (model, path);
 }
 

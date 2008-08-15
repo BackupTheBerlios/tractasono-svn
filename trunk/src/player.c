@@ -362,7 +362,7 @@ void player_handle_tag_message(GstMessage *message)
 	gst_tag_list_get_string (tag_list, GST_TAG_LOCATION, &uri);
 	gst_tag_list_get_string (tag_list, GST_TAG_CDDA_MUSICBRAINZ_DISCID, &discid);
 
-	g_message ("DiscID: %s", discid);
+	//g_message ("DiscID: %s", discid);
 	
 	interface_set_songinfo (artist, title);
 	

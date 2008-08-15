@@ -54,5 +54,13 @@ gchar* db_settings_get_text (gchar *group, gchar *key);
 void db_settings_set_number (gchar *group, gchar *key, gint value);
 gint db_settings_get_number (gchar *group, gchar *key);
 
+gint db_track_add (TrackDetails *track);
+
+gint db_artist_add (gchar *artist);
+
+gint db_genre_add (gchar *genre);
+
+gint db_album_add (AlbumDetails *album);
+
 
 #endif

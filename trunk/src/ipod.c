@@ -145,7 +145,7 @@ void ipod_init (void)
 	setup_playlist_tree ();
 
 	// iPod Liste befüllen
-	ipod_fill_combo ();
+	//ipod_fill_combo ();
 	
 	//insert_test_daten ();
 }

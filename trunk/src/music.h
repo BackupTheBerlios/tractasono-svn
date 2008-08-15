@@ -26,4 +26,6 @@
 // Prototypen
 void music_init (void);
 
+void music_artist_fill (void);
+
 #endif

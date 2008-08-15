@@ -49,7 +49,7 @@ void db_init (int argc, char *argv[])
 	sqlite3_update_hook(db, update_callback, NULL);
 
 	// Testfunktion
-	//db_testfunc ();
+	db_testfunc ();
 }
 
 
@@ -66,7 +66,13 @@ void db_testfunc (void)
 {
 	g_message ("Datenbank Tesfunktion");
 	
-	gboolean wert_bool;
+	
+	
+	//db_track_add (NULL);
+	
+	
+	
+	/*gboolean wert_bool;
 	gchar *wert_text;
 	gint wert_number;
 	
@@ -76,7 +82,7 @@ void db_testfunc (void)
 	
 	g_debug ("Firstrun: %i", wert_bool);
 	g_debug ("Version: %s", wert_text);
-	g_debug ("Aktueller Tab: %i", wert_number);
+	g_debug ("Aktueller Tab: %i", wert_number);*/
 	
 }
 
@@ -213,3 +219,238 @@ void update_callback (void * data,
 }
 
 
+
+
+
+
+
+
+gint db_track_id (gchar *track)
+{
+	gint id = 0;
+	char **results;
+	gint rows;
+	gint cols;
+	char *err;
+	gchar *sql;
+	
+	sql = g_strdup_printf ("SELECT IDtrack FROM tbl_track WHERE trackname = '%s'", track);
+	
+	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
+		g_warning (err);
+		return id;
+	}
+	
+	//g_message ("Cols: (%i) / Rows: (%i)", cols, rows);
+	
+	if (rows > 0) {
+		id = atoi(results[1]);
+	}
+	
+	return id;
+}
+
+
+
+gint db_artist_id (gchar *artist)
+{
+	gint id = 0;
+	char **results;
+	gint rows;
+	gint cols;
+	char *err;
+	gchar *sql;
+	
+	sql = g_strdup_printf ("SELECT IDartist FROM tbl_artist WHERE artistname = '%s'", artist);
+	
+	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
+		g_warning (err);
+		return id;
+	}
+	
+	//g_message ("Cols: (%i) / Rows: (%i)", cols, rows);
+	
+	if (rows > 0) {
+		id = atoi(results[1]);
+	}
+	
+	return id;
+}
+
+
+gint db_genre_id (gchar *genre)
+{
+	gint id = 0;
+	char **results;
+	gint rows;
+	gint cols;
+	char *err;
+	gchar *sql;
+	
+	sql = g_strdup_printf ("SELECT IDgenre FROM tbl_genre WHERE genrename = '%s'", genre);
+	
+	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
+		g_warning (err);
+		return id;
+	}
+	
+	//g_message ("Cols: (%i) / Rows: (%i)", cols, rows);
+	
+	if (rows > 0) {
+		id = atoi(results[1]);
+	}
+	
+	return id;
+}
+
+
+gint db_album_id (gchar *album)
+{
+	gint id = 0;
+	char **results;
+	gint rows;
+	gint cols;
+	char *err;
+	gchar *sql;
+	
+	sql = g_strdup_printf ("SELECT IDalbum FROM tbl_album WHERE albumname = '%s'", album);
+	
+	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
+		g_warning (err);
+		return id;
+	}
+	
+	//g_message ("Cols: (%i) / Rows: (%i)", cols, rows);
+	
+	if (rows > 0) {
+		id = atoi(results[1]);
+	}
+	
+	return id;
+}
+
+
+// Füge einen Artist ein, oder mache nichts wenn er schon existiert
+gint db_artist_add (gchar *artist)
+{
+	gint id = 0;
+	char *err;
+	gchar *sql;
+	
+	id = db_artist_id (artist);
+	if (id != 0) {
+		return id;
+	}
+	
+	sql = g_strdup_printf ("INSERT INTO tbl_artist (artistname) VALUES ('%s')", artist);
+	
+	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
+		g_warning (err);
+		return id;
+	}
+	
+	id = db_artist_id (artist);
+	if (id != 0) {
+		return id;
+	}
+	
+	return id;
+}
+
+
+
+// Füge ein Genre ein, oder mache nichts wenn er schon existiert
+gint db_genre_add (gchar *genre)
+{
+	gint id = 0;
+	char *err;
+	gchar *sql;
+	
+	id = db_artist_id (genre);
+	if (id != 0) {
+		return id;
+	}
+	
+	sql = g_strdup_printf ("INSERT INTO tbl_genre (genrename) VALUES ('%s')", genre);
+	
+	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
+		g_warning (err);
+		return id;
+	}
+	
+	id = db_artist_id (genre);
+	if (id != 0) {
+		return id;
+	}
+	
+	return id;
+}
+
+
+// Füge einen Album ein, oder mache nichts wenn er schon existiert
+gint db_album_add (AlbumDetails *album)
+{
+	gint id = 0;
+	char *err;
+	gchar *sql;
+	
+	gint genre = db_genre_add (album->genre);
+	
+	id = db_album_id (album->title);
+	if (id != 0) {
+		return id;
+	}
+	
+	sql = g_strdup_printf ("INSERT INTO tbl_album (albumname, IDgenre) VALUES ('%s', %i)", album->title, genre);
+	
+	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
+		g_warning (err);
+		return id;
+	}
+	
+	id = db_album_id (album->title);
+	if (id != 0) {
+		return id;
+	}
+	
+	return id;
+}
+
+
+
+
+
+// Füge einen Track ein, oder mache nichts wenn er schon existiert
+gint db_track_add (TrackDetails *track)
+{
+	if (track == NULL) {
+		return 0;
+	}
+	
+	gint artist = db_artist_add (track->artist);
+	gint album = db_album_add (track->album);
+	
+	gint id = 0;
+	char *err;
+	gchar *sql;
+	
+	id = db_track_id (track->title);
+	if (id != 0) {
+		return id;
+	}
+	
+	sql = g_strdup_printf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%s', '%s', %i)", artist, album, track->title, track->path, track->number);
+	
+	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
+		g_warning (err);
+		return id;
+	}
+	
+	id = db_track_id (track->title);
+	if (id != 0) {
+		return id;
+	}
+	
+	return id;
+	
+}

@@ -21,6 +21,8 @@
 
 #include "disc.h"
 #include "musicbrainz.h"
+#include "database.h"
+#include "music.h"
 #include "interface.h"
 #include "strukturen.h"
 #include "utils.h"
@@ -255,8 +257,15 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 				GtkListStore *store;
 				TrackDetails *track;
 				
+				// Aktuelle Infos holen um sie in die Datenbank zu schreiben
+				store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+				gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
+				db_track_add (track);
+				music_artist_fill ();
+				
+				
 				if (find_next ()) {
-					store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+					//store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
 					gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
 					extract_track (track);
 				} else {
@@ -654,6 +663,9 @@ void extract_track (TrackDetails *track)
 	
 	// Dateipfad auf Sink setzen
 	g_object_set (sink, "location", filepath, NULL);
+	
+	// Pfad in der Struktur aktualisieren
+	track->path = g_strdup_printf ("%s/%s", filepath, filename);
 	
 	// Tags setzen
 	GstTagList *taglist;

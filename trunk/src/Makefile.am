@@ -1,4 +1,5 @@
 INCLUDES = $(GTK_CFLAGS) \
+		   $(GTKGLEXT_CFLAGS) \
 		   $(GNOMEVFS_CFLAGS) \
 		   $(LIBGLADE_CFLAGS) \
 		   $(GCONF_CFLAGS) \
@@ -55,6 +56,7 @@ tractasono_SOURCES = main.c \
 tractasono_LDFLAGS = -export-dynamic
 
 tractasono_LDADD = $(GTK_LIBS) \
+				   $(GTKGLEXT_LIBS) \
 				   $(GNOMEVFS_LIBS) \
 				   $(LIBGLADE_LIBS) \
 				   $(GCONF_LIBS) \

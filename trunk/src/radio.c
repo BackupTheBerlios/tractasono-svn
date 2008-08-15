@@ -132,25 +132,25 @@ void radio_init(void)
 	// Playlist Parser einrichten
 	pl_parser = totem_pl_parser_new ();
 	g_object_set (pl_parser, "recurse", FALSE, "debug", FALSE, NULL);
-	g_signal_connect (pl_parser, "playlist-start", G_CALLBACK(cb_parser_start), NULL);
-	g_signal_connect (pl_parser, "playlist-end", G_CALLBACK(cb_parser_end), NULL);
+	g_signal_connect (pl_parser, "playlist-started", G_CALLBACK(cb_parser_start), NULL);
+	g_signal_connect (pl_parser, "playlist-ended", G_CALLBACK(cb_parser_end), NULL);
 	g_signal_connect (pl_parser, "entry-parsed", G_CALLBACK(cb_parser_entry), NULL);
 
 
 
 
 	// Circle
-	GtkWidget *circle;
-	GtkWidget *vbox;
-	vbox = glade_xml_get_widget(glade, "vbox_circle");
-	if (vbox == NULL) {
+	//GtkWidget *circle;
+	//GtkWidget *vbox;
+	//vbox = glade_xml_get_widget(glade, "vbox_circle");
+	/*if (vbox == NULL) {
 		g_error("Konnte vbox_circle nicht holen!\n");
-	}
-	circle = gtk_circle_new ();
-	gtk_container_add (GTK_CONTAINER (vbox), GTK_WIDGET (circle));
+	}*/
+	//circle = gtk_circle_new ();
+	//gtk_container_add (GTK_CONTAINER (vbox), GTK_WIDGET (circle));
 	
 	// Widget anzeigen
-	gtk_widget_show (GTK_WIDGET (circle));
+	//gtk_widget_show (GTK_WIDGET (circle));
 
 	// Widget zerstören
 	//gtk_widget_destroy(circle);
