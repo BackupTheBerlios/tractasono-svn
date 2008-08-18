@@ -220,6 +220,7 @@ static void draw_text (Lcd *lcd, cairo_t *cr)
 	LcdPrivate *priv;
 	GtkWidget *widget;
 	cairo_text_extents_t extents;
+	cairo_font_options_t *options;
 	gdouble x, y;
 	gchar *text;
 
@@ -233,10 +234,18 @@ static void draw_text (Lcd *lcd, cairo_t *cr)
 	cairo_set_source_rgb (cr, 0, 0, 0);
 
 	// Font setzen
-	cairo_select_font_face (cr, "Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	//cairo_select_font_face (cr, "Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	//cairo_select_font_face (cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr, 24);
 	cairo_text_extents (cr, text, &extents);
 	
+	// Font-Antialiasing ausschalten
+	options = NULL;
+	cairo_get_font_options (cr, options);
+	if (options) {
+		cairo_font_options_set_antialias (options, CAIRO_ANTIALIAS_NONE);
+		cairo_set_font_options (cr, options);	
+	}
 	
 	// Nur sliden wenn Text grösser als Platz ist
 	if (extents.width < widget->allocation.width - FRAME_ABSTAND) {
@@ -256,11 +265,10 @@ static void draw_text (Lcd *lcd, cairo_t *cr)
 	cairo_show_text (cr, text);
 	
 	// Debug Rechteck zeichnen
-	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgb (cr, 1, 0, 0);
-	cairo_rectangle (cr, x, y-extents.height, extents.width, extents.height);
+	//cairo_set_line_width (cr, 1);
+	//cairo_set_source_rgb (cr, 1, 0, 0);
+	//cairo_rectangle (cr, x, y-extents.height, extents.width, extents.height);
 	//cairo_stroke (cr);
-
 }
 
 
