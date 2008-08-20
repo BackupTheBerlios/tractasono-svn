@@ -43,8 +43,7 @@ void player_set_play (void);
 void player_set_pause (void);
 void player_set_stop (void);
 
-void player_play_uri (const gchar *uri);
-void player_play_from_list (GtkTreeModel *model, GtkTreePath *path);
+//void player_play_uri (const gchar *uri);
 
 gboolean player_play_next ();
 gboolean player_play_prev ();

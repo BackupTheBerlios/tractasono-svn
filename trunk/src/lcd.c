@@ -236,13 +236,15 @@ static void draw_text (Lcd *lcd, cairo_t *cr)
 	// Font setzen
 	//cairo_select_font_face (cr, "Mono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	//cairo_select_font_face (cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	//cairo_select_font_face (cr, "Ubuntu-Title", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr, 24);
 	cairo_text_extents (cr, text, &extents);
 	
 	// Font-Antialiasing ausschalten
-	options = NULL;
-	cairo_get_font_options (cr, options);
-	if (options) {
+	options = cairo_font_options_create ();
+	//cairo_get_font_options (cr, options);
+	if (!options) {
+		g_message ("Font-Antialiasing ausschalten");
 		cairo_font_options_set_antialias (options, CAIRO_ANTIALIAS_NONE);
 		cairo_set_font_options (cr, options);	
 	}

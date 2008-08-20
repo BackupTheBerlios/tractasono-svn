@@ -31,9 +31,9 @@ GstElement *src;
 GstElement *decoder;
 GstElement *audiosink;
 
-// Playlist Store
-GtkTreeModel *playlist_store;
-GtkTreeIter playlist_iter;
+// Playliste
+GList *playlist = NULL;
+gint position = 0;
 
 // Prototypen
 void player_handle_tag_message (GstMessage *message);
@@ -286,41 +286,17 @@ void player_play_uri (const gchar *uri)
 		g_object_set(G_OBJECT (pipeline), "uri", uri, NULL);
 		player_set_play();
 		
-		if (!get_prev_uri ()) {
+		/*if (!get_prev_uri ()) {
 			interface_update_controls (CONTROL_STATE_FIRST);
 		} else if (!get_next_uri ()) {
 			interface_update_controls (CONTROL_STATE_LAST);
 		} else {
 			interface_update_controls (CONTROL_STATE_MID);	
-		}
+		}*/
 		
 		
 	} else {
 		g_warning ("pipeline nicht bereit oder uri nicht angegeben!");
-	}
-}
-
-
-// Spiele eine Datei oder einen Stream ab
-void player_play_from_list (GtkTreeModel *model, GtkTreePath *path)
-{	
-	if (pipeline) {
-		//player_set_stop();
-		
-		playlist_store = model;
-		gtk_tree_model_get_iter (playlist_store, &playlist_iter, path);
-		
-		//gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
-		
-		
-		g_debug ("player_play_from_list -> path=%s", "");
-		//g_object_set(G_OBJECT (pipeline), "uri", path, NULL);
-		
-		
-		
-		//player_set_play();
-	} else {
-		g_warning ("pipeline nicht bereit!");
 	}
 }
 
@@ -372,20 +348,15 @@ void player_handle_tag_message(GstMessage *message)
 	gst_tag_list_free (tag_list);
 }
 
-const gchar* get_next_uri ()
-{
-	if (!gtk_tree_model_iter_next (playlist_store, &playlist_iter)) {
-		return NULL;
-	} else {
-		//gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
-		return "";
-	}	
-}
-
 
 gboolean player_play_next ()
 {
-	const gchar *uri = get_next_uri ();
+	if (!playlist) {
+		return FALSE;
+	}
+	playlist = g_list_next (playlist);
+	
+	const gchar *uri = playlist->data;
 				
 	if (uri) {
 		uri = g_strdup_printf ("file://%s", uri);
@@ -394,28 +365,17 @@ gboolean player_play_next ()
 	} else {
 		return FALSE;
 	}
-}
-
-
-const gchar* get_prev_uri ()
-{
-	GtkTreeIter parent;
-	
-	if (!gtk_tree_model_iter_parent (playlist_store, &parent, &playlist_iter)) {
-		g_message ("prev uri is NULL!");
-		return NULL;
-	} else {
-		g_message ("prev uri is %d", parent.stamp);
-		playlist_iter = parent;
-		//gtk_tree_model_get (playlist_store, &playlist_iter, STORE_TRACK_PATH, &path, -1);
-		return "";
-	}	
 }
 
 
 gboolean player_play_prev ()
 {
-	const gchar *uri = get_prev_uri ();
+	if (!playlist) {
+		return FALSE;
+	}
+	playlist = g_list_previous (playlist);
+	
+	const gchar *uri = playlist->data;
 				
 	if (uri) {
 		uri = g_strdup_printf ("file://%s", uri);
@@ -424,4 +384,19 @@ gboolean player_play_prev ()
 	} else {
 		return FALSE;
 	}
+}
+
+
+gboolean player_play_new_playlist (GList *new_playlist, gint pos)
+{
+	if (!new_playlist || pos < 0) {
+		return FALSE;
+	}
+	
+	playlist = new_playlist;
+	position = pos;
+	
+	player_play_uri (g_list_nth (playlist, position));
+	
+	return TRUE;
 }
