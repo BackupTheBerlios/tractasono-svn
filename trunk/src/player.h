@@ -44,6 +44,7 @@ void player_set_pause (void);
 void player_set_stop (void);
 
 //void player_play_uri (const gchar *uri);
+gboolean player_play_new_playlist (GList *new_playlist);
 
 gboolean player_play_next ();
 gboolean player_play_prev ();

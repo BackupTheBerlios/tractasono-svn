@@ -487,26 +487,64 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	gint rows;
 	gint cols;
 	char *err;
+	gboolean iter_ok;
+	gchar *sql;
+	GList *playlist = NULL;
 	
 	model = gtk_tree_view_get_model (tree);
-	gtk_tree_model_get_iter (model, &iter, path);
 	
-	// Track Id holen
-	gtk_tree_model_get (model, &iter, COL_TRACK_ID, &id, -1);
-	
-	// Hier Track-Details holen
-	gchar *sql;
-	sql = g_strdup_printf ("SELECT trackpath FROM tbl_track WHERE IDtrack = %d", id);
-	g_message (sql);
-	
-	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
-		g_warning (err);
-		return;
+	// Alle Tracks einlesen
+	iter_ok = gtk_tree_model_get_iter_first (model, &iter);
+	while (iter_ok) {
+		
+		// Track Id holen
+		gtk_tree_model_get (model, &iter, COL_TRACK_ID, &id, -1);
+		
+		g_message ("Step 0");
+		
+		// Hier Track-Details holen
+		sql = g_strdup_printf ("SELECT trackpath FROM tbl_track WHERE IDtrack = %d", id);
+		
+		g_message ("Step 1");
+		
+		if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
+			g_warning (err);
+			return;
+		}
+		
+		g_message (sql);
+		g_message ("Resultat: %s", results[1]);
+		
+		// Pfad in Liste einfügen
+		g_message ("Step 2");
+		
+		playlist = g_list_append (playlist, g_strdup_printf ("file://%s", results[1]));
+		
+		g_message ("Step 3");
+		
+		g_free (sql);
+		
+		g_message ("Step 4");
+		
+		iter_ok = gtk_tree_model_iter_next (model, &iter);
+		
+		g_message ("Step 5");
 	}
 	
+	g_message ("Step 6");
+	
 	// Musik abspielen
-	gchar *track_path = g_strdup_printf ("file://%s", results[1]);
-	player_play_uri (track_path);
-	//player_play_from_list (model, path);
+	//gchar *track_path = g_strdup_printf ("file://%s", results[1]);
+	
+	//player_play_uri (track_path); Alt
+	
+	g_message ("Anzahl Elemente in der Playliste: %i", g_list_length (playlist));
+	
+	// TODO
+	// Schauen welcher Track ausgewählt wurde
+	//gtk_tree_model_get_iter (model, &iter, path);
+	playlist = g_list_nth (playlist, 0);
+	
+	player_play_new_playlist (playlist);
 }
 

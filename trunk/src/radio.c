@@ -420,7 +420,7 @@ void radio_station_parse (const gchar *genre)
 	s_genre = g_string_new (url_station);
 	g_string_append_printf (s_genre, "%s", genre);
 	
-	//content = xml_load (s_genre->str);
+	content = xml_load (s_genre->str);
   	
 	static GMarkupParser parser = { xml_station_start, NULL, NULL, NULL, xml_err };
 	GMarkupParseContext *context;

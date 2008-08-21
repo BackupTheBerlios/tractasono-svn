@@ -33,7 +33,6 @@ GstElement *audiosink;
 
 // Playliste
 GList *playlist = NULL;
-gint position = 0;
 
 // Prototypen
 void player_handle_tag_message (GstMessage *message);
@@ -286,13 +285,13 @@ void player_play_uri (const gchar *uri)
 		g_object_set(G_OBJECT (pipeline), "uri", uri, NULL);
 		player_set_play();
 		
-		/*if (!get_prev_uri ()) {
+		if (!g_list_previous (playlist)) {
 			interface_update_controls (CONTROL_STATE_FIRST);
-		} else if (!get_next_uri ()) {
+		} else if (!g_list_next (playlist)) {
 			interface_update_controls (CONTROL_STATE_LAST);
 		} else {
 			interface_update_controls (CONTROL_STATE_MID);	
-		}*/
+		}
 		
 		
 	} else {
@@ -352,8 +351,14 @@ void player_handle_tag_message(GstMessage *message)
 gboolean player_play_next ()
 {
 	if (!playlist) {
+		g_warning ("Playlist existiert nicht!");
 		return FALSE;
 	}
+	
+	if (!g_list_next (playlist)) {
+		return FALSE;
+	}
+	
 	playlist = g_list_next (playlist);
 	
 	const gchar *uri = playlist->data;
@@ -371,8 +376,14 @@ gboolean player_play_next ()
 gboolean player_play_prev ()
 {
 	if (!playlist) {
+		g_warning ("Playlist existiert nicht!");
 		return FALSE;
 	}
+	
+	if (!g_list_previous (playlist)) {
+		return FALSE;
+	}
+	
 	playlist = g_list_previous (playlist);
 	
 	const gchar *uri = playlist->data;
@@ -387,16 +398,42 @@ gboolean player_play_prev ()
 }
 
 
-gboolean player_play_new_playlist (GList *new_playlist, gint pos)
+void dump_playlist (GList *playlist)
 {
-	if (!new_playlist || pos < 0) {
+	int i = 1;
+	GList *temp = g_list_first (playlist);
+	
+	while (temp) {
+		g_debug ("Playlist Element %i: %s", i, temp->data);
+		temp = g_list_next (temp);
+		i++;
+	}
+	
+		
+	
+}
+
+
+gboolean player_play_new_playlist (GList *new_playlist)
+{
+	if (!new_playlist) {
+		g_warning ("Problem mit den Playlist Parametern!");
 		return FALSE;
 	}
 	
 	playlist = new_playlist;
-	position = pos;
+	dump_playlist (playlist);
 	
-	player_play_uri (g_list_nth (playlist, position));
+	gchar *uri = playlist->data;
+	if (!uri) {
+		g_warning ("Problem mit der Playlist!");
+		return FALSE;
+	}
+	
+	player_play_uri (uri);
 	
 	return TRUE;
 }
+
+
+
