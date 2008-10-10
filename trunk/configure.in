@@ -1,6 +1,6 @@
 # Init
 AC_INIT(configure.in)
-AM_INIT_AUTOMAKE(tractasono, 0.1)
+AM_INIT_AUTOMAKE(tractasono, 0.2)
 AM_CONFIG_HEADER(src/config.h)
 
 # Checks for programs.
