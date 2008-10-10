@@ -8,7 +8,6 @@
     <property name="visible">True</property>
     <property name="border_width">5</property>
     <property name="title">tractasono</property>
-    <property name="resizable">False</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <signal name="destroy" handler="on_main_window_destroy"/>
     <signal name="delete_event" handler="on_main_window_delete_event"/>

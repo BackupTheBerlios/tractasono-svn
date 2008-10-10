@@ -1,5 +1,6 @@
-sharedir = $(prefix)/share/tractasono
 
+# App Images
+sharedir = $(prefix)/share/tractasono
 share_DATA = tractasono.glade \
 			 fullscreen.png \
 			 music.png \
@@ -7,7 +8,17 @@ share_DATA = tractasono.glade \
 			 settings.png \
 			 tractasono.png \
 			 internetradio.png \
-			 ipod.png
+			 ipod.png			 
 
-EXTRA_DIST = $(share_DATA)
+# App Icon
+pixmapdir = $(prefix)/share/pixmaps
+pixmap_DATA = tractasono-icon.png
 
+# Desktop Menu Entry
+desktopdir = $(prefix)/share/applications
+desktop_DATA = tractasono.desktop
+
+
+EXTRA_DIST = $(share_DATA) \
+			 $(pixmap_DATA) \
+			 $(desktop_DATA)

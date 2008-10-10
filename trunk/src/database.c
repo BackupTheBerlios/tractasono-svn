@@ -41,7 +41,7 @@ void db_init (int argc, char *argv[])
 	g_message ("Database init");
 	
 	// Mit Datenbank verbinden
-	if (sqlite3_open (get_database_file (), &db)) {
+	if (!db_open ()) {
 		g_error ("Can't open database: %s", sqlite3_errmsg (db));
 	}
 	
@@ -52,6 +52,52 @@ void db_init (int argc, char *argv[])
 	db_testfunc ();
 }
 
+
+gboolean db_check ()
+{	
+	if (db == NULL) {
+		return FALSE;
+	}
+	
+	gint tabellen = 0;
+	gchar *sql;
+	sqlite3_stmt *stmt;
+	const char *tail;
+	
+	sql = g_strdup_printf ("SELECT COUNT(*) AS tabellen FROM sqlite_master;");
+	if (sqlite3_prepare (db, sql, strlen (sql), &stmt, &tail) != SQLITE_OK) {
+		g_error ("SQL error: %s", sqlite3_errmsg (db));
+	}
+	if (sqlite3_step (stmt) == SQLITE_ROW) {
+		tabellen = sqlite3_column_int (stmt, 1);
+	}
+	g_message ("Anzahl Tabellen: %i", tabellen);
+	sqlite3_finalize(stmt);
+	
+	return tabellen;
+}
+
+
+gboolean db_open (void)
+{
+	if (sqlite3_open (get_database_file (), &db) != SQLITE_OK) {
+		return FALSE;
+	}
+	if (!db_check ()) {
+		db_create ();
+	}
+	return TRUE;
+}
+
+
+// Neue Datenbank erstellen
+void db_create (void)
+{
+	create_dir (get_database_dir ());
+	
+	g_message ("New Database created!");
+
+}
 
 void db_close (void)
 {

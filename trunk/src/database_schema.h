@@ -1,5 +1,5 @@
 /*
- *      utils.h
+ *      database_schema.h
  *      
  *      Copyright 2007 Patrik Obrist <patrik@gmx.net>
  *      
@@ -19,8 +19,8 @@
  *      MA 02110-1301, USA.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef DATABASE_SCHEMA_H
+#define DATABASE_SCHEMA_H
 
 
 // Includes
@@ -28,30 +28,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <tag_c.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <libgnomevfs/gnome-vfs.h>
 #include <libgnomevfs/gnome-vfs-utils.h>
 
-// Defines
-#define BUFFER_SIZE		9216
-
-// Prototypen
-void create_dir (const gchar *path);
-gchar *get_tractasono_dir (void);
-gchar *get_music_dir (void);
-gchar *get_database_dir (void);
-gchar *get_database_file (void);
-gchar *get_artist_dir (gchar *artist);
-void create_artist_dir (gchar *artist);
-gchar *get_album_dir (gchar *album, gchar *artist);
-void create_album_dir (gchar *album, gchar *artist);
-gchar *get_track_path (gchar *track, gchar *album, gchar *artist);
-gchar *get_track_name (gchar *title, gchar *artist, gint tracknr, gchar *extension);
-gchar *get_file_extension (gchar *path);
-gboolean copy_file (const gchar *source, const gchar *target);
-gboolean exist_target (const gchar *source, const gchar *target);
 
 
 #endif

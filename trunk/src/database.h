@@ -62,5 +62,11 @@ gint db_genre_add (gchar *genre);
 
 gint db_album_add (AlbumDetails *album);
 
+gboolean db_open (void);
+
+gboolean db_check (void);
+
+void db_create (void);
+
 
 #endif

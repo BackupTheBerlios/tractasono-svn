@@ -36,6 +36,12 @@ gchar *get_music_dir (void)
 	return g_strdup_printf ("%smusic/", get_tractasono_dir ());
 }
 
+// Gibt das Datenbank Vezeichnis zurück
+gchar *get_database_dir (void)
+{
+	return get_tractasono_dir ();
+}
+
 // Gibt den Datenbank Dateipfad zurück
 gchar *get_database_file (void)
 {
@@ -85,7 +91,7 @@ void create_dir (const gchar *path)
 {
 	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
 		if (g_mkdir_with_parents (path, 493) != 0) {
-			g_warning ("Konnte Verzeichnis nicht erstellen -> %s", path);
+			g_error ("Konnte Verzeichnis nicht erstellen -> %s", path);
 		}
 	}
 }
