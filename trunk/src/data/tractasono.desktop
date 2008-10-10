@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=0.1
+Encoding=UTF-8
+Name=tractasono
+Comment=Multifunctional music management software
+Type=Application
+Exec=tractasono
+Icon=tractasono-icon
+Terminal=false
+Categories=GNOME;GTK;AudioVideo;
+MimeType=audio/x-scpls;audio/x-mpegurl;
+StartupNotify=true
