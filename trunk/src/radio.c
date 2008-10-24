@@ -611,9 +611,9 @@ gchar* xml_load (const gchar *uri)
 	GnomeVFSResult result;
 	
 	gint file_size;
-	GString *content;
-	
-	content = g_string_new_len ("", 20000);
+	GString *file_content;
+
+	file_content = g_string_new ("");
 
 	/* remember to initialize GnomeVFS! */
 	if (!gnome_vfs_initialized ()) {
@@ -623,13 +623,13 @@ gchar* xml_load (const gchar *uri)
 		}
 	}
 	
-	result = gnome_vfs_read_entire_file (uri, &file_size, &content->str);
+	result = gnome_vfs_read_entire_file (uri, &file_size, &file_content->str);
 	if (result != GNOME_VFS_OK) {
 		vfs_print_error (result, uri);
 		return NULL;
 	}
 
-	return content->str;
+	return file_content->str;
 }
 
 

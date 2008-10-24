@@ -283,7 +283,7 @@ gint db_track_id (gchar *track)
 	sql = g_strdup_printf ("SELECT IDtrack FROM tbl_track WHERE trackname = '%s'", track);
 	
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
