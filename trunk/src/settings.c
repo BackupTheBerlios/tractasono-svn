@@ -40,7 +40,7 @@ void recursive_dir (const gchar *path);
 void import_file (const gchar *import_path);
 gboolean check_tags (TagLib_Tag *tag);
 gchar *get_song_path (TagLib_Tag *tag, gchar *extension);
-gboolean register_file (TagLib_Tag *tag);
+gboolean register_file (gchar *file);
 
 
 
@@ -192,7 +192,7 @@ void import_file (const gchar *import_path)
 	}
 	
 	// File in Datenbank eintragen
-	if (!register_file (tag)) {
+	if (!register_file (export_path)) {
 		g_error ("Datei %s konnte nicht in die Datenbank importiert werden!", filename);
 	}
 	
@@ -260,71 +260,42 @@ gchar *get_song_path (TagLib_Tag *tag, gchar *extension)
 
 
 // Datei in Datenbank eintragen
-gboolean register_file (TagLib_Tag *tag)
+gboolean register_file (gchar *file)
 {
-	gint rc;
-	gchar *sql;
-	sqlite3_stmt *stmt;
+	TagLib_File *tagfile;
+	TagLib_Tag *tag;
 	
-	gchar *artist;
+	gint id_track;
 	
-	// Tags holen
-	artist = g_strdelimit(taglib_tag_artist (tag), "/", '-');
+	TrackDetails *track;
 	
-	
-	// Artist
-	gint id_artist;
-	
-	sql = g_strdup_printf ("SELECT IDartist FROM tbl_artist WHERE artistname = '%s'", artist);
-	rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
-	if (rc != SQLITE_OK) {
-		g_error ("SQL error: %s", sqlite3_errmsg (db));
+	// Prüfen ob die Datei gültig ist
+	tagfile = taglib_file_new (file);
+	if (tagfile == NULL) {
+		return FALSE;
 	}
-	rc = sqlite3_step (stmt);
 	
-	// Existiert Artist schon?
-	if (rc == SQLITE_ROW) {
-		// Artist wurde gefunden
-		g_debug ("Artist wurde gefunden");
-		id_artist = sqlite3_column_int (stmt, 0);
-	} else {
-		// Artist neu einfügen
-		
-		sqlite3_finalize (stmt);
-		
-		sql = g_strdup_printf ("INSERT INTO tbl_artist (artistname) VALUES ('%s')", artist);
-		rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
-		if (rc != SQLITE_OK) {
-			g_error ("SQL error: %s", sqlite3_errmsg (db));
-		}
-		rc = sqlite3_step (stmt);
-		if (rc == SQLITE_DONE) {
-			g_debug ("Artist erfolgreich eingefügt");
-		} else {
-			g_debug ("Artist konnte nicht eingefügt werden!");
-			return FALSE;
-		}
-		sqlite3_finalize (stmt);
-		
-		
-		sql = g_strdup_printf ("SELECT IDartist FROM tbl_artist WHERE artistname = '%s'", artist);
-		rc = sqlite3_prepare (db, sql, strlen (sql), &stmt, NULL);
-		if (rc != SQLITE_OK) {
-			g_error ("SQL error: %s", sqlite3_errmsg (db));
-		}
-		rc = sqlite3_step (stmt);
-		if (rc == SQLITE_ROW) {
-			// Artist wurde gefunden
-			id_artist = sqlite3_column_int (stmt, 0);
-		} else {
-			g_error ("Konnte Artist nicht einfügen!");
-		}	
-		
+	// Prüfen ob wir Tags haben
+	tag = taglib_file_tag (tagfile);
+	if (tagfile == NULL) {
+		return FALSE;
 	}
-	sqlite3_finalize (stmt);
 	
+	// Track hinzufügen
+	track = track_new ();
+	track->number = taglib_tag_track (tag);
+	track->path = g_strdup (file);
+	track->title = g_strdup (taglib_tag_title (tag));
+	track->artist->name = g_strdup (taglib_tag_artist (tag));
+	track->album->title = g_strdup (taglib_tag_album (tag));
+	track->album->genre = g_strdup (taglib_tag_genre (tag));
+	id_track = db_track_add (track);
+	track_free (track);
 	
-	g_debug (">>>> ID: %d <<<<<", id_artist);
+	// Taglib file freigeben
+	taglib_file_free (tagfile);
+	
+	g_debug ("File registriert: Track Id %i", id_track);
 	
 	return TRUE;
 }

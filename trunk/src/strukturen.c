@@ -21,13 +21,68 @@
 
 #include "strukturen.h"
 
-#include <glib/glist.h>
+#include <glib.h>
+
+
+// Neue Artist Struktur erstellen
+ArtistDetails* artist_new (void)
+{
+	ArtistDetails *artist;
+	
+	artist = g_new0 (ArtistDetails, 1);
+	artist->id = 0;
+	artist->name = g_strdup ("");
+	
+	return artist;
+}
+
+
+// Neue Album Struktur erstellen
+AlbumDetails* album_new (void)
+{
+	AlbumDetails *album;
+	
+	album = g_new0 (AlbumDetails, 1);
+	album->id = 0;
+	album->title = g_strdup ("");
+	album->artist = artist_new ();
+	album->genre = g_strdup ("");
+	album->number = 0;
+	album->compilation = FALSE;
+	album->tracks = NULL;
+	album->release_date = g_date_new ();
+	album->album_id = g_strdup ("");
+	album->artist_id = g_strdup ("");
+	
+	return album;
+}
+
+
+// Neue Track Struktur erstellen
+TrackDetails* track_new (void)
+{
+	TrackDetails *track;
+	
+	track = g_new0 (TrackDetails, 1);
+	
+	track->artist = artist_new ();
+	track->album = album_new ();
+	track->id = 0;
+	track->number = 0;
+	track->duration = 0;
+	track->title = g_strdup ("");
+	track->track_id = g_strdup ("");
+	track->artist_id = g_strdup ("");
+	track->path = g_strdup ("");
+	
+	return track;
+}
 
 
 /**
  * Free a TrackDetails*
  */
-void track_details_free(TrackDetails *track)
+void track_free (TrackDetails *track)
 {
 	g_return_if_fail (track != NULL);
 	g_free (track->title);
@@ -35,13 +90,15 @@ void track_details_free(TrackDetails *track)
 	g_free (track->path);
 	g_free (track->track_id);
 	g_free (track->artist_id);
+	album_free (track->album);
+	artist_free (track->artist);
 	g_free (track);
 }
 
 /**
  * Free a AlbumDetails*
  */
-void album_details_free(AlbumDetails *album)
+void album_free (AlbumDetails *album)
 {
 	g_return_if_fail (album != NULL);
 	g_free (album->title);
@@ -53,6 +110,7 @@ void album_details_free(AlbumDetails *album)
 	}
 	//g_list_deep_free (album->tracks, (GFunc)track_details_free);
 	g_list_free (album->tracks);
+	artist_free (album->artist);
 	g_free (album);
 }
 
@@ -60,7 +118,8 @@ void album_details_free(AlbumDetails *album)
 /**
  * Free a ArtistDetails*
  */
-void artist_details_free(ArtistDetails *artist)
+void artist_free (ArtistDetails *artist)
 {
+	g_return_if_fail (artist != NULL);
 	g_free (artist->name);
 }

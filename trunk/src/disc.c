@@ -373,7 +373,7 @@ void on_cell_edited (GtkCellRendererText *renderer, gchar *path,
 				break;
 			case COLUMN_ARTIST:
 				g_free (track->artist);
-				track->artist = g_strdup (string);
+				track->artist->name = g_strdup (string);
 				gtk_list_store_set (store, &iter, COLUMN_ARTIST, track->artist, -1);
 				break;
 			default:
@@ -423,7 +423,7 @@ void display_disctitle (AlbumDetails *album)
 	
 	// CD Artist
 	widget = interface_get_widget ("entry_disc_artist");
-	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->artist));
+	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->artist->name));
 	
 	// CD Genre
 	widget = interface_get_widget ("entry_disc_genre");
@@ -456,7 +456,7 @@ void disc_reread (void)
 		g_warning ("CD konnte nich eingelesen werden!");
 	} else {
 		g_message ("CD wurde eingelesen (title: %s | artist: %s | tracks: %d)", the_album->title,
-														  the_album->artist,
+														  the_album->artist->name,
 														  the_album->number);
 
 		// CD Namen anzeigen
@@ -651,11 +651,11 @@ void extract_track (TrackDetails *track)
 	gchar *filename;
 	gchar *filepath;
 	
-	create_artist_dir (track->artist);
-	create_album_dir (track->album->title, track->artist);
+	create_artist_dir (track->artist->name);
+	create_album_dir (track->album->title, track->artist->name);
 	
-	filename = get_track_name (track->title, track->artist, track->number, ".ogg");
-	filepath = get_track_path (filename, track->album->title, track->artist);
+	filename = get_track_name (track->title, track->artist->name, track->number, ".ogg");
+	filepath = get_track_path (filename, track->album->title, track->artist->name);
 	
 	//g_message ("filepath: %s", filepath);
 	
@@ -735,14 +735,16 @@ void on_treeview_disc_row_activated (GtkTreeView *tree,
 
 void play_track (TrackDetails *track)
 {
-	gchar *uri;
+	g_debug ("Funktion 'play_track' noch nicht implementiert!");
+	
+	//gchar *uri;
 	
 	// Musik abspielen
-	uri = g_strdup_printf ("cdda://%d", track->number);
-	player_play_uri (uri);
+	//uri = g_strdup_printf ("cdda://%d", track->number);
+	//player_play_uri (uri);
 	
 	// Muss manuell gesetzt werden
-	interface_set_songinfo (track->artist, track->title);
+	//interface_set_songinfo (track->artist, track->title);
 }
 
 

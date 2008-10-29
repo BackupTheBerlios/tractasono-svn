@@ -70,17 +70,14 @@ AlbumDetails* musicbrainz_lookup_offline (void)
 	
 	num_tracks = mb_GetResultInt (mb, MBE_TOCGetLastTrack);
 
-	album = g_new0 (AlbumDetails, 1);
-	album->artist = g_strdup ("Unknown Artist");
-	album->title = g_strdup ("Unknown Title");
-	album->genre = g_strdup ("Unknown Genre");
+	album = album_new ();
 	
 	for (i = 1; i <= num_tracks; i++) {
-		track = g_new0 (TrackDetails, 1);
+		track = track_new ();
 		track->album = album;
 		track->number = i;
 		track->title = g_strdup_printf ("Track %d", i);
-		track->artist = g_strdup (album->artist);
+		track->artist = album->artist;
 		track->duration = get_duration_from_sectors (mb_GetResultInt1 (mb, MBE_TOCGetTrackNumSectors, i+1));
 		album->tracks = g_list_append (album->tracks, track);
 		album->number++;
@@ -138,16 +135,16 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 
 		if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistName, data, sizeof (data))) {
 			//g_message ("2");
-			album->artist = g_strdup (data);
+			album->artist->name = g_strdup (data);
 		} else {
 			//g_message ("3");
 			if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
 				//g_message ("4");
-				album->artist = g_strdup ("Various Artist");
+				album->artist->name = g_strdup ("Various Artist");
 				album->compilation = TRUE;
 			} else {
 				//g_message ("5");
-				album->artist = g_strdup ("Unknown Artist");
+				album->artist->name = g_strdup ("Unknown Artist");
 			}
 		}
 		//g_message ("id: %s", album->artist_id);
@@ -155,11 +152,11 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 			//g_message ("6");
 			album->compilation = TRUE;
 		}
-		if (g_ascii_strcasecmp (album->artist, "Various Artist") == 0) {
+		if (g_ascii_strcasecmp (album->artist->name, "Various Artist") == 0) {
 			//g_message ("7");
 			album->compilation = TRUE;
 		}
-		if (g_ascii_strcasecmp (album->artist, "Various Artists") == 0) {
+		if (g_ascii_strcasecmp (album->artist->name, "Various Artists") == 0) {
 			//g_message ("8");
 			album->compilation = TRUE;
 		}
@@ -225,7 +222,7 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 		}
 
 		if (track->artist == NULL && mb_GetResultData1(mb, MBE_AlbumGetArtistName, data, sizeof (data), j)) {
-			track->artist = g_strdup (data);
+			track->artist->name = g_strdup (data);
 		}
 
 		if (mb_GetResultData1(mb, MBE_AlbumGetTrackDuration, data, sizeof (data), j)) {
@@ -234,7 +231,7 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 
 		if (from_freedb) {
 			convert_encoding (&track->title);
-			convert_encoding (&track->artist);
+			convert_encoding (&track->artist->name);
 		}
   
 		album->tracks = g_list_append (album->tracks, track);
@@ -243,7 +240,7 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 
 	if (from_freedb) {
 		convert_encoding (&album->title);
-		convert_encoding (&album->artist);
+		convert_encoding (&album->artist->name);
 	}
 
 	mb_Select (mb, MBS_Rewind);
@@ -327,7 +324,7 @@ static void artist_and_title_from_title (TrackDetails *track, gpointer data)
 		return;
 	}
 	split = g_strsplit (data, " / ", 2);
-	track->artist = g_strdup (split[0]);
+	track->artist->name = g_strdup (split[0]);
 	track->title = g_strdup (split[1]);
 	g_strfreev (split);
 }

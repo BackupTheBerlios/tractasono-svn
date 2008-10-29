@@ -56,7 +56,7 @@ gint db_settings_get_number (gchar *group, gchar *key);
 
 gint db_track_add (TrackDetails *track);
 
-gint db_artist_add (gchar *artist);
+gint db_artist_add (ArtistDetails *artist);
 
 gint db_genre_add (gchar *genre);
 

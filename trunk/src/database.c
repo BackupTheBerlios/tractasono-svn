@@ -314,8 +314,6 @@ gint db_artist_id (gchar *artist)
 		return id;
 	}
 	
-	//g_message ("Cols: (%i) / Rows: (%i)", cols, rows);
-	
 	if (rows > 0) {
 		id = atoi(results[1]);
 	}
@@ -377,29 +375,26 @@ gint db_album_id (gchar *album)
 
 
 // Füge einen Artist ein, oder mache nichts wenn er schon existiert
-gint db_artist_add (gchar *artist)
+gint db_artist_add (ArtistDetails *artist)
 {
 	gint id = 0;
 	char *err;
 	gchar *sql;
 	
-	id = db_artist_id (artist);
+	id = db_artist_id (artist->name);
 	if (id != 0) {
 		return id;
 	}
 	
-	sql = g_strdup_printf ("INSERT INTO tbl_artist (artistname) VALUES ('%s')", artist);
+	sql = g_strdup_printf ("INSERT INTO tbl_artist (artistname) VALUES ('%s')", artist->name);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);
 		return id;
 	}
 	
-	id = db_artist_id (artist);
-	if (id != 0) {
-		return id;
-	}
-	
+	id = db_artist_id (artist->name);
+
 	return id;
 }
 
@@ -433,7 +428,7 @@ gint db_genre_add (gchar *genre)
 }
 
 
-// Füge einen Album ein, oder mache nichts wenn er schon existiert
+// Füge einen Album ein, oder mache nichts wenn es schon existiert
 gint db_album_add (AlbumDetails *album)
 {
 	gint id = 0;

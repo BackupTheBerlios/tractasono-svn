@@ -10,7 +10,7 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(TOTEMPLPARSE_CFLAGS) \
 		   $(TAGLIB_CFLAGS)
 
-AM_CFLAGS = -Wall -g
+AM_CFLAGS = -Wall -Werror -g
 
 AM_CPPFLAGS = -DINSTALL_PREFIX=\"$(prefix)\" \
 			  -DDATADIR\="\"$(datadir)"\" \
