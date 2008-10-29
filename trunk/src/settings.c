@@ -55,12 +55,27 @@ void on_notebook1_switch_page(GtkNotebook *notebook, GtkNotebookPage *page, guin
 {
 	gchararray name;
 	g_object_get(notebook, "name", &name, NULL);
-	g_print("Page name: %s\n", name);
+	//g_print ("Page name: %s\n", name);
 
-	g_print("Reiter gewechselt, schliesse Tastatur\n");
+	//g_print ("Reiter gewechselt, schliesse Tastatur\n");
 	keyboard_show(FALSE);
 }
 
+
+// Fügt eine Zeile Text ein
+void settings_import_messages_add (gchar *text)
+{
+	GtkTextView *view;
+	GtkTextBuffer *buf;
+	GtkTextIter iter;
+	
+	view = (GtkTextView*) interface_get_widget ("settings_textview_import");
+	buf = gtk_text_view_get_buffer (view);
+
+	gtk_text_buffer_get_end_iter (buf, &iter);
+	gtk_text_buffer_insert (buf, &iter, g_strdup_printf ("%s\n", text), -1);
+	
+}
 
 
 // Tritt auf, nachdem der "Jetzt importieren" Button gedrückt wurde
@@ -84,22 +99,24 @@ void on_button_settings_import_now_clicked (GtkWidget *widget, gpointer user_dat
 void settings_import_music (const gchar *path)
 {
 	GtkWidget *button;
+	gchar *text;
 	
 	button = interface_get_widget ("button_settings_import_now");
 	
 	gtk_widget_set_sensitive (button, FALSE);
-	g_debug ("BEGINN Importiere Musik von %s", path);
 	
-	
+	text = g_strdup_printf ("Starte Import von %s", path);
+	settings_import_messages_add (text);
+	g_debug (text);
 	
 	// Starte Scan
 	recursive_dir (path);
 	
+	text = g_strdup_printf ("Import beendet!");
+	settings_import_messages_add (text);
+	g_debug (text);
 	
-	
-	g_debug ("ENDE Importiere Musik von %s", path);
 	gtk_widget_set_sensitive (button, TRUE);
-	
 }
 
 
@@ -167,7 +184,9 @@ void import_file (const gchar *import_path)
 	
 	// Falls Tags unvollständig sind -> Nicht importieren
 	if (!check_tags (tag)) {
-		g_message ("Nicht importieren! (Tags unvollstaendig) -> %s", import_path);
+		gchar *text;
+		text = g_strdup_printf ("Nicht importieren! (Tags unvollstaendig) -> %s", import_path);
+		settings_import_messages_add (text);
 		return;
 	}
 	
@@ -184,16 +203,29 @@ void import_file (const gchar *import_path)
 	
 	// Export Pfad bestimmen
 	export_path = get_song_path (tag, get_file_extension (filename));
-	//g_debug("export-Pfad: %s", export_path);
+	
+	// Prüfen, ob schon vorhanden
+	if (exist_target (import_path, export_path)) {
+		gchar *text;
+		text = g_strdup_printf ("Überspringe: %s", filename);
+		settings_import_messages_add (text);
+		return;
+	}
 	
 	// Datei kopieren
 	if (!copy_file (import_path, export_path)) {
-		g_warning ("Import fehlgeschlagen! -> %s", filename);
+		gchar *text;
+		text = g_strdup_printf ("Import fehlgeschlagen! -> %s", filename);
+		settings_import_messages_add (text);
+		return;
 	}
 	
 	// File in Datenbank eintragen
 	if (!register_file (export_path)) {
-		g_error ("Datei %s konnte nicht in die Datenbank importiert werden!", filename);
+		gchar *text;
+		text = g_strdup_printf ("Datei '%s' konnte nicht in der Datenbank registriert werden!", filename);
+		settings_import_messages_add (text);
+		return;
 	}
 	
 	// Speicher wieder freigeben
@@ -266,6 +298,7 @@ gboolean register_file (gchar *file)
 	TagLib_Tag *tag;
 	
 	gint id_track;
+	gchar *line;
 	
 	TrackDetails *track;
 	
@@ -290,12 +323,15 @@ gboolean register_file (gchar *file)
 	track->album->title = g_strdup (taglib_tag_album (tag));
 	track->album->genre = g_strdup (taglib_tag_genre (tag));
 	id_track = db_track_add (track);
+	
+	line = g_strdup_printf ("Importiert: %s - %s (%s)", track->artist->name,
+							track->title, track->album->title);
+	settings_import_messages_add (line);
+	g_free (line);
+	
+	// Speicher freigeben
 	track_free (track);
-	
-	// Taglib file freigeben
 	taglib_file_free (tagfile);
-	
-	g_debug ("File registriert: Track Id %i", id_track);
 	
 	return TRUE;
 }

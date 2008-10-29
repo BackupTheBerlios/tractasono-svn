@@ -29,7 +29,7 @@ void keyboard_show(gboolean show)
 {
 	if (show) {
 		// Keyboard anzeigen
-		g_print("Keyboard wird angezeigt!\n");
+		//g_print ("Keyboard wird angezeigt!\n");
 
 		gboolean visible;
 		g_object_get(keyboard, "visible", &visible, NULL);
@@ -39,7 +39,7 @@ void keyboard_show(gboolean show)
 		
 	} else {
 		// Keyboard ausblenden
-		g_print("Keyboard wird ausgeblendet!\n");
+		//g_print ("Keyboard wird ausgeblendet!\n");
 		gtk_widget_hide(keyboard);
 	}
 }
@@ -75,7 +75,7 @@ void on_key_clicked(GtkButton *button, gpointer user_data)
 
 gboolean on_entry_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-	g_print("Eingabefeld hat Fokus bekommen!\n");
+	//g_print("Eingabefeld hat Fokus bekommen!\n");
 
 	actual_entry = GTK_ENTRY(widget);
 	keyboard_show(TRUE);

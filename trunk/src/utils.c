@@ -123,10 +123,7 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	
 	// Prüfen, ob die Datei bereits vorhanden ist
 	if (exist_target (source, target)) {
-		g_message ("Existiert bereits -> %s", source);
 		return TRUE;
-	} else {
-		g_message ("Wird importiert -> %s", source);
 	}
 
 	// Neue Datei zum befüllen anlegen

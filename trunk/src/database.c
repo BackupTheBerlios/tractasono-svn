@@ -386,7 +386,8 @@ gint db_artist_add (ArtistDetails *artist)
 		return id;
 	}
 	
-	sql = g_strdup_printf ("INSERT INTO tbl_artist (artistname) VALUES ('%s')", artist->name);
+	//sql = g_strdup_printf ("INSERT INTO tbl_artist (artistname) VALUES ('%s')", artist->name);
+	sql = sqlite3_mprintf ("INSERT INTO tbl_artist (artistname) VALUES ('%q')", artist->name);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);
@@ -412,7 +413,8 @@ gint db_genre_add (gchar *genre)
 		return id;
 	}
 	
-	sql = g_strdup_printf ("INSERT INTO tbl_genre (genrename) VALUES ('%s')", genre);
+	//sql = g_strdup_printf ("INSERT INTO tbl_genre (genrename) VALUES ('%s')", genre);
+	sql = sqlite3_mprintf ("INSERT INTO tbl_genre (genrename) VALUES ('%q')", genre);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);
@@ -442,7 +444,8 @@ gint db_album_add (AlbumDetails *album)
 		return id;
 	}
 	
-	sql = g_strdup_printf ("INSERT INTO tbl_album (IDgenre, albumname) VALUES (%i, '%s')",  genre, album->title);
+	//sql = g_strdup_printf ("INSERT INTO tbl_album (IDgenre, albumname) VALUES (%i, '%s')",  genre, album->title);
+	sql = sqlite3_mprintf ("INSERT INTO tbl_album (IDgenre, albumname) VALUES (%i, '%q')",  genre, album->title);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);
@@ -480,7 +483,8 @@ gint db_track_add (TrackDetails *track)
 		return id;
 	}
 	
-	sql = g_strdup_printf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%s', '%s', %i)", artist, album, track->title, track->path, track->number);
+	//sql = g_strdup_printf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%s', '%s', %i)", artist, album, track->title, track->path, track->number);
+	sql = sqlite3_mprintf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%q', '%q', %i)", artist, album, track->title, track->path, track->number);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);
