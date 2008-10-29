@@ -14,7 +14,7 @@ AM_CFLAGS = -Wall -Werror -g
 
 AM_CPPFLAGS = -DINSTALL_PREFIX=\"$(prefix)\" \
 			  -DDATADIR\="\"$(datadir)"\" \
-			  -DGNOME_ICONDIR=\""$(datadir)/pixmaps"\"
+			  -DICON_DIR=\"$(datadir)/pixmaps\"
 
 bin_PROGRAMS = tractasono
 

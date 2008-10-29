@@ -32,6 +32,7 @@
 
 #define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
 #define INSTALLED_GLADE DATADIR"/tractasono/tractasono.glade"
+#define INSTALLED_ICON  ICON_DIR"/tractasono-icon.png"
 
 
 
@@ -86,6 +87,12 @@ void interface_init (int argc, char *argv[])
 	mainwindow = glade_xml_get_widget(glade, "window_main");
 	if (mainwindow == NULL) {
 		g_print("Fehler: Konnte window_main nicht holen!\n");
+	}
+	
+	// Icon setzen
+	const gchar* icon = INSTALLED_ICON;
+	if (g_file_test(icon, G_FILE_TEST_EXISTS) == TRUE) {
+		gtk_window_set_icon_from_file (GTK_WINDOW (mainwindow), icon, NULL);
 	}
 
 	// Placeholder holen
