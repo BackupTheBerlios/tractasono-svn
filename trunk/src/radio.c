@@ -184,7 +184,7 @@ void cb_parser_entry (TotemPlParser *parser, const char *uri, const char *title,
 }
 
 
-void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
+void on_button_radio_stream_clicked (GtkWidget *widget, gpointer user_data)
 {
 	//g_message ("Radio Stream abspielen...");
 	
@@ -195,7 +195,8 @@ void on_button_radio_stream_clicked(GtkWidget *widget, gpointer user_data)
 	url = gtk_entry_get_text(GTK_ENTRY(urlinput));
 	
 	// Stream abspielen
-	player_play_uri(url);
+	//player_play_uri(url);
+	g_debug ("'on_button_radio_stream_clicked' muss noch angepasst werden!");
 
 	lcd_set_title (LCD(lcd), "Bla Bla");
 }
@@ -519,7 +520,8 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	lcd_set_album (LCD(lcd), NULL);
 
 	// Stream abspielen
-	player_play_uri(url);
+	//player_play_uri(url);
+	g_debug ("'on_treeview_radio_station_row_activated' muss noch angepasst werden!");
 	
 	lcd_set_title (LCD(lcd), name);
 }

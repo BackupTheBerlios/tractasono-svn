@@ -602,7 +602,8 @@ void on_treeview_ipod_tracks_row_activated (GtkTreeView *tree,
 	
 	// Musik abspielen
 	track_path = g_strdup_printf ("file://%s", track_path);
-	player_play_uri (track_path);
+	//player_play_uri (track_path);
+	g_debug ("'on_treeview_ipod_tracks_row_activated' muss noch angepasst werden!");
 }
 
 

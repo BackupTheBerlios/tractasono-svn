@@ -404,7 +404,7 @@ void dump_playlist (GList *playlist)
 	GList *temp = g_list_first (playlist);
 	
 	while (temp) {
-		g_debug ("Playlist Element %i: %s", i, temp->data);
+		g_debug ("Playlist Element %i: %s", i, (gchar*)temp->data);
 		temp = g_list_next (temp);
 		i++;
 	}
