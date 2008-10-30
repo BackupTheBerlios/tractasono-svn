@@ -404,7 +404,7 @@ void on_combobox_ipod_list_changed (GtkWidget *widget, gpointer user_data)
 	
 	vars.it_db = itdb_parse (mount_point, &error);
 	if (error) {
-		g_warning (error->message);
+		g_warning ("%s", error->message);
 	}
 	
 	guint32 track_count = itdb_tracks_number (vars.it_db);
@@ -435,7 +435,7 @@ void on_button_ipod_connect_clicked (GtkWidget *widget, gpointer user_data)
 	ipod_device_eject (device, &error);
 	
 	if (error) {
-		g_warning (error->message);
+		g_warning ("%s", error->message);
 	}
 	
 	ipod_display_info ("", "", "");

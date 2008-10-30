@@ -107,14 +107,14 @@ void settings_import_music (const gchar *path)
 	
 	text = g_strdup_printf ("Starte Import von %s", path);
 	settings_import_messages_add (text);
-	g_debug (text);
+	g_debug ("%s", text);
 	
 	// Starte Scan
 	recursive_dir (path);
 	
 	text = g_strdup_printf ("Import beendet!");
 	settings_import_messages_add (text);
-	g_debug (text);
+	g_debug ("%s", text);
 	
 	gtk_widget_set_sensitive (button, TRUE);
 }

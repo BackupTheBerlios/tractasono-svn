@@ -508,11 +508,11 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 		g_message ("Step 1");
 		
 		if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
-			g_warning (err);
+			g_warning ("%s", err);
 			return;
 		}
 		
-		g_message (sql);
+		g_message ("%s", sql);
 		g_message ("Resultat: %s", results[1]);
 		
 		// Pfad in Liste einfügen

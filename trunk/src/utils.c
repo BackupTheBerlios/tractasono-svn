@@ -120,6 +120,7 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	FILE *fp_out;
 	gchar buffer[BUFFER_SIZE];
 	int anz;
+	int size;
 	
 	// Prüfen, ob die Datei bereits vorhanden ist
 	if (exist_target (target, source)) {
@@ -147,7 +148,10 @@ gboolean copy_file (const gchar *source, const gchar *target)
 			gtk_main_iteration();
 		}
 		
-		fwrite (buffer, sizeof(char), anz, fp_out);
+		size = fwrite (buffer, sizeof(char), anz, fp_out);
+		if (size != anz) {
+			return FALSE;
+		}
 	}
 	
 	// Dateien schliessen

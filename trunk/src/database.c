@@ -295,7 +295,7 @@ gint db_artist_id (gchar *artist)
 	sql = g_strdup_printf ("SELECT IDartist FROM tbl_artist WHERE artistname = '%s'", artist);
 	
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
@@ -319,7 +319,7 @@ gint db_genre_id (gchar *genre)
 	sql = g_strdup_printf ("SELECT IDgenre FROM tbl_genre WHERE genrename = '%s'", genre);
 	
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
@@ -345,7 +345,7 @@ gint db_album_id (gchar *album)
 	sql = g_strdup_printf ("SELECT IDalbum FROM tbl_album WHERE albumname = '%s'", album);
 	
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
@@ -375,7 +375,7 @@ gint db_artist_add (ArtistDetails *artist)
 	sql = sqlite3_mprintf ("INSERT INTO tbl_artist (artistname) VALUES ('%q')", artist->name);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
@@ -402,7 +402,7 @@ gint db_genre_add (gchar *genre)
 	sql = sqlite3_mprintf ("INSERT INTO tbl_genre (genrename) VALUES ('%q')", genre);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
@@ -433,7 +433,7 @@ gint db_album_add (AlbumDetails *album)
 	sql = sqlite3_mprintf ("INSERT INTO tbl_album (IDgenre, albumname) VALUES (%i, '%q')",  genre, album->title);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	
@@ -471,10 +471,10 @@ gint db_track_add (TrackDetails *track)
 	//sql = g_strdup_printf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%s', '%s', %i)", artist, album, track->title, track->path, track->number);
 	sql = sqlite3_mprintf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%q', '%q', %i)", artist, album, track->title, track->path, track->number);
 	
-	g_debug (sql);
+	g_debug ("%s", sql);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
-		g_warning (err);
+		g_warning ("%s", err);
 		return id;
 	}
 	

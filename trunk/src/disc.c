@@ -227,7 +227,7 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 		case GST_MESSAGE_ERROR: {
 			GError *err;
 			gst_message_parse_error (message, &err, NULL);
-			g_warning (err->message);
+			g_warning ("%s", err->message);
 			g_error_free (err);
 			break;
 		}
