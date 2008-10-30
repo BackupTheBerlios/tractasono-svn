@@ -25,6 +25,7 @@
 
 
 #include "database.h"
+#include "database_schema.h"
 #include "utils.h"
 #include <string.h>
 
@@ -49,43 +50,24 @@ void db_init (int argc, char *argv[])
 	sqlite3_update_hook(db, update_callback, NULL);
 
 	// Testfunktion
-	db_testfunc ();
-}
-
-
-gboolean db_check ()
-{	
-	if (db == NULL) {
-		return FALSE;
-	}
-	
-	gint tabellen = 0;
-	gchar *sql;
-	sqlite3_stmt *stmt;
-	const char *tail;
-	
-	sql = g_strdup_printf ("SELECT COUNT(*) AS tabellen FROM sqlite_master;");
-	if (sqlite3_prepare (db, sql, strlen (sql), &stmt, &tail) != SQLITE_OK) {
-		g_error ("SQL error: %s", sqlite3_errmsg (db));
-	}
-	if (sqlite3_step (stmt) == SQLITE_ROW) {
-		tabellen = sqlite3_column_int (stmt, 1);
-	}
-	g_message ("Anzahl Tabellen: %i", tabellen);
-	sqlite3_finalize(stmt);
-	
-	return tabellen;
+	//db_testfunc ();
 }
 
 
 gboolean db_open (void)
 {
-	if (sqlite3_open (get_database_file (), &db) != SQLITE_OK) {
-		return FALSE;
-	}
-	if (!db_check ()) {
+	gchar *db_file;
+	
+	db_file = get_database_file ();
+	
+	if (!exist_file (db_file)) {
 		db_create ();
 	}
+	
+	if (sqlite3_open (db_file, &db) != SQLITE_OK) {
+		return FALSE;
+	}
+	
 	return TRUE;
 }
 
@@ -93,7 +75,10 @@ gboolean db_open (void)
 // Neue Datenbank erstellen
 void db_create (void)
 {
+	gchar *sql;
+	
 	create_dir (get_database_dir ());
+	sql = get_create_sql ();
 	
 	g_message ("New Database created!");
 
@@ -485,6 +470,8 @@ gint db_track_add (TrackDetails *track)
 	
 	//sql = g_strdup_printf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%s', '%s', %i)", artist, album, track->title, track->path, track->number);
 	sql = sqlite3_mprintf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%q', '%q', %i)", artist, album, track->title, track->path, track->number);
+	
+	g_debug (sql);
 	
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning (err);

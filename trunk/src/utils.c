@@ -122,7 +122,7 @@ gboolean copy_file (const gchar *source, const gchar *target)
 	int anz;
 	
 	// Prüfen, ob die Datei bereits vorhanden ist
-	if (exist_target (source, target)) {
+	if (exist_target (target, source)) {
 		return TRUE;
 	}
 
@@ -159,7 +159,8 @@ gboolean copy_file (const gchar *source, const gchar *target)
 
 
 // Prüfen, ob die Ziel-Datei bereits vorhanden ist
-gboolean exist_target (const gchar *source, const gchar *target)
+// Vergleicht auch die Dateigrössen
+gboolean exist_target (const gchar *target, const gchar *source)
 {
 	if (g_file_test(target, G_FILE_TEST_EXISTS)) {
 		
@@ -184,4 +185,11 @@ gboolean exist_target (const gchar *source, const gchar *target)
 	}
 	
 	return FALSE;
+}
+
+
+// Prüfen, ob die Ziel-Datei bereits vorhanden ist
+gboolean exist_file (const gchar *file)
+{
+	return g_file_test(file, G_FILE_TEST_EXISTS);
 }

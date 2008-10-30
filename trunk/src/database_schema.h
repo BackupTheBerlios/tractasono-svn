@@ -24,14 +24,10 @@
 
 
 // Includes
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
 #include <glib.h>
-#include <glib/gstdio.h>
-#include <libgnomevfs/gnome-vfs.h>
-#include <libgnomevfs/gnome-vfs-utils.h>
+
+
+gchar *get_create_sql (void);
 
 
 

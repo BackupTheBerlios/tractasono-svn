@@ -52,6 +52,7 @@ gchar *get_track_name (gchar *title, gchar *artist, gint tracknr, gchar *extensi
 gchar *get_file_extension (gchar *path);
 gboolean copy_file (const gchar *source, const gchar *target);
 gboolean exist_target (const gchar *source, const gchar *target);
+gboolean exist_file (const gchar *file);
 
 
 #endif

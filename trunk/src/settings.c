@@ -145,6 +145,11 @@ void recursive_dir (const gchar *path)
 				continue;
 			}
 			
+			// Update UI
+			while (gtk_events_pending()) {
+				gtk_main_iteration();
+			}
+			
 			recursive_dir (full_path);
 			g_free ((gchar *) full_path);
 		}
@@ -205,7 +210,7 @@ void import_file (const gchar *import_path)
 	export_path = get_song_path (tag, get_file_extension (filename));
 	
 	// Prüfen, ob schon vorhanden
-	if (exist_target (import_path, export_path)) {
+	if (exist_target (export_path, import_path)) {
 		gchar *text;
 		text = g_strdup_printf ("Überspringe: %s", filename);
 		settings_import_messages_add (text);

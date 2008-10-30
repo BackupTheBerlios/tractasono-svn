@@ -25,5 +25,11 @@
 
 
 #include "database_schema.h"
-#include "utils.h"
+
+
+// Das ganze SQL um die tractasono db aufzubauen
+gchar *get_create_sql (void)
+{
+	return "Test Test";
+}
 

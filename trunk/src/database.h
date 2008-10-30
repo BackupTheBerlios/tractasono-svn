@@ -64,8 +64,6 @@ gint db_album_add (AlbumDetails *album);
 
 gboolean db_open (void);
 
-gboolean db_check (void);
-
 void db_create (void);
 
 
