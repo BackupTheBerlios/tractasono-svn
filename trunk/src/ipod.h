@@ -22,12 +22,7 @@
 #ifndef IPOD_H
 #define IPOD_H
 
-// Globale Includes
-#include <gtk/gtk.h>
-#include <glade/glade.h>
-
 // Prototypen
 void ipod_init (void);
-void ipod_load (void);
 
 #endif

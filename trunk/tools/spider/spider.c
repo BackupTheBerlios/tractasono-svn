@@ -1,5 +1,5 @@
 /*
- *      main.c
+ *      spider.c
  *      
  *      Copyright 2007 Patrik Obrist <padx@gmx.net>
  *      
@@ -21,15 +21,14 @@
 
 
 // Includes
-#include <stdlib.h>
-#include <stdio.h>
+//#include <stdlib.h>
+//#include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <tag_c.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <libgnomevfs/gnome-vfs.h>
-#include <libgnomevfs/gnome-vfs-utils.h>
+#include <gio/gio.h>
 
 // Defines
 #define RETURN_SUCCESS	0
@@ -62,9 +61,6 @@ int main (int argc, char *argv[])
 		g_message ("Es wurde kein Import-Verzeichnis angegeben!");
 		return RETURN_ERROR;
 	}
-
-	// GnomeVFS initialisieren
-	gnome_vfs_init ();
 
 	// Braucht es das?
 	taglib_set_strings_unicode(TRUE);
@@ -181,9 +177,9 @@ void create_dir (const gchar *path, gboolean with_parents)
 		gint ret;
 		if (with_parents) {
 			// g_debug("Ordnername: %s", path);
-			ret = g_mkdir_with_parents (path, 493);
+			ret = g_mkdir_with_parents (path, S_IRWXU);
 		} else {
-			ret = g_mkdir (path, 493);
+			ret = g_mkdir (path, S_IRWXU);
 		}
 		if (ret != 0) {
 			g_warning ("Konnte Verzeichnis nicht erstellen -> %s", path);
@@ -341,38 +337,34 @@ gboolean exist_target (const gchar *source, const gchar *target)
 {
 	if (g_file_test(target, G_FILE_TEST_EXISTS)) {
 		
-		GnomeVFSFileInfo *info_source, *info_target;
-		GnomeVFSResult res;
-		GnomeVFSURI *uri_source, *uri_target;
+		GFile *file_source, *file_target;
+		GFileInfo *info_source, *info_target;
+		goffset size_source, size_target;
+		GError *err = NULL;
 		
-		info_source = gnome_vfs_file_info_new ();
-		info_target = gnome_vfs_file_info_new ();
+		info_source = g_file_info_new ();
+		info_target = g_file_info_new ();
 
-		// Dateiinformationen der Quelldatei holen
-		uri_source = gnome_vfs_uri_new (gnome_vfs_make_uri_from_input (source));
-		if (uri_source == NULL) {
-			g_error ("URI %s is NULL", source);
-		}
-		res = gnome_vfs_get_file_info_uri (uri_source, info_source, GNOME_VFS_FILE_INFO_DEFAULT);
-		if (res != GNOME_VFS_OK) {
-			g_warning ("'%s' in Quelldatei %s", gnome_vfs_result_to_string (res), source);
+		// Informationen der Quelldatei holen
+		file_source = g_file_new_for_path (source); // Hier evtl. URI?
+		info_source = g_file_query_info (file_source, G_FILE_ATTRIBUTE_STANDARD_SIZE,
+                                         G_FILE_QUERY_INFO_NONE, NULL, &err);
+		if (err != NULL) {
 			return FALSE;
 		}
 		
-		// Dateiinformationen der Zieldatei holen
-		uri_target = gnome_vfs_uri_new (gnome_vfs_get_uri_from_local_path (target));
-		if (uri_target == NULL) {
-			g_error ("URI %s is NULL", target);
-		}
-		res = gnome_vfs_get_file_info_uri (uri_target, info_target, GNOME_VFS_FILE_INFO_DEFAULT);
-		if (res != GNOME_VFS_OK) {
-			g_warning ("'%s' in Zieldatei %s", gnome_vfs_result_to_string (res), target);
+		// Informationen der Zieldatei holen
+		file_target = g_file_new_for_path (target); // Hier evtl. URI?
+		info_target = g_file_query_info (file_target, G_FILE_ATTRIBUTE_STANDARD_SIZE,
+                                         G_FILE_QUERY_INFO_NONE, NULL, &err);
+		if (err != NULL) {
 			return FALSE;
 		}
 		
-		//g_debug ("Source size: %llu / Target size: %llu", info_source->size, info_target->size);
-		
-		if (info_source->size == info_target->size) {
+		// Grössenvergleich
+		size_source = g_file_info_get_size (info_source);
+		size_target = g_file_info_get_size (info_target);
+		if (size_source == size_target) {
 			return TRUE;
 		}
 	}

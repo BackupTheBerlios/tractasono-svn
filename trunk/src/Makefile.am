@@ -1,12 +1,9 @@
 INCLUDES = $(GTK_CFLAGS) \
-		   $(GNOMEVFS_CFLAGS) \
-		   $(LIBGLADE_CFLAGS) \
-		   $(GCONF_CFLAGS) \
+		   $(GIO_CFLAGS) \
+		   $(GLADE_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
 		   $(MUSICBRAINZ_CFLAGS) \
 		   $(SQLITE_CFLAGS) \
-		   $(LIBGPOD_CFLAGS) \
-		   $(LIBIPODDEVICE_CFLAGS) \
 		   $(TOTEMPLPARSE_CFLAGS) \
 		   $(TAGLIB_CFLAGS)
 
@@ -57,14 +54,11 @@ tractasono_SOURCES = main.c \
 tractasono_LDFLAGS = -export-dynamic
 
 tractasono_LDADD = $(GTK_LIBS) \
-				   $(GNOMEVFS_LIBS) \
-				   $(LIBGLADE_LIBS) \
-				   $(GCONF_LIBS) \
+				   $(GIO_LIBS) \
+				   $(GLADE_LIBS) \
 				   $(GSTREAMER_LIBS) \
 				   $(MUSICBRAINZ_LIBS) \
 				   $(SQLITE_LIBS) \
-				   $(LIBGPOD_LIBS) \
-				   $(LIBIPODDEVICE_LIBS) \
 				   $(TOTEMPLPARSE_LIBS) \
 				   $(TAGLIB_LIBS) \
 				   -ltag_c
