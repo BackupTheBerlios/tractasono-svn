@@ -22,6 +22,7 @@
 
 #include "utils.h"
 #include <gtk/gtk.h>
+#include <gio/gio.h>
 
 
 // Gibt das tractasono Vezeichnis zurück (~/tractasono/)

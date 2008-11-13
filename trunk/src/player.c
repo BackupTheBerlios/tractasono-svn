@@ -318,7 +318,7 @@ gchar* ns_formatted(gint64 ns)
 	
 	seconds = ns_to_seconds(ns);
 	
-	return g_strdup_printf ("%li:%li", seconds/60, seconds%60);
+	return g_strdup_printf ("%li:%li", (long int)seconds/60, (long int)seconds%60);
 }
 
 
