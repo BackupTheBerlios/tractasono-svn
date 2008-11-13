@@ -27,8 +27,6 @@
 #include "strukturen.h"
 #include "utils.h"
 
-#include <gconf/gconf-client.h>
-
 
 // GStreamer Variablen
 GstElement *ripper;
@@ -451,7 +449,10 @@ void disc_reread (void)
 	gtk_list_store_clear (store);
 	
 	// FIXME: hier muss zuerst Speicher freigegeben werden
+	g_debug ("stage 1");
 	the_album = musicbrainz_lookup_cd ();
+	g_debug ("stage 2");
+	
 	if (the_album == NULL) {
 		g_warning ("CD konnte nich eingelesen werden!");
 	} else {
@@ -515,7 +516,7 @@ void track_insert (const TrackDetails *track)
 						COLUMN_EXTRACT, TRUE,
 						COLUMN_NUMBER, track->number,
 						COLUMN_TITLE, track->title,
-						COLUMN_ARTIST, track->artist,
+						COLUMN_ARTIST, track->artist->name,
 						COLUMN_DURATION, track->duration,
 						COLUMN_DETAILS, track, -1);
 											

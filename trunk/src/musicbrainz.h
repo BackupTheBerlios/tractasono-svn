@@ -22,11 +22,7 @@
 #ifndef MUSICBRAINZ_H
 #define MUSICBRAINZ_H
 
-// Includes
 #include "strukturen.h"
-
-#include <glib.h>
-#include <musicbrainz/mb_c.h>
 
 // Prototypen
 void musicbrainz_init (void);

@@ -31,8 +31,6 @@
 #include <tag_c.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <libgnomevfs/gnome-vfs.h>
-#include <libgnomevfs/gnome-vfs-utils.h>
 
 // Defines
 #define BUFFER_SIZE		9216

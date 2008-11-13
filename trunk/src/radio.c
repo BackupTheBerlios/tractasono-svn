@@ -23,11 +23,7 @@
 
 #include <gtk/gtk.h>
 #include <glade/glade.h>
-
 #include <stdio.h>
-#include <libgnomevfs/gnome-vfs.h>
-#include <libgnomevfs/gnome-vfs-utils.h>
-
 #include <totem-pl-parser.h>
 
 #include "radio.h"
@@ -107,8 +103,6 @@ void cb_parser_start (TotemPlParser *parser, const char *title);
 void cb_parser_end (TotemPlParser *parser, const char *title);
 void cb_parser_entry (TotemPlParser *parser, const char *uri, const char *title,
 				  const char *genre, gpointer data);
-				  
-int vfs_print_error (GnomeVFSResult result, const char *uri_string);
 
 void setup_url_combo (void);
 void radio_combo_add_url (const gchar *url);
@@ -610,38 +604,19 @@ gint sort_station_compare_func (GtkTreeModel *model,
 
 gchar* xml_load (const gchar *uri)
 {
-	GnomeVFSResult result;
+	return NULL;
 	
-	gint file_size;
+	/*gint file_size;
 	GString *file_content;
 
 	file_content = g_string_new ("");
-
-	/* remember to initialize GnomeVFS! */
-	if (!gnome_vfs_initialized ()) {
-		if (!gnome_vfs_init ()) {
-			printf ("Could not initialize GnomeVFS\n");
-			return NULL;
-		}
-	}
-	
 	result = gnome_vfs_read_entire_file (uri, &file_size, &file_content->str);
 	if (result != GNOME_VFS_OK) {
 		vfs_print_error (result, uri);
 		return NULL;
 	}
 
-	return file_content->str;
-}
-
-
-int vfs_print_error (GnomeVFSResult result, const char *uri_string)
-{
-	const char *error_string;
-	/* get the string corresponding to this GnomeVFSResult value */
-	error_string = gnome_vfs_result_to_string (result);
-	printf ("Error %s occured opening location %s\n", error_string, uri_string);
-	return 1;
+	return file_content->str;*/
 }
 
 

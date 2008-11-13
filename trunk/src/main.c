@@ -44,6 +44,7 @@ int main (int argc, char *argv[])
 	musicbrainz_init ();
 	
 	// Drives initialisieren
+	gtk_init (&argc, &argv); // TODO: Init System umbauen
 	drives_init ();
 	
 	// Player initialisieren
