@@ -30,6 +30,7 @@
 #include "database.h"
 #include "musicbrainz.h"
 #include "player.h"
+#include "upnp-cp.h"
 
 // Programmeinstieg
 int main (int argc, char *argv[])
@@ -46,6 +47,9 @@ int main (int argc, char *argv[])
 	// Drives initialisieren
 	gtk_init (&argc, &argv); // TODO: Init System umbauen
 	drives_init ();
+	
+	// UPNP initialisieren
+	upnp_init (argc, argv);
 	
 	// Player initialisieren
 	player_init (argc, argv);

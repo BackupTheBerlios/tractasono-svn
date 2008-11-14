@@ -3,6 +3,7 @@ INCLUDES = $(GTK_CFLAGS) \
 		   $(GLADE_CFLAGS) \
 		   $(GSTREAMER_CFLAGS) \
 		   $(MUSICBRAINZ_CFLAGS) \
+		   $(GUPNP_CFLAGS) \
 		   $(SQLITE_CFLAGS) \
 		   $(TOTEMPLPARSE_CFLAGS) \
 		   $(TAGLIB_CFLAGS)
@@ -34,6 +35,8 @@ tractasono_SOURCES = main.c \
 					 musicbrainz.h \
 					 keyboard.c \
 					 keyboard.h \
+					 upnp-cp.c \
+					 upnp-cp.h \
 					 disc.c \
 					 disc.h \
 					 database.c \
@@ -61,6 +64,7 @@ tractasono_LDADD = $(GTK_LIBS) \
 				   $(GSTREAMER_LIBS) \
 				   $(MUSICBRAINZ_LIBS) \
 				   $(SQLITE_LIBS) \
+				   $(GUPNP_LIBS) \
 				   $(TOTEMPLPARSE_LIBS) \
 				   $(TAGLIB_LIBS) \
 				   -ltag_c
