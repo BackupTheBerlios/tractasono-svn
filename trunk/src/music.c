@@ -489,6 +489,7 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	gchar *sql;
 	gchar *uri;
 	PlayList *list;
+	gint *indices;
 	
 	model = gtk_tree_view_get_model (tree);
 	list = playlist_new ();
@@ -514,14 +515,7 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 		g_free (sql);
 		iter_ok = gtk_tree_model_iter_next (model, &iter);
 	}
-	
-	//g_message ("Anzahl Elemente in der Playliste: %i", g_list_length (playlist));
-	
-	// TODO
-	// Schauen welcher Track ausgewählt wurde
-	//gtk_tree_model_get_iter (model, &iter, path);
-	//playlist = g_list_nth (playlist, 0);
-	
-	player_play_playlist (list, 0);
+	indices = gtk_tree_path_get_indices (path);
+	player_play_playlist (list, indices[0]);
 }
 

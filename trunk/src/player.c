@@ -396,7 +396,7 @@ void player_play_playlist (PlayList *playlist, gint pos)
 	}
 	
 	the_list = playlist;
-	//playlist_nth (playlist, pos);
+	playlist_nth (playlist, pos);
 	uri = playlist_get_uri (the_list);
 	if (!uri) {
 		g_warning ("PlayList ist leer!");
