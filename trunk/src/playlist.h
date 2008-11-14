@@ -39,6 +39,9 @@ gchar* playlist_get_uri (PlayList *playlist);
 gboolean playlist_next (PlayList *playlist);
 gboolean playlist_prev (PlayList *playlist);
 
+gboolean playlist_has_next (PlayList *playlist);
+gboolean playlist_has_prev (PlayList *playlist);
+
 gboolean playlist_nth (PlayList *playlist, gint pos);
 
 void playlist_free (PlayList *playlist);

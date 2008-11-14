@@ -159,7 +159,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			GstState oldstate, newstate, pending;
 			
 			gst_message_parse_state_changed(message, &oldstate, &newstate, &pending);
-			g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
+			//g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
 
 			if (newstate == 4) {
 				g_message ("GStreamer is now playing!\n");
@@ -281,25 +281,15 @@ gboolean player_seek_to_position(gint64 position)
 // Spiele eine Datei oder einen Stream ab
 void player_play_uri (const gchar *uri)
 {
-	g_return_if_fail (uri != NULL);
 	g_return_if_fail (pipeline != NULL);
 	
-	g_debug ("Player spielt jetzt URI: %s", uri);
+	interface_update_controls (the_list);
 	
-	if (pipeline) {
+	if (uri) {
 		player_set_stop();
 		g_object_set(G_OBJECT (pipeline), "uri", uri, NULL);
 		player_set_play();
-		
-		// TODO: Update Controls
-		/*if (!g_list_previous (playlist)) {
-			interface_update_controls (CONTROL_STATE_FIRST);
-		} else if (!g_list_next (playlist)) {
-			interface_update_controls (CONTROL_STATE_LAST);
-		} else {
-			interface_update_controls (CONTROL_STATE_MID);	
-		}*/
-		
+		g_debug ("Player spielt jetzt URI: %s", uri);
 	}
 }
 
@@ -356,14 +346,9 @@ gboolean player_play_next ()
 {
 	g_return_val_if_fail (the_list != NULL, FALSE);
 	
-	if (!playlist_next (the_list)) {
-		return FALSE;
-	}
-	
-	gchar *uri = playlist_get_uri (the_list);
-	if (!uri) {
-		return FALSE;
-	}
+	gchar *uri;
+	playlist_next (the_list);
+	uri = playlist_get_uri (the_list);
 	player_play_uri (uri);
 	
 	return TRUE;
@@ -373,15 +358,10 @@ gboolean player_play_next ()
 gboolean player_play_prev ()
 {
 	g_return_val_if_fail (the_list != NULL, FALSE);
-	
-	if (!playlist_prev (the_list)) {
-		return FALSE;
-	}
-	
-	gchar *uri = playlist_get_uri (the_list);
-	if (!uri) {
-		return FALSE;
-	}
+
+	gchar *uri;
+	playlist_prev (the_list);
+	uri = playlist_get_uri (the_list);
 	player_play_uri (uri);
 	
 	return TRUE;

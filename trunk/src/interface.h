@@ -26,6 +26,8 @@
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 #include "player.h"
+#include "playlist.h"
+
 
 // Strukturen
 typedef struct {
@@ -38,13 +40,6 @@ typedef struct {
 	GtkWidget *disc;
 	GtkWidget *previous;
 } WindowModule;
-
-
-typedef enum {
-  CONTROL_STATE_FIRST,
-  CONTROL_STATE_MID,
-  CONTROL_STATE_LAST
-} ControlState;
 
 
 // Globale Variablen
@@ -71,7 +66,7 @@ void interface_set_songinfo (const gchar *artist, const gchar *title);
 void interface_set_song_position (gint64 position);
 void interface_set_song_duration (gint64 duration);
 void interface_set_playing (PlayerState state);
-void interface_update_controls (ControlState state);
+void interface_update_controls (PlayList *playlist);
 
 GtkWidget* interface_get_widget (gchar *name);
 

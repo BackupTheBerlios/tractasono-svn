@@ -376,9 +376,6 @@ void on_treeview_artists_row_activated (GtkTreeView *tree,
 	
 	gtk_tree_model_get (model, &iter, COL_ARTIST_ID, &idartist, -1);
 	
-	//g_debug ("Id Artist %d", idartist);
-	
-	
 	// Vorhandene Alben zuerst löschen
 	gtk_list_store_clear (album_store);
 	
@@ -503,40 +500,20 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 		// Track Id holen
 		gtk_tree_model_get (model, &iter, COL_TRACK_ID, &id, -1);
 		
-		g_message ("Step 0");
-		
 		// Hier Track-Details holen
 		sql = g_strdup_printf ("SELECT trackpath FROM tbl_track WHERE IDtrack = %d", id);
-		
-		g_message ("Step 1");
-		
 		if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
 			g_warning ("%s", err);
 			return;
 		}
 		
-		g_message ("%s", sql);
-		g_message ("Resultat: %s", results[1]);
-		
 		// Pfad in Liste einfügen
-		g_message ("Step 2");
-		
 		uri = g_strdup_printf ("file://%s", results[1]);
 		playlist_add_uri (list, uri);
 		g_free (uri);
-		
-		g_message ("Step 3");
-		
 		g_free (sql);
-		
-		g_message ("Step 4");
-		
 		iter_ok = gtk_tree_model_iter_next (model, &iter);
-		
-		g_message ("Step 5");
 	}
-	
-	g_message ("Step 6");
 	
 	//g_message ("Anzahl Elemente in der Playliste: %i", g_list_length (playlist));
 	

@@ -29,7 +29,7 @@ PlayList* playlist_new (void)
 	PlayList *playlist;
 	
 	playlist = g_new0 (PlayList, 1);
-	playlist->list = g_list_alloc ();
+	playlist->list = NULL;
 		
 	return playlist;
 }
@@ -58,9 +58,9 @@ void playlist_add_uri (PlayList *playlist, const gchar *uri)
 	g_return_if_fail (uri != NULL);
 	
 	playlist->list = g_list_append (playlist->list, g_strdup (uri));
-	playlist->list->data = g_strdup (uri);
+	//playlist->list->data = g_strdup (uri);
 	
-	g_debug ("Aktuelle URI: %s", playlist_get_uri (playlist));
+	g_debug ("Playlist added URI: %s", playlist_get_uri (playlist));
 }
 
 
@@ -69,11 +69,7 @@ gchar* playlist_get_uri (PlayList *playlist)
 {
 	g_return_val_if_fail (playlist != NULL, NULL);
 	
-	if (!playlist->list->data) {
-		return NULL;
-	}
-	
-	return (gchar*) playlist->list->data;
+	return playlist->list->data;
 }
 
 
@@ -128,4 +124,32 @@ gboolean playlist_nth (PlayList *playlist, gint pos)
 	playlist->list = temp_list;
 	
 	return TRUE;
+}
+
+
+// Prüft ob ein weiterer Eintrag vorhanden ist
+gboolean playlist_has_next (PlayList *playlist)
+{
+	g_return_val_if_fail (playlist != NULL, FALSE);
+	
+	GList *next = g_list_next (playlist->list);
+	if (next) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+
+
+// Prüft ob ein vorheriger Eintrag vorhanden ist
+gboolean playlist_has_prev (PlayList *playlist)
+{
+	g_return_val_if_fail (playlist != NULL, FALSE);
+	
+	GList *prev = g_list_previous (playlist->list);
+	if (prev) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }

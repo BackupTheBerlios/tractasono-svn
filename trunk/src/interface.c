@@ -328,7 +328,7 @@ void interface_set_song_position(gint64 position)
 // Setze die Song Informationen
 void interface_set_songinfo (const gchar *artist, const gchar *title)
 {
-	g_message ("interface_set_songinfo: %s, title: %s", artist, title);
+	//g_message ("interface_set_songinfo: %s, title: %s", artist, title);
 	if (title) {
 		lcd_set_title (LCD (lcd), title);
 	}
@@ -519,45 +519,18 @@ void on_button_prev_clicked (GtkButton *button, gpointer user_data)
 }
 
 
-void interface_update_controls (ControlState state)
+void interface_update_controls (PlayList *playlist)
 {
+	g_return_if_fail (playlist != NULL);
+	
 	GtkWidget *prev;
 	GtkWidget *next;
 	
-	prev = glade_xml_get_widget (glade, "button_prev");
-	if (prev == NULL) {
-		g_warning ("Konnte den Previous Button nicht holen!");
-		return;
-	}
+	prev = interface_get_widget ("button_prev");
+	next = interface_get_widget ("button_next");
 	
-	next = glade_xml_get_widget (glade, "button_next");
-	if (next == NULL) {
-		g_warning ("Konnte den Previous Button nicht holen!");
-		return;
-	}
-	
-	switch (state) {
-		case CONTROL_STATE_FIRST: {
-			g_message ("ControlState: First");
-			gtk_widget_set_sensitive (prev, FALSE);
-			break;
-		}
-		case CONTROL_STATE_MID: {
-			g_message ("ControlState: Mid");
-			gtk_widget_set_sensitive (prev, TRUE);
-			gtk_widget_set_sensitive (next, TRUE);
-			break;
-		}
-		case CONTROL_STATE_LAST: {
-			g_message ("ControlState: Last");
-			gtk_widget_set_sensitive (next, FALSE);
-			break;
-		}
-		default: {
-			g_warning ("ControlState ungültig!");
-		}
-	}
-	
+	gtk_widget_set_sensitive (prev, playlist_has_prev (playlist));
+	gtk_widget_set_sensitive (next, playlist_has_next (playlist));
 }
 
 
