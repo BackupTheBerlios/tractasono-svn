@@ -95,20 +95,14 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 	char data[256];
 	int num_albums, j;
 	
-	g_debug ("stage 3");
-	
 	/* Get the Table of Contents */
 	if (!mb_Query (mb, MBQ_GetCDTOC)) {
 		return NULL;
 	}
-	
-	g_debug ("stage 4");
 
 	if (!mb_Query (mb, MBQ_GetCDInfo)) {
 		return NULL;
 	}
-	
-	g_debug ("stage 5");
 	
 	num_albums = mb_GetResultInt(mb, MBE_GetNumAlbums);
 	if (num_albums < 1) {
@@ -116,20 +110,14 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 		return album;
 	}
 	
-	g_debug ("stage 6");
-	
 	int num_tracks;
 	gboolean from_freedb = FALSE;
 
 	mb_Select1(mb, MBS_SelectAlbum, 1);
 	album = album_new ();
 	
-	g_debug ("stage 7");
-	
 	// default values
 	album->genre = g_strdup ("Unbekannt");
-	album->compilation = FALSE;
-	album->release_date = NULL;
 
 	if (mb_GetResultData(mb, MBE_AlbumGetAlbumId, data, sizeof (data))) {
 		from_freedb = strstr(data, "freedb:") == data;
@@ -137,65 +125,29 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 		album->album_id = g_strdup (data);
 	}
 
-	g_debug ("stage 8");
-
 	if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistId, data, sizeof (data))) {
-		//g_message ("1");
 		mb_GetIDFromURL (mb, data, data, sizeof (data));
 		album->artist_id = g_strdup (data);
-
-		g_debug ("stage 81");
-
 		if (mb_GetResultData (mb, MBE_AlbumGetAlbumArtistName, data, sizeof (data))) {
-			//g_message ("2");
-			
-			g_debug ("stage 81,5");
-			
-			g_debug ("Id: %i", album->artist->id);
-			g_debug ("%s", data);
-			
 			album->artist->name = g_strdup (data);
-			
-			g_debug ("stage 82");
-			
 		} else {
-			//g_message ("3");
 			if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
-				//g_message ("4");
 				album->artist->name = g_strdup ("Various Artist");
 				album->compilation = TRUE;
 			} else {
-				//g_message ("5");
 				album->artist->name = g_strdup ("Unknown Artist");
 			}
-			
-			g_debug ("stage 83");
-			
 		}
-		//g_message ("id: %s", album->artist_id);
 		if (g_ascii_strcasecmp (MBI_VARIOUS_ARTIST_ID, album->artist_id) == 0) {
-			//g_message ("6");
 			album->compilation = TRUE;
 		}
-		
-		g_debug ("stage 84");
-		
 		if (g_ascii_strcasecmp (album->artist->name, "Various Artist") == 0) {
-			//g_message ("7");
 			album->compilation = TRUE;
 		}
-		
-		g_debug ("stage 85");
-		
 		if (g_ascii_strcasecmp (album->artist->name, "Various Artists") == 0) {
-			//g_message ("8");
 			album->compilation = TRUE;
 		}
-		
-		g_debug ("stage 86");
 	}
-	
-	g_debug ("stage 9");
 
 	// Disc title
 	if (mb_GetResultData(mb, MBE_AlbumGetAlbumName, data, sizeof (data))) {
@@ -203,8 +155,6 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 	} else {
 		album->title = g_strdup ("Unknown Title");
 	}
-	
-	g_debug ("stage 10");
 
 	{
 		int num_releases;
@@ -215,14 +165,12 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 				int matched, year=1, month=1, day=1;
 				matched = sscanf(data, "%u-%u-%u", &year, &month, &day);
 				if (matched >= 1) {
-					album->release_date = g_date_new_dmy ((day == 0) ? 1 : day, (month == 0) ? 1 : month, year);
+					album->release_date = g_strdup_printf ("%i", year);
 				}
 			}
 			mb_Select(mb, MBS_Back);
 		}
 	}
-
-	g_debug ("stage 11");
 
 	num_tracks = mb_GetResultInt(mb, MBE_AlbumGetNumTracks);
 	if (num_tracks < 1) {
@@ -232,8 +180,6 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 		g_warning ("Incomplete metadata for this CD");
 		return NULL;
 	}
-	
-	g_debug ("stage 12");
 
 	for (j = 1; j <= num_tracks; j++) {
 		TrackDetails *track;
@@ -246,12 +192,10 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 			mb_GetIDFromURL (mb, data, data, sizeof (data));
 			track->track_id = g_strdup (data);
 		}
-
 		if (mb_GetResultData1(mb, MBE_AlbumGetArtistId, data, sizeof (data), j)) {
 			mb_GetIDFromURL (mb, data, data, sizeof (data));
 			track->artist_id = g_strdup (data);
 		}
-
 		if (mb_GetResultData1(mb, MBE_AlbumGetTrackName, data, sizeof (data), j)) {
 			if (track->artist_id != NULL) {
 				artist_and_title_from_title (track, data);
@@ -261,26 +205,19 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 		} else {
 			track->title = g_strdup ("[Untitled]");
 		}
-
 		if (!strcmp(track->artist->name, "") && mb_GetResultData1(mb, MBE_AlbumGetArtistName, data, sizeof (data), j)) {
-			g_debug ("Track Artist: %s", data);
 			track->artist->name = g_strdup (data);
 		}
-
 		if (mb_GetResultData1(mb, MBE_AlbumGetTrackDuration, data, sizeof (data), j)) {
 			track->duration = atoi (data) / 1000;
 		}
-
 		if (from_freedb) {
 			convert_encoding (&track->title);
 			convert_encoding (&track->artist->name);
 		}
-  
 		album->tracks = g_list_append (album->tracks, track);
 		album->number++;
 	}
-	
-	g_debug ("stage 13");
 
 	if (from_freedb) {
 		convert_encoding (&album->title);
@@ -288,8 +225,6 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 	}
 
 	mb_Select (mb, MBS_Rewind);
-	
-	g_debug ("stage 14");
 
 	/* For each album, we need to insert the duration data if necessary
 	* We need to query this here because otherwise we would flush the
@@ -308,8 +243,6 @@ AlbumDetails* musicbrainz_lookup_cd (void)
 		}
 		j++;
 	}
-	
-	g_debug ("stage 15");
 	
 	return album;
 }

@@ -36,9 +36,10 @@ struct _TrackDetails {
 	gint number; /* track number */
 	gint duration; /* seconds */
 	gchar *title;
+	gchar *path;
 	gchar *track_id;
 	gchar *artist_id;
-	gchar *path;
+
 };
 
 struct _AlbumDetails {
@@ -49,7 +50,7 @@ struct _AlbumDetails {
 	gint   number; /* number of tracks in the album */
 	gboolean compilation;
 	GList *tracks;
-	GDate *release_date; /* MusicBrainz support multiple releases per album */
+	gchar *release_date; /* MusicBrainz support multiple releases per album */
 	gchar *album_id;
 	gchar *artist_id;
 };

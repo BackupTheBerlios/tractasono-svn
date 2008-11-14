@@ -50,7 +50,7 @@ AlbumDetails* album_new (void)
 	album->number = 0;
 	album->compilation = FALSE;
 	album->tracks = NULL;
-	album->release_date = g_date_new ();
+	album->release_date = g_strdup ("");
 	album->album_id = g_strdup ("");
 	album->artist_id = g_strdup ("");
 	
@@ -67,12 +67,11 @@ TrackDetails* track_new (void)
 	
 	track->artist = artist_new ();
 	track->album = album_new ();
-	track->id = 0;
 	track->number = 0;
-	track->duration = 0;
-	track->title = g_strdup ("");
+	track->id = 0;
 	track->track_id = g_strdup ("");
 	track->artist_id = g_strdup ("");
+	track->title = g_strdup ("");
 	track->path = g_strdup ("");
 	
 	return track;
@@ -101,16 +100,20 @@ void track_free (TrackDetails *track)
 void album_free (AlbumDetails *album)
 {
 	g_return_if_fail (album != NULL);
+	artist_free (album->artist);
 	g_free (album->title);
 	g_free (album->artist);
 	g_free (album->genre);
+	g_free (album->release_date);
 	g_free (album->album_id);
-	if (album->release_date) {
-		g_date_free (album->release_date);
+
+	// Alle Tracks freigeben
+	GList *t;
+	for (t = album->tracks; t != NULL; t = t->next) {
+		track_free (t->data);
 	}
-	//g_list_deep_free (album->tracks, (GFunc)track_details_free);
 	g_list_free (album->tracks);
-	artist_free (album->artist);
+	
 	g_free (album);
 }
 

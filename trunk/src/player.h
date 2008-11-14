@@ -33,6 +33,7 @@ typedef enum {
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
+#include "playlist.h"
 
 // Prototypen
 gint player_test (void);
@@ -43,8 +44,7 @@ void player_set_play (void);
 void player_set_pause (void);
 void player_set_stop (void);
 
-//void player_play_uri (const gchar *uri);
-gboolean player_play_new_playlist (GList *new_playlist);
+void player_play_playlist (PlayList *playlist, gint pos);
 
 gboolean player_play_next ();
 gboolean player_play_prev ();

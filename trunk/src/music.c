@@ -26,6 +26,7 @@
 #include "interface.h"
 #include "player.h"
 #include "utils.h"
+#include "playlist.h"
 
 
 GtkTreeView *artist_tree;
@@ -489,9 +490,11 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	char *err;
 	gboolean iter_ok;
 	gchar *sql;
-	GList *playlist = NULL;
+	gchar *uri;
+	PlayList *list;
 	
 	model = gtk_tree_view_get_model (tree);
+	list = playlist_new ();
 	
 	// Alle Tracks einlesen
 	iter_ok = gtk_tree_model_get_iter_first (model, &iter);
@@ -518,7 +521,9 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 		// Pfad in Liste einfügen
 		g_message ("Step 2");
 		
-		playlist = g_list_append (playlist, g_strdup_printf ("file://%s", results[1]));
+		uri = g_strdup_printf ("file://%s", results[1]);
+		playlist_add_uri (list, uri);
+		g_free (uri);
 		
 		g_message ("Step 3");
 		
@@ -533,18 +538,13 @@ void on_treeview_tracks_row_activated (GtkTreeView *tree,
 	
 	g_message ("Step 6");
 	
-	// Musik abspielen
-	//gchar *track_path = g_strdup_printf ("file://%s", results[1]);
-	
-	//player_play_uri (track_path); Alt
-	
-	g_message ("Anzahl Elemente in der Playliste: %i", g_list_length (playlist));
+	//g_message ("Anzahl Elemente in der Playliste: %i", g_list_length (playlist));
 	
 	// TODO
 	// Schauen welcher Track ausgewählt wurde
 	//gtk_tree_model_get_iter (model, &iter, path);
-	playlist = g_list_nth (playlist, 0);
+	//playlist = g_list_nth (playlist, 0);
 	
-	player_play_new_playlist (playlist);
+	player_play_playlist (list, 0);
 }
 

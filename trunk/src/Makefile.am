@@ -44,6 +44,8 @@ tractasono_SOURCES = main.c \
 					 lcd.h \
 					 ipod.c \
 					 ipod.h \
+					 playlist.c \
+					 playlist.h \
 					 strukturen.c \
 					 strukturen.h \
 					 utils.c \

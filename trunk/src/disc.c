@@ -26,6 +26,7 @@
 #include "interface.h"
 #include "strukturen.h"
 #include "utils.h"
+#include <string.h>
 
 
 // GStreamer Variablen
@@ -370,9 +371,9 @@ void on_cell_edited (GtkCellRendererText *renderer, gchar *path,
 				gtk_list_store_set (store, &iter, COLUMN_TITLE, track->title, -1);
 				break;
 			case COLUMN_ARTIST:
-				g_free (track->artist);
+				g_free (track->artist->name);
 				track->artist->name = g_strdup (string);
-				gtk_list_store_set (store, &iter, COLUMN_ARTIST, track->artist, -1);
+				gtk_list_store_set (store, &iter, COLUMN_ARTIST, track->artist->name, -1);
 				break;
 			default:
 				g_warning ("Unknown column %d was edited", column);
@@ -428,8 +429,8 @@ void display_disctitle (AlbumDetails *album)
 	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->genre));
 	
 	// Release Jahr
-	widget = interface_get_widget ("spinbutton_disc_year");
-	gtk_spin_button_set_value (GTK_SPIN_BUTTON (widget), (gdouble)g_date_get_year (album->release_date));
+	widget = interface_get_widget ("entry_disc_year");
+	gtk_entry_set_text (GTK_ENTRY (widget), g_strdup (album->release_date));	
 	
 	// CD Nummer
 	widget = interface_get_widget ("spinbutton_disc_discno");
@@ -449,9 +450,7 @@ void disc_reread (void)
 	gtk_list_store_clear (store);
 	
 	// FIXME: hier muss zuerst Speicher freigegeben werden
-	g_debug ("stage 1");
 	the_album = musicbrainz_lookup_cd ();
-	g_debug ("stage 2");
 	
 	if (the_album == NULL) {
 		g_warning ("CD konnte nich eingelesen werden!");
@@ -674,15 +673,20 @@ void extract_track (TrackDetails *track)
 	// Tags setzen
 	GstTagList *taglist;
 	taglist = gst_tag_list_new ();
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_COMMENT, "ripped by tractasono", NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TITLE, track->title, NULL);
-	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ARTIST, track->artist, NULL);
+	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ARTIST, track->artist->name, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ALBUM, track->album->title, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_GENRE, track->album->genre, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TRACK_NUMBER, track->number, NULL);
-	if (track->album->release_date) {
-		gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_DATE, track->album->release_date, NULL);
-	}
-	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_COMMENT, "ripped by tractasono", NULL);
+	// TODO: Release Datum in Tags schreiben
+	/*if (!strcmp (track->album->release_date, "")) {
+		GDate *date;
+		date = g_date_new ();
+		g_date_set_year (date, atoi (track->album->release_date));
+		gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_DATE, date, NULL);
+	}*/
+	
 	gst_tag_setter_merge_tags  (GST_TAG_SETTER (encoder), taglist, GST_TAG_MERGE_REPLACE_ALL);
 	gst_tag_list_free (taglist);
 	
@@ -727,27 +731,10 @@ void on_treeview_disc_row_activated (GtkTreeView *tree,
 	
 	gtk_tree_model_get (model, &iter, COLUMN_DETAILS, &track, -1);
 	
-	play_track (track);
+	//play_track (track);
 	
-	display_track_state (track->number, STATE_PLAYING);
+	//display_track_state (track->number, STATE_PLAYING);
 }
-
-
-
-void play_track (TrackDetails *track)
-{
-	g_debug ("Funktion 'play_track' noch nicht implementiert!");
-	
-	//gchar *uri;
-	
-	// Musik abspielen
-	//uri = g_strdup_printf ("cdda://%d", track->number);
-	//player_play_uri (uri);
-	
-	// Muss manuell gesetzt werden
-	//interface_set_songinfo (track->artist, track->title);
-}
-
 
 
 void display_track_state (gint track, TrackState state)
@@ -819,6 +806,7 @@ void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
 		const gchar *text;
 		GtkTreeModel *model;
 		GtkTreeIter iter;
+		TrackDetails *track;
 		
 		text = gtk_entry_get_text (GTK_ENTRY (editable));
 	
@@ -826,15 +814,30 @@ void on_entry_disc_artist_changed (GtkEditable *editable, gpointer user_data)
 		if (gtk_tree_model_get_iter_first (model, &iter)) {
 			do {
 				gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_ARTIST, text, -1);
+				gtk_tree_model_get (model, &iter, COLUMN_DETAILS, &track, -1);
+				track->artist->name = g_strdup (text);
 			} while (gtk_tree_model_iter_next (model, &iter));
 		}
 	}
 }
 
 
+void on_entry_disc_title_changed (GtkEditable *editable, gpointer user_data)
+{
+	g_return_if_fail (the_album != NULL);
+	
+	const gchar *title;
+	
+	title = gtk_entry_get_text (GTK_ENTRY (editable));
+	the_album->title = g_strdup (title);
+	//g_message ("New Album Title: %s", the_album->title);
+}
+
 
 void on_entry_disc_genre_changed (GtkEditable *editable, gpointer user_data)
 {
+	g_return_if_fail (the_album != NULL);
+	
 	const gchar *genre;
 	
 	genre = gtk_entry_get_text (GTK_ENTRY (editable));
@@ -842,3 +845,14 @@ void on_entry_disc_genre_changed (GtkEditable *editable, gpointer user_data)
 	//g_message ("New Album Genre: %s", the_album->genre);
 }
 
+
+void on_entry_disc_year_changed (GtkEditable *editable, gpointer user_data)
+{
+	g_return_if_fail (the_album != NULL);
+	
+	const gchar *year;
+	
+	year = gtk_entry_get_text (GTK_ENTRY (editable));
+	the_album->release_date = g_strdup (year);
+	//g_message ("New Release Date: %s", the_album->release_date);
+}

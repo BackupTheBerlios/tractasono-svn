@@ -32,7 +32,7 @@ GstElement *decoder;
 GstElement *audiosink;
 
 // Playliste
-GList *playlist = NULL;
+PlayList *the_list;
 
 // Prototypen
 void player_handle_tag_message (GstMessage *message);
@@ -96,6 +96,9 @@ void player_init (int argc, char *argv[])
 	
 	// Watch hinzufügen welcher jede Sekunde auftritt
 	g_timeout_add (1000, (GSourceFunc) player_timer_event, pipeline);
+	
+	// Playlist mit NULL initialisieren
+	the_list = NULL;
 }
 
 
@@ -278,24 +281,25 @@ gboolean player_seek_to_position(gint64 position)
 // Spiele eine Datei oder einen Stream ab
 void player_play_uri (const gchar *uri)
 {
-	g_message ("player_play_uri: uri=%s", uri);
+	g_return_if_fail (uri != NULL);
+	g_return_if_fail (pipeline != NULL);
 	
-	if (pipeline && uri) {
+	g_debug ("Player spielt jetzt URI: %s", uri);
+	
+	if (pipeline) {
 		player_set_stop();
 		g_object_set(G_OBJECT (pipeline), "uri", uri, NULL);
 		player_set_play();
 		
-		if (!g_list_previous (playlist)) {
+		// TODO: Update Controls
+		/*if (!g_list_previous (playlist)) {
 			interface_update_controls (CONTROL_STATE_FIRST);
 		} else if (!g_list_next (playlist)) {
 			interface_update_controls (CONTROL_STATE_LAST);
 		} else {
 			interface_update_controls (CONTROL_STATE_MID);	
-		}
+		}*/
 		
-		
-	} else {
-		g_warning ("pipeline nicht bereit oder uri nicht angegeben!");
 	}
 }
 
@@ -350,51 +354,37 @@ void player_handle_tag_message(GstMessage *message)
 
 gboolean player_play_next ()
 {
-	if (!playlist) {
-		g_warning ("Playlist existiert nicht!");
+	g_return_val_if_fail (the_list != NULL, FALSE);
+	
+	if (!playlist_next (the_list)) {
 		return FALSE;
 	}
 	
-	if (!g_list_next (playlist)) {
+	gchar *uri = playlist_get_uri (the_list);
+	if (!uri) {
 		return FALSE;
 	}
+	player_play_uri (uri);
 	
-	playlist = g_list_next (playlist);
-	
-	const gchar *uri = playlist->data;
-				
-	if (uri) {
-		uri = g_strdup_printf ("file://%s", uri);
-		player_play_uri (uri);
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return TRUE;
 }
 
 
 gboolean player_play_prev ()
 {
-	if (!playlist) {
-		g_warning ("Playlist existiert nicht!");
+	g_return_val_if_fail (the_list != NULL, FALSE);
+	
+	if (!playlist_prev (the_list)) {
 		return FALSE;
 	}
 	
-	if (!g_list_previous (playlist)) {
+	gchar *uri = playlist_get_uri (the_list);
+	if (!uri) {
 		return FALSE;
 	}
+	player_play_uri (uri);
 	
-	playlist = g_list_previous (playlist);
-	
-	const gchar *uri = playlist->data;
-				
-	if (uri) {
-		uri = g_strdup_printf ("file://%s", uri);
-		player_play_uri (uri);
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return TRUE;
 }
 
 
@@ -414,25 +404,25 @@ void dump_playlist (GList *playlist)
 }
 
 
-gboolean player_play_new_playlist (GList *new_playlist)
+void player_play_playlist (PlayList *playlist, gint pos)
 {
-	if (!new_playlist) {
-		g_warning ("Problem mit den Playlist Parametern!");
-		return FALSE;
+	g_return_if_fail (playlist != NULL);
+	
+	gchar *uri;
+	
+	// Vorhandene Playlist gegebenenfalls freigeben
+	if (the_list) {
+		playlist_free (the_list);
 	}
 	
-	playlist = new_playlist;
-	dump_playlist (playlist);
-	
-	gchar *uri = playlist->data;
+	the_list = playlist;
+	//playlist_nth (playlist, pos);
+	uri = playlist_get_uri (the_list);
 	if (!uri) {
-		g_warning ("Problem mit der Playlist!");
-		return FALSE;
+		g_warning ("PlayList ist leer!");
 	}
 	
 	player_play_uri (uri);
-	
-	return TRUE;
 }
 
 
