@@ -20,60 +20,65 @@
  */
 
 #include "upnp-cp.h"
+#include <glib.h>
 
 
 
-static void service_proxy_available_cb (GUPnPControlPoint *cp,
-                            GUPnPServiceProxy *proxy,
-                            gpointer           userdata)
+// Tritt auf, wenn das Gerät erscheint
+static void device_proxy_available_cb (GUPnPControlPoint *control_point,
+									   GUPnPDeviceProxy  *proxy,
+									   gpointer user_data)
 {
-  GError *error = NULL;
-  char *ip = NULL;
-  
-  gupnp_service_proxy_send_action (proxy,
-				   /* Action name and error location */
-				   "GetExternalIPAddress", &error,
-				   /* IN args */
-				   NULL,
-				   /* OUT args */
-				   "NewExternalIPAddress",
-				   G_TYPE_STRING, &ip,
-				   NULL);
-  
-  if (error == NULL) {
-    g_print ("External IP address is %s\n", ip);
-    g_free (ip);
-  } else {
-    g_printerr ("Error: %s\n", error->message);
-    g_error_free (error);
-  }
-  //g_main_loop_quit (main_loop);
+	GUPnPDeviceInfo *info;
+	gchar *name;
+	
+	info = (GUPnPDeviceInfo*) proxy;
+	
+	name = gupnp_device_info_get_friendly_name (info);
+	g_debug ("MediaServer '%s' gefunden!", name);
+	
+	g_free (name);
 }
 
 
+// Tritt auf, wenn das Gerät verschwindet
+static void device_proxy_unavailable_cb (GUPnPControlPoint *control_point,
+									   GUPnPDeviceProxy  *proxy,
+									   gpointer user_data)
+{
+	GUPnPDeviceInfo *info;
+	gchar *name;
+	
+	info = (GUPnPDeviceInfo*) proxy;
+	
+	name = gupnp_device_info_get_friendly_name (info);
+	g_debug ("MediaServer '%s' verloren!", name);
+	
+	g_free (name);
+}
+
+
+// UPNP Initialisieren
 void upnp_init (int argc, char *argv[])
 {
-	/* Required initialisation */
-	g_thread_init (NULL);
-
+	g_message ("UPNP init");
+	
 	GUPnPContext *context;
 	GUPnPControlPoint *cp;
 	
-	/* Create a new GUPnP Context.  By here we are using the default GLib main
-     context, and connecting to the current machine's default IP on an
-     automatically generated port. */
+	// Required initialisation
+	g_thread_init (NULL);
+	
+	// Create a new GUPnP Context
     context = gupnp_context_new (NULL, NULL, 0, NULL);
 
-	/* Create a Control Point targeting WAN IP Connection services */
-	cp = gupnp_control_point_new (context, "urn:schemas-upnp-org:service:WANIPConnection:1");
+	// Create a Control Point
+	cp = gupnp_control_point_new (context, "urn:schemas-upnp-org:device:MediaServer:1");
 	
-	/* The service-proxy-available signal is emitted when any services which match
-     our target are found, so connect to it */
-    g_signal_connect (cp, "service-proxy-available", G_CALLBACK (service_proxy_available_cb), NULL);
+	// Connect Signals
+    g_signal_connect (cp, "device-proxy-available", G_CALLBACK (device_proxy_available_cb), NULL);
+    g_signal_connect (cp, "device-proxy-unavailable", G_CALLBACK (device_proxy_unavailable_cb), NULL);
 
-	/* Tell the Control Point to start searching */
+	// Tell the Control Point to start searching
 	gssdp_resource_browser_set_active (GSSDP_RESOURCE_BROWSER (cp), TRUE);
-
-
-	
 }
