@@ -64,7 +64,9 @@ gint db_album_add (AlbumDetails *album);
 
 gboolean db_open (void);
 
-void db_create (void);
+gboolean db_create (const gchar *db_file);
+
+gchar *db_get_structure_sql (void);
 
 
 #endif

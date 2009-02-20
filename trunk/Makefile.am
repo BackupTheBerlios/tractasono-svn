@@ -1,6 +1,7 @@
 SUBDIRS =	doc \
 			tools/cdlookup \
 			tools/spider \
+			src/data/sql \
 			src/data \
 			src
 			

@@ -25,7 +25,6 @@
 
 
 #include "database.h"
-#include "database_schema.h"
 #include "utils.h"
 #include <string.h>
 
@@ -43,7 +42,7 @@ void db_init (int argc, char *argv[])
 	
 	// Mit Datenbank verbinden
 	if (!db_open ()) {
-		g_error ("Can't open database: %s", sqlite3_errmsg (db));
+		g_error ("Die Datenbank konnte nicht geoeffnet werden!");
 	}
 	
 	// UPDATE callback registrieren
@@ -61,28 +60,67 @@ gboolean db_open (void)
 	db_file = get_database_file ();
 	
 	if (!exist_file (db_file)) {
-		db_create ();
+		if (!db_create (db_file)) {
+			g_unlink (db_file);
+			return FALSE;
+		}
 	}
 	
 	if (sqlite3_open (db_file, &db) != SQLITE_OK) {
 		return FALSE;
 	}
 	
+	// TODO: Auf gültige DB prüfen!
+	
 	return TRUE;
 }
 
 
-// Neue Datenbank erstellen
-void db_create (void)
+// Das ganze SQL um die tractasono db struktur aufzubauen
+gchar *db_get_structure_sql (void)
 {
+	gboolean ok;
+	gchar *filename;
+	gchar *content;
+	
+	filename = get_database_structure_file ();
+	if (filename == NULL) {
+		return NULL;
+	}
+	ok = g_file_get_contents (filename, &content, NULL, NULL);                                              
+    if (!ok) {
+    	return NULL;
+	}
+	
+	return content;
+}
+
+
+// Neue Datenbank erstellen
+gboolean db_create (const gchar *db_file)
+{
+	char *err;
 	gchar *sql;
 	
 	create_dir (get_database_dir ());
-	sql = get_create_sql ();
+	sql = db_get_structure_sql ();
+	if (sql == NULL) {
+		return FALSE;
+	}
+	sql = sqlite3_mprintf ("%q", sql);
+	if (sqlite3_open (db_file, &db) != SQLITE_OK) {
+		return FALSE;
+	}
 	
-	g_message ("New Database created!");
-
+	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
+		g_warning ("Es konnte keine neue tractasono Datenbank erstellt werden: %s", err);
+		return FALSE;
+	}
+	
+	g_message ("Neue tractasono Datenbank wurde erfolgreich erstellt!");
+	return TRUE;
 }
+
 
 void db_close (void)
 {

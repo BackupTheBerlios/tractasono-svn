@@ -41,8 +41,6 @@ tractasono_SOURCES = main.c \
 					 disc.h \
 					 database.c \
 					 database.h \
-					 database_schema.c \
-					 database_schema.h \
 					 lcd.c \
 					 lcd.h \
 					 ipod.c \

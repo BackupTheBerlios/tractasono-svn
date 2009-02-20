@@ -25,6 +25,9 @@
 #include <gio/gio.h>
 
 
+#define INSTALLED_STRUCTURE_SQL DATADIR"/tractasono/sql/tractasono.sql"
+
+
 // Gibt das tractasono Vezeichnis zurück (~/tractasono/)
 gchar *get_tractasono_dir (void)
 {
@@ -47,6 +50,20 @@ gchar *get_database_dir (void)
 gchar *get_database_file (void)
 {
 	return g_strdup_printf ("%stractasono.db", get_tractasono_dir ());
+}
+
+// Gibt den Dateinamen der tractasono.sql Datei zurück
+gchar *get_database_structure_file (void)
+{
+	GString* filename = g_string_new(g_get_current_dir());
+	filename = g_string_append(filename, "/data/sql/tractasono.sql");
+	if (g_file_test(filename->str, G_FILE_TEST_EXISTS) == FALSE) {
+		filename = g_string_assign(filename, INSTALLED_STRUCTURE_SQL);
+		if (g_file_test(filename->str, G_FILE_TEST_EXISTS) == FALSE) {
+			return NULL;
+		}
+	}
+	return filename->str;
 }
 
 // Gibt den Verzeichnisname für einen Artist zurück

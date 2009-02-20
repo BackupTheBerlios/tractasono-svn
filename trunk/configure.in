@@ -57,6 +57,7 @@ AC_OUTPUT([ Makefile \
 			doc/Makefile \
 			tools/cdlookup/Makefile \
 			tools/spider/Makefile \
+			src/data/sql/Makefile \
 			src/data/Makefile \
 			src/Makefile ])
 
