@@ -1759,7 +1759,7 @@ Datenbank vorgenommen werden!&lt;/b&gt;</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label21">
+                          <widget class="GtkLabel" id="label_settings_version">
                             <property name="visible">True</property>
                             <property name="ypad">15</property>
                             <property name="label" translatable="yes">&lt;span weight="bold" size="xx-large"&gt;tractasono 0.1&lt;/span&gt;</property>

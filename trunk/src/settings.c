@@ -47,6 +47,18 @@ gboolean register_file (gchar *file);
 void settings_init()
 {
 	g_message ("\tSettings Modul init");
+	
+	// Aktuelle Version anzeigen
+	gchar *text;
+	GtkWidget *label_version;
+	label_version = interface_get_widget ("label_settings_version");
+	if (strcmp (REVISION, "")) {
+		text = g_strdup_printf ("%s %s", PACKAGE, REVISION);
+	} else {
+		text = g_strdup_printf ("%s %s", PACKAGE, VERSION);
+	}
+	gtk_label_set_text (GTK_LABEL (label_version), text);
+	g_free (text);
 }
 
 

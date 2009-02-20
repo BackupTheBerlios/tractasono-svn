@@ -52,6 +52,14 @@ PKG_CHECK_MODULES(TAGLIB, taglib)
 AC_SUBST(TAGLIB_LIBS)
 AC_SUBST(TAGLIB_CFLAGS)
 
+# SVN Revision
+SVN=`which svn 2>/dev/null`
+if test -d ".svn" -a "x${SVN}" != "x" -a -x "${SVN}"
+then
+	REVISION=r`$SVN info|grep 'Last Changed Rev'|cut -d' ' -f4`
+fi
+AC_DEFINE_UNQUOTED([REVISION], "$REVISION", [subversion revision number])
+
 # Makefile output
 AC_OUTPUT([ Makefile \
 			doc/Makefile \
@@ -62,13 +70,16 @@ AC_OUTPUT([ Makefile \
 			src/Makefile ])
 
 # Nice output
-AC_MSG_RESULT([
-*******************************************************
-*  $PACKAGE $VERSION:  Automatic configuration OK.
-*
-*  Installation directories:
-*     Program: ................. ${prefix}/bin
-*
-*  Type 'make' to compile $PACKAGE.
-*******************************************************
-])
+echo "*******************************************************"
+echo "*  $PACKAGE $VERSION:  Automatic configuration OK."
+echo "*"
+if test "$REVISION" != ""
+then
+	echo "*  Compiling Subversion revision: $REVISION"
+	echo "*"
+fi
+echo "*  Installation directories:"
+echo "*     Program: ................. ${prefix}/bin"
+echo "*"
+echo "*  Type 'make' to compile $PACKAGE."
+echo "*******************************************************"
