@@ -304,7 +304,7 @@ gint db_track_id (gchar *track)
 	gchar *sql;
 	
 	sql = sqlite3_mprintf ("SELECT IDtrack FROM tbl_track WHERE trackname = '%q'", track);
-	g_debug ("SQL: %s", sql);
+	//g_debug ("SQL: %s", sql);
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
 		g_warning ("%s", err);
 		return id;
@@ -330,7 +330,7 @@ gint db_artist_id (gchar *artist)
 	gchar *sql;
 	
 	sql = sqlite3_mprintf ("SELECT IDartist FROM tbl_artist WHERE artistname = '%q'", artist);
-	g_debug ("SQL: %s", sql);
+	//g_debug ("SQL: %s", sql);
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
 		g_warning ("%s", err);
 		return id;
@@ -354,7 +354,7 @@ gint db_genre_id (gchar *genre)
 	gchar *sql;
 	
 	sql = sqlite3_mprintf ("SELECT IDgenre FROM tbl_genre WHERE genrename = '%q'", genre);
-	g_debug ("SQL: %s", sql);
+	//g_debug ("SQL: %s", sql);
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
 		g_warning ("%s", err);
 		return id;
@@ -379,7 +379,7 @@ gint db_album_id (gchar *album)
 	gchar *sql;
 	
 	sql = sqlite3_mprintf ("SELECT IDalbum FROM tbl_album WHERE albumname = '%q'", album);
-	g_debug ("SQL: %s", sql);
+	//g_debug ("SQL: %s", sql);
 	if (sqlite3_get_table (db, sql, &results, &rows, &cols, &err)) {
 		g_warning ("%s", err);
 		return id;
@@ -465,14 +465,14 @@ gint db_album_add (AlbumDetails *album)
 	}
 	
 	sql = sqlite3_mprintf ("INSERT INTO tbl_album (IDgenre, albumname) VALUES (%i, '%q')",  genre, album->title);
-	g_debug ("SQL: %s", sql);
+	//g_debug ("SQL: %s", sql);
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning ("%s", err);
 		return id;
 	}
 	
 	id = db_album_id (album->title);
-	g_debug ("Album Id: %i", id);
+	//g_debug ("Album Id: %i", id);
 	if (id != 0) {
 		return id;
 	}
@@ -504,7 +504,7 @@ gint db_track_add (TrackDetails *track)
 	}
 	
 	sql = sqlite3_mprintf ("INSERT INTO tbl_track (IDartist, IDalbum, trackname, trackpath, tracknumber) VALUES (%i, %i, '%q', '%q', %i)", artist, album, track->title, track->path, track->number);
-	g_debug ("SQL: %s", sql);
+	//g_debug ("SQL: %s", sql);
 	if (sqlite3_exec (db, sql, NULL, NULL, &err) != SQLITE_OK) {
 		g_warning ("%s", err);
 		return id;

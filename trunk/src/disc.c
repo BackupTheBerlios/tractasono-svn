@@ -47,6 +47,7 @@ static GtkTreeIter current;
 
 // TreeView
 GtkTreeView *disc_tree;
+GtkProgressBar *bar;
 
 
 typedef enum {
@@ -108,6 +109,7 @@ void disc_init()
 	//ripper_test ();
 	
 	track_extracting = 1;
+	bar = GTK_PROGRESS_BAR (interface_get_widget ("progressbar_disc"));
 }
 
 void ripper_setup (void)
@@ -237,31 +239,31 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			//g_message ("States: (old=%i, new=%i, pending=%i)", oldstate, newstate, pending);
 
 			if (newstate == 4) {
-				g_message ("Ripper is now ripping! :)");	
+				//g_message ("Ripper is now ripping! :)");	
 			}
 			if ((newstate == 2) && (oldstate == 3)) {
-				g_message ("Ripper is now ready!");
+				//g_message ("Ripper is now ready!");
 			}
 			if ((newstate == 3) && (oldstate == 4)) {
-				g_message ("Ripper is now paused!");
+				//g_message ("Ripper is now paused!");
 			}
 		}
 		case GST_MESSAGE_EOS: {
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
-				
-				
-				g_message ("Track fertig importiert!");
-				
 				
 				GtkListStore *store;
 				TrackDetails *track;
 				
 				// Aktuelle Infos holen um sie in die Datenbank zu schreiben
 				store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+				
+				g_message ("Track fertig importiert!");
+				gtk_list_store_set (store, &current,
+						COLUMN_STATE, STATE_IMPORTED, -1);
+				
 				gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
 				db_track_add (track);
 				music_artist_fill ();
-				
 				
 				if (find_next ()) {
 					//store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
@@ -269,6 +271,7 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 					extract_track (track);
 				} else {
 					g_message ("Disc komplett importiert!");
+					gtk_progress_bar_set_text (bar, "Disc komplett importiert!");
 				}
 				
 				
@@ -454,10 +457,12 @@ void disc_reread (void)
 	
 	if (the_album == NULL) {
 		g_warning ("CD konnte nich eingelesen werden!");
+		gtk_progress_bar_set_text (bar, "CD konnte nich eingelesen werden!");
 	} else {
 		g_message ("CD wurde eingelesen (title: %s | artist: %s | tracks: %d)", the_album->title,
 														  the_album->artist->name,
 														  the_album->number);
+		gtk_progress_bar_set_text (bar, "CD kann nun abgespielt oder importiert werden!");
 
 		// CD Namen anzeigen
 		display_disctitle (the_album);
@@ -638,6 +643,7 @@ static gboolean extract_track_cb (GtkTreeModel *model, GtkTreePath *path,
 		++total_extracting;
 	}
 	
+	//g_debug ("extract_track_cb (%i)", total_extracting);
 
 	return FALSE;
 }
@@ -650,6 +656,13 @@ void extract_track (TrackDetails *track)
 	
 	gchar *filename;
 	gchar *filepath;
+	GtkListStore *store;
+	
+	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
+	gtk_list_store_set (store, &current,
+						COLUMN_STATE, STATE_EXTRACTING, -1);
+	
+	
 	
 	create_artist_dir (track->artist->name);
 	create_album_dir (track->album->title, track->artist->name);
@@ -679,18 +692,24 @@ void extract_track (TrackDetails *track)
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_ALBUM, track->album->title, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_GENRE, track->album->genre, NULL);
 	gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_TRACK_NUMBER, track->number, NULL);
-	// TODO: Release Datum in Tags schreiben
-	/*if (!strcmp (track->album->release_date, "")) {
+	if (strcmp (track->album->release_date, "")) {
+		//g_debug ("Release Datum: %s", track->album->release_date);
 		GDate *date;
 		date = g_date_new ();
 		g_date_set_year (date, atoi (track->album->release_date));
+		g_date_set_month (date, 1);
+		g_date_set_day (date, 1);
 		gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND, GST_TAG_DATE, date, NULL);
-	}*/
+	}
 	
 	gst_tag_setter_merge_tags  (GST_TAG_SETTER (encoder), taglist, GST_TAG_MERGE_REPLACE_ALL);
 	gst_tag_list_free (taglist);
 	
 	gst_element_set_state (ripper, GST_STATE_PLAYING);
+	
+	gchar *msg;
+	msg = g_strdup_printf ("Importiere Track %i", track->number);
+	gtk_progress_bar_set_text (bar, msg);
 }
 
 
@@ -699,6 +718,7 @@ void extract_disc (void)
 {
 	GtkListStore *store;
 	TrackDetails *track = NULL;
+	gboolean extract;
 	
 	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
 	
@@ -707,11 +727,18 @@ void extract_disc (void)
 	
 	// Mit dem ersten Track beginnen
 	gtk_tree_model_get_iter_first (GTK_TREE_MODEL (store), &current);
-	
-	
-	
-	gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
-	extract_track (track);
+	gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_EXTRACT, &extract, -1);
+	if (!extract) {
+		if (find_next ()) {
+			gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
+			extract_track (track);
+		} else {
+			gtk_progress_bar_set_text (bar, "Zuerst einen Track selektieren!");
+		}
+	} else {
+		gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
+		extract_track (track);
+	}
 }
 
 
@@ -755,10 +782,20 @@ void display_track_state (gint track, TrackState state)
 static gboolean find_next (void)
 {
 	GtkListStore *store;
+	gboolean extract;
+	gboolean has_next;
 	
 	store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);
 	
-	return gtk_tree_model_iter_next (GTK_TREE_MODEL (store), &current);;
+	//g_debug ("current %p", &current);
+	has_next = gtk_tree_model_iter_next (GTK_TREE_MODEL (store), &current);
+	if (has_next) {
+		gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_EXTRACT, &extract, -1);
+		if (!extract) {
+			return find_next ();
+		}
+	}
+	return has_next;
 }
 
 
