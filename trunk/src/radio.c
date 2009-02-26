@@ -31,6 +31,7 @@
 #include "interface.h"
 #include "lcd.h"
 #include "gtk-circle.h"
+#include "playlist.h"
 
 
 const gchar url_genre[] = "http://www.shoutcast.com/sbin/newxml.phtml";
@@ -415,7 +416,12 @@ void radio_station_parse (const gchar *genre)
 	s_genre = g_string_new (url_station);
 	g_string_append_printf (s_genre, "%s", genre);
 	
+	g_debug ("XML Load %s", s_genre->str);
 	content = xml_load (s_genre->str);
+	//g_debug ("content (%s)", content);
+	if (!content) {
+		return;
+	}
   	
 	static GMarkupParser parser = { xml_station_start, NULL, NULL, NULL, xml_err };
 	GMarkupParseContext *context;
@@ -459,7 +465,7 @@ void on_treeview_radio_genre_row_activated (GtkTreeView *tree,
 	
 	gtk_tree_model_get (model, &iter, COL_R_G_NAME, &name, -1);
 	
-	//g_debug ("Row activated: column=%s", name);
+	g_debug ("Row activated: column=%s", name);
 	
 	// Vorhandene Stationen zuerst löschen
 	gtk_list_store_clear (station_store);
@@ -477,6 +483,7 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	GtkTreeIter iter;
 	gchar *name, *id;
 	GString *s_url;
+	PlayList *list;
 	TotemPlParserResult parser_result;
 	
 	model = gtk_tree_view_get_model (tree);
@@ -493,14 +500,14 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	radio_combo_clean ();
 	
 	// Hole Playlist des Senders
-	//g_debug ("Playlist parsing beginnt!");
+	g_debug ("Playlist parsing beginnt!");
 	parser_result = totem_pl_parser_parse (pl_parser, s_url->str, FALSE);
-	//g_debug ("Playlist parsing beendet!");
-	/*if (parser_result == TOTEM_PL_PARSER_RESULT_SUCCESS) {
+	g_debug ("Playlist parsing beendet!");
+	if (parser_result == TOTEM_PL_PARSER_RESULT_SUCCESS) {
 		g_debug ("   Parsing war erfolgreich!");
 	} else {
 		g_debug ("   Parsing war nicht erfolgreich!");
-	}*/
+	}
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
 
 	GtkWidget *urlinput;
@@ -515,6 +522,13 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 
 	// Stream abspielen
 	//player_play_uri(url);
+	
+	// Playlist erstellen und abspielen
+	list = playlist_new ();
+	//uri = g_strdup_printf ("file://%s", results[1]);
+	playlist_add_uri (list, url);
+	player_play_playlist (list, 0);
+	
 	g_debug ("'on_treeview_radio_station_row_activated' muss noch angepasst werden!");
 	
 	lcd_set_title (LCD(lcd), name);
@@ -603,20 +617,26 @@ gint sort_station_compare_func (GtkTreeModel *model,
 
 
 gchar* xml_load (const gchar *uri)
-{
-	return NULL;
+{	
+	GFile *file;
+	gchar *content = NULL;
+	gboolean ok;
+	GError *err = NULL;
+	GVfs *gvfs;
 	
-	/*gint file_size;
-	GString *file_content;
-
-	file_content = g_string_new ("");
-	result = gnome_vfs_read_entire_file (uri, &file_size, &file_content->str);
-	if (result != GNOME_VFS_OK) {
-		vfs_print_error (result, uri);
-		return NULL;
+	gvfs = g_vfs_get_default ();
+	file = g_vfs_get_file_for_uri (gvfs, uri);
+	if (!file) {
+		g_warning ("File konnte nicht erstellt werden! (%s)", uri);
+	}                                  
+	ok = g_file_load_contents (file, NULL, &content, NULL, NULL, &err);
+    if (!ok) {
+    	g_warning ("Konnte Dateiinhalt nicht einlesen! (%s) Fehler: (%s)", uri, err->message);
+    	return NULL;
 	}
-
-	return file_content->str;*/
+	//g_debug ("Dateiinhalt: (%s)", content);
+	
+	return content;
 }
 
 
