@@ -30,7 +30,8 @@
 #include "database.h"
 #include "musicbrainz.h"
 #include "player.h"
-#include "upnp-cp.h"
+
+#include <libgnomevfs/gnome-vfs.h>
 
 // Programmeinstieg
 int main (int argc, char *argv[])
@@ -38,29 +39,21 @@ int main (int argc, char *argv[])
 	// Startmeldung
 	g_message ("<== "PACKAGE" "VERSION" starting ==>");
 	
-	// Databenbank initialisieren
+	// Externe Module initialisieren
+	gtk_init (&argc, &argv);
+	gnome_vfs_init ();
+	
+	// Interne Module initialisieren
 	db_init (argc, argv);
-	
-	// Musicbrainz initialisieren
 	musicbrainz_init ();
-	
-	// Drives initialisieren
-	gtk_init (&argc, &argv); // TODO: Init System umbauen
 	drives_init ();
-	
-	// UPNP initialisieren
-	upnp_init (argc, argv);
-	
-	// Player initialisieren
 	player_init (argc, argv);
-	
-	// Interface initialisieren
 	interface_init (argc, argv);
 
 	// Programmloop starten
 	gtk_main ();
 	
-	// Ressourcen wieder freigeben
+	// Datenbank schliessen
 	db_close ();
 
 	// Shutdown Meldung

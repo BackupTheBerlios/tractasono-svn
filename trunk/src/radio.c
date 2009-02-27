@@ -25,6 +25,7 @@
 #include <glade/glade.h>
 #include <stdio.h>
 #include <totem-pl-parser.h>
+#include <libgnomevfs/gnome-vfs.h>
 
 #include "radio.h"
 #include "player.h"
@@ -617,26 +618,31 @@ gint sort_station_compare_func (GtkTreeModel *model,
 
 
 gchar* xml_load (const gchar *uri)
-{	
-	GFile *file;
-	gchar *content = NULL;
-	gboolean ok;
-	GError *err = NULL;
-	GVfs *gvfs;
+{
+	GnomeVFSResult result;
 	
-	gvfs = g_vfs_get_default ();
-	file = g_vfs_get_file_for_uri (gvfs, uri);
-	if (!file) {
-		g_warning ("File konnte nicht erstellt werden! (%s)", uri);
-	}                                  
-	ok = g_file_load_contents (file, NULL, &content, NULL, NULL, &err);
-    if (!ok) {
-    	g_warning ("Konnte Dateiinhalt nicht einlesen! (%s) Fehler: (%s)", uri, err->message);
-    	return NULL;
+	gint file_size;
+	GString *file_content;
+
+	file_content = g_string_new ("");
+
+	/* remember to initialize GnomeVFS! */
+	if (!gnome_vfs_initialized ()) {
+			if (!gnome_vfs_init ()) {
+					printf ("Could not initialize GnomeVFS\n");
+					return NULL;
+			}
 	}
-	//g_debug ("Dateiinhalt: (%s)", content);
 	
-	return content;
+	result = gnome_vfs_read_entire_file (uri, &file_size, &file_content->str);
+	if (result != GNOME_VFS_OK) {
+			const char *error_string;
+        	error_string = gnome_vfs_result_to_string (result);
+        	g_warning ("Error %s occured opening location %s\n", error_string, uri);
+			return NULL;
+	}
+
+	return file_content->str;
 }
 
 
