@@ -20,7 +20,7 @@
  */
 
 #include "lcd.h"
-
+#include <string.h>
 
 // Defines
 #define FRAME_ABSTAND 10
@@ -437,7 +437,11 @@ static gchar* construct_text (Lcd *lcd)
 	} else if (!priv->title) {
 		text = g_strdup (priv->artist);
 	} else {
-		text = g_strdup_printf ("%s - %s", priv->artist, priv->title);
+		if (!strcmp (priv->artist, "") && !strcmp (priv->title, "")) {
+			text = g_strdup ("");
+		} else {
+			text = g_strdup_printf ("%s - %s", priv->artist, priv->title);
+		}
 	}
 	
 	return text;

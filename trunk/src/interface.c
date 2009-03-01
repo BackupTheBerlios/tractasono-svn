@@ -461,21 +461,22 @@ void interface_set_playimage(const gchar *stock_id)
 
 void interface_set_playing (PlayerState state)
 {
-	GtkWidget *progress;
-	progress = glade_xml_get_widget(glade, "alignment_progress");
+	GtkWidget *progress_area;
+	progress_area = glade_xml_get_widget(glade, "alignment_progress");
 	
 	switch(state) {
 		case STATE_PLAY_LOCAL:	
 			interface_set_playimage("gtk-media-pause");
-			gtk_widget_show (progress);
+			gtk_widget_show (progress_area);
 			break;
 		case STATE_PLAY_STREAM:
 			interface_set_playimage("gtk-media-stop");
-			gtk_widget_hide (progress);
+			gtk_widget_hide (progress_area);
 			break;
 		case STATE_PLAY_NOTHING:
 			interface_set_playimage("gtk-media-play");
-			//gtk_widget_show (progress);
+			interface_set_songinfo ("", "");
+			gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progress), 0);
 			break;
 	}
 }

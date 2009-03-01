@@ -178,6 +178,7 @@ gboolean player_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 			if (g_ascii_strcasecmp(gst_message_type_get_name (GST_MESSAGE_TYPE (message)), "eos") == 0) {
 				g_message ("End Of Stream");
 				if (!player_play_next ()) {
+					player_set_stop ();
 					interface_set_playing (STATE_PLAY_NOTHING);
 				}
 			}
@@ -346,12 +347,16 @@ gboolean player_play_next ()
 {
 	g_return_val_if_fail (the_list != NULL, FALSE);
 	
+	gboolean has_next;
 	gchar *uri;
-	playlist_next (the_list);
-	uri = playlist_get_uri (the_list);
-	player_play_uri (uri);
 	
-	return TRUE;
+	has_next = playlist_next (the_list);
+	if (has_next) {
+		uri = playlist_get_uri (the_list);
+		player_play_uri (uri);
+	}
+	
+	return has_next;
 }
 
 
