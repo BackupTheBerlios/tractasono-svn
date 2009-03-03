@@ -263,7 +263,6 @@ gboolean ripper_bus_callback (GstBus *bus, GstMessage *message, gpointer data)
 				
 				gtk_tree_model_get (GTK_TREE_MODEL (store), &current, COLUMN_DETAILS, &track, -1);
 				db_track_add (track);
-				music_artist_fill ();
 				
 				if (find_next ()) {
 					//store = (GtkListStore*) gtk_tree_view_get_model (disc_tree);

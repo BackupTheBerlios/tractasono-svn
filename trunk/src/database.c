@@ -26,6 +26,7 @@
 
 #include "database.h"
 #include "utils.h"
+#include "music.h"
 #include <string.h>
 
 
@@ -415,6 +416,9 @@ gint db_artist_add (ArtistDetails *artist)
 	}
 	
 	id = db_artist_id (artist->name);
+	
+	// Sollten hier die Artisten nicht neu geladen werden?
+	music_artist_fill ();
 
 	return id;
 }

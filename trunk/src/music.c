@@ -75,8 +75,7 @@ gint sort_artist_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   
 gint sort_album_compare_func (GtkTreeModel *model, GtkTreeIter *a,
 							   GtkTreeIter *b, gpointer userdata);
-							   
-void music_artist_fill (void);
+
 void music_track_fill (gint artist, gint album);
 
 
