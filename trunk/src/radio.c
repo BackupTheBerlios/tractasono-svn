@@ -175,7 +175,7 @@ void on_button_radio_stream_clicked (GtkWidget *widget, gpointer user_data)
 }
 
 
-static void xml_genre_start (GMarkupParseContext *context,
+/*static void xml_genre_start (GMarkupParseContext *context,
 					  		 const gchar *element_name,
 					  		 const gchar **attribute_names,
 					  		 const gchar **attribute_values,
@@ -186,10 +186,9 @@ static void xml_genre_start (GMarkupParseContext *context,
 
 	element = g_markup_parse_context_get_element(context);
 	if (g_ascii_strcasecmp(element, "genre") == 0) {
-		//g_debug("genre: %s", attribute_values[0]);
 		radio_genre_insert ((gchar*)attribute_values[0]);
 	}
-}
+}*/
 
 
 static void xml_station_start (GMarkupParseContext *context,
@@ -363,20 +362,7 @@ void radio_genre_insert_initial (void)
 
 void radio_genre_parse (void)
 {
-	//g_debug("Fetch & parse genres...");
-	
-	gchar *content;
-	
-	content = xml_load (url_genre);
-  	
-	static GMarkupParser parser = { xml_genre_start, NULL, NULL, NULL, xml_err };
-	GMarkupParseContext *context;
-	
-	context = g_markup_parse_context_new (&parser, 0, NULL, NULL);
-	g_markup_parse_context_parse (context, content, -1, NULL);
-	g_markup_parse_context_free (context);
-	
-	g_free (content);
+	xml_load (url_genre);
 }
 
 
@@ -385,26 +371,13 @@ void radio_station_parse (const gchar *genre)
 	//g_debug("Fetch & parse radio stations...");
 	
 	GString *s_genre;
-	gchar *content;
 	
 	s_genre = g_string_new (url_station);
 	g_string_append_printf (s_genre, "%s", genre);
 	
 	g_debug ("XML Load %s", s_genre->str);
-	content = xml_load (s_genre->str);
-	//g_debug ("content (%s)", content);
-	if (!content) {
-		return;
-	}
-  	
-	static GMarkupParser parser = { xml_station_start, NULL, NULL, NULL, xml_err };
-	GMarkupParseContext *context;
-	
-	context = g_markup_parse_context_new (&parser, 0, NULL, NULL);
-	g_markup_parse_context_parse (context, content, -1, NULL);
-	g_markup_parse_context_free (context);
-	
-	g_free (content);
+
+	xml_load (s_genre->str);
 }
 
 
@@ -590,19 +563,42 @@ gint sort_station_compare_func (GtkTreeModel *model,
 }
 
 
-gchar* xml_load (const gchar *uri)
+void content_load_cb (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-	GFile *file;
+	//GFile *file;
 	gchar *content;
 	GError *err = NULL;
 	
-	file = g_file_new_for_uri (uri);
-	if (!g_file_load_contents (file, NULL, &content, NULL, NULL, &err)) {
+	g_debug ("Load CB");
+	
+	if (!g_file_load_contents_finish (G_FILE (source_object), res, &content, NULL, NULL, &err)) {
 		g_warning ("Unable to read file: %s", err->message);
 		g_error_free (err);
+	} else {
+		g_print ("%s", content);
+		
+		static GMarkupParser parser = { xml_station_start, NULL, NULL, NULL, xml_err };GMarkupParseContext *context;
+	
+		context = g_markup_parse_context_new (&parser, 0, NULL, NULL);
+		g_markup_parse_context_parse (context, content, -1, NULL);
+		g_markup_parse_context_free (context);
+	
+		g_free (content);
 	}
+}
 
-	return content;
+
+gchar* xml_load (const gchar *uri)
+{
+	GFile *file;
+	//gchar *content;
+	//GError *err = NULL;
+	
+	file = g_file_new_for_uri (uri);
+	
+	g_file_load_contents_async (file, NULL, content_load_cb, NULL);
+	
+	return NULL;
 }
 
 
