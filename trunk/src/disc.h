@@ -23,9 +23,6 @@
 #define DISC_H
 
 #include <gtk/gtk.h>
-#include <glade/glade.h>
-
-
 
 void disc_init(void);
 

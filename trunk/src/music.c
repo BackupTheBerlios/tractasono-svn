@@ -101,10 +101,7 @@ void music_artist_setup_tree (void)
 	GtkTreeSortable *sortable;
 	
 	// TreeView holen
-	artist_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_artists");
-	if (artist_tree == NULL) {
-		g_warning ("Fehler: Konnte treeview_artists nicht holen!");
-	}
+	artist_tree = GTK_TREE_VIEW (interface_get_widget ("treeview_artists"));
 
 	// Name
 	renderer = gtk_cell_renderer_text_new ();
@@ -135,11 +132,7 @@ void music_album_setup_tree (void)
 	GtkTreeSortable *sortable;
 	
 	// TreeView holen
-	album_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_albums");
-	if (album_tree == NULL) {
-		g_warning ("Fehler: Konnte treeview_albums nicht holen!");
-	}
-	//gtk_tree_view_set_headers_visible (album_tree, FALSE);
+	album_tree = GTK_TREE_VIEW (interface_get_widget ("treeview_albums"));
 
 	// Name
 	renderer = gtk_cell_renderer_text_new ();
@@ -171,11 +164,7 @@ void music_track_setup_tree (void)
 	GtkTreeSortable *sortable;
 	
 	// TreeView holen
-	track_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_tracks");
-	if (track_tree == NULL) {
-		g_warning ("Fehler: Konnte treeview_tracks nicht holen!");
-	}
-	//gtk_tree_view_set_headers_visible (track_tree, FALSE);
+	track_tree = GTK_TREE_VIEW (interface_get_widget ("treeview_tracks"));
 
 	// Track Nummer
 	renderer = gtk_cell_renderer_text_new ();

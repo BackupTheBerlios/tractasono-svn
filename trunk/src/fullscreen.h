@@ -22,10 +22,6 @@
 #ifndef FULLSCREEN_H
 #define FULLSCREEN_H
 
-#include <gtk/gtk.h>
-#include <glade/glade.h>
-
-
 void fullscreen_init (void);
 void fullscreen_load (void);
 

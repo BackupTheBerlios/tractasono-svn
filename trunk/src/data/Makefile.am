@@ -1,7 +1,7 @@
 
 # App Images
 sharedir = $(prefix)/share/tractasono
-share_DATA = tractasono.glade \
+share_DATA = tractasono.ui \
 			 fullscreen.png \
 			 music.png \
 			 disc.png \

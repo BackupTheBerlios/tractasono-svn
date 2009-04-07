@@ -23,25 +23,26 @@
 #include "disc.h"
 #include "musicbrainz.h"
 
-#include <libgnomevfs/gnome-vfs.h>
+#include <gio/gio.h>
 
-GnomeVFSVolumeMonitor *monitor;
-
+GVolumeMonitor *monitor;
 
 // Drive-Connected Signal
-void drive_connected (GnomeVFSVolumeMonitor *volume_monitor, GnomeVFSDrive *drive, gpointer data)
+void volume_added (GVolumeMonitor *volume_monitor, GVolume *volume, gpointer data)
 {
 	gchar *name;
-	name = gnome_vfs_drive_get_display_name (drive);
+	name = g_volume_get_name (volume);
 	g_debug ("%s connected!", name);
+	g_free (name);
 }
 
 // Drive-Disconnected Signal
-void drive_disconnected (GnomeVFSVolumeMonitor *volume_monitor, GnomeVFSDrive *drive, gpointer data)
+void volume_removed (GVolumeMonitor *volume_monitor, GVolume *volume, gpointer data)
 {
 	gchar *name;
-	name = gnome_vfs_drive_get_display_name (drive);
+	name = g_volume_get_name (volume);
 	g_debug ("%s disconnected!", name);
+	g_free (name);
 }
 
 
@@ -49,10 +50,10 @@ int drives_init()
 {
 	g_message ("Drives init");
 	
-	monitor = gnome_vfs_get_volume_monitor ();
+	monitor = g_volume_monitor_get ();
 	
-	g_signal_connect (monitor, "drive-connected", G_CALLBACK(drive_connected), NULL);
-	g_signal_connect (monitor, "drive-disconnected", G_CALLBACK(drive_disconnected), NULL);
+	g_signal_connect (monitor, "volume-added", G_CALLBACK(volume_added), NULL);
+	g_signal_connect (monitor, "volume-removed", G_CALLBACK(volume_removed), NULL);
 	
 	return TRUE;
 }

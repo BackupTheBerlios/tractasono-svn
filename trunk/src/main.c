@@ -31,17 +31,16 @@
 #include "musicbrainz.h"
 #include "player.h"
 
-#include <libgnomevfs/gnome-vfs.h>
+#include <gio/gio.h>
 
 // Programmeinstieg
 int main (int argc, char *argv[])
 {
 	// Startmeldung
-	g_message ("<== "PACKAGE" "VERSION" starting ==>");
+	g_message ("<== "PACKAGE" "REVISION" starting ==>");
 	
 	// Externe Module initialisieren
 	gtk_init (&argc, &argv);
-	gnome_vfs_init ();
 	
 	// Interne Module initialisieren
 	db_init (argc, argv);

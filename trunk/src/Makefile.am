@@ -47,9 +47,7 @@ tractasono_SOURCES = main.c \
 					 strukturen.c \
 					 strukturen.h \
 					 utils.c \
-					 utils.h \
-					 gtk-circle.c \
-					 gtk-circle.h
+					 utils.h
 	
 tractasono_LDFLAGS = -export-dynamic
 

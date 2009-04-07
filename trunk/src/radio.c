@@ -22,16 +22,14 @@
 #include <stdlib.h>
 
 #include <gtk/gtk.h>
-#include <glade/glade.h>
 #include <stdio.h>
 #include <totem-pl-parser.h>
-#include <libgnomevfs/gnome-vfs.h>
+#include <gio/gio.h>
 
 #include "radio.h"
 #include "player.h"
 #include "interface.h"
 #include "lcd.h"
-#include "gtk-circle.h"
 #include "playlist.h"
 
 
@@ -131,27 +129,6 @@ void radio_init(void)
 	g_signal_connect (pl_parser, "playlist-started", G_CALLBACK(cb_parser_start), NULL);
 	g_signal_connect (pl_parser, "playlist-ended", G_CALLBACK(cb_parser_end), NULL);
 	g_signal_connect (pl_parser, "entry-parsed", G_CALLBACK(cb_parser_entry), NULL);
-
-
-
-
-	// Circle
-	//GtkWidget *circle;
-	//GtkWidget *vbox;
-	//vbox = glade_xml_get_widget(glade, "vbox_circle");
-	/*if (vbox == NULL) {
-		g_error("Konnte vbox_circle nicht holen!\n");
-	}*/
-	//circle = gtk_circle_new ();
-	//gtk_container_add (GTK_CONTAINER (vbox), GTK_WIDGET (circle));
-	
-	// Widget anzeigen
-	//gtk_widget_show (GTK_WIDGET (circle));
-
-	// Widget zerstören
-	//gtk_widget_destroy(circle);
-	//g_free(circle);
-
 }
 
 
@@ -187,8 +164,8 @@ void on_button_radio_stream_clicked (GtkWidget *widget, gpointer user_data)
 	GtkWidget *urlinput;
 	const gchar *url;
 	
-	urlinput = glade_xml_get_widget(glade, "radio_url_combo_entry");
-	url = gtk_entry_get_text(GTK_ENTRY(urlinput));
+	urlinput = interface_get_widget ("radio_url_combo_entry");
+	url = gtk_entry_get_text (GTK_ENTRY (urlinput));
 	
 	// Stream abspielen
 	//player_play_uri(url);
@@ -251,11 +228,7 @@ void radio_genre_setup_tree (void)
 	GtkTreeSortable *sortable;
 	
 	// TreeView holen
-	genre_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_radio_genre");
-	if (genre_tree == NULL) {
-		g_warning ("Fehler: Konnte treeview_radio_genre nicht holen!");
-	}
-	//gtk_tree_view_set_headers_visible (genre_tree, FALSE);
+	genre_tree = GTK_TREE_VIEW (interface_get_widget ("treeview_radio_genre"));
 
 	// Name
 	renderer = gtk_cell_renderer_text_new ();
@@ -286,7 +259,7 @@ void radio_station_setup_tree (void)
 	GtkTreeSortable *sortable;
 	
 	// TreeView holen
-	station_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_radio_station");
+	station_tree = GTK_TREE_VIEW (interface_get_widget ("treeview_radio_station"));
 	if (station_tree == NULL) {
 		g_warning ("Fehler: Konnte treeview_radio_station nicht holen!");
 	}
@@ -514,8 +487,8 @@ void on_treeview_radio_station_row_activated (GtkTreeView *tree,
 	GtkWidget *urlinput;
 	const gchar *url;
 	
-	urlinput = glade_xml_get_widget(glade, "radio_url_combo_entry");
-	url = gtk_entry_get_text(GTK_ENTRY(urlinput));
+	urlinput = interface_get_widget ("radio_url_combo_entry");
+	url = gtk_entry_get_text (GTK_ENTRY(urlinput));
 
 	lcd_set_title (LCD(lcd), NULL);
 	lcd_set_artist (LCD(lcd), NULL);
@@ -619,30 +592,17 @@ gint sort_station_compare_func (GtkTreeModel *model,
 
 gchar* xml_load (const gchar *uri)
 {
-	GnomeVFSResult result;
+	GFile *file;
+	gchar *content;
+	GError *err = NULL;
 	
-	gint file_size;
-	GString *file_content;
-
-	file_content = g_string_new ("");
-
-	/* remember to initialize GnomeVFS! */
-	if (!gnome_vfs_initialized ()) {
-			if (!gnome_vfs_init ()) {
-					printf ("Could not initialize GnomeVFS\n");
-					return NULL;
-			}
-	}
-	
-	result = gnome_vfs_read_entire_file (uri, &file_size, &file_content->str);
-	if (result != GNOME_VFS_OK) {
-			const char *error_string;
-        	error_string = gnome_vfs_result_to_string (result);
-        	g_warning ("Error %s occured opening location %s\n", error_string, uri);
-			return NULL;
+	file = g_file_new_for_uri (uri);
+	if (!g_file_load_contents (file, NULL, &content, NULL, NULL, &err)) {
+		g_warning ("Unable to read file: %s", err->message);
+		g_error_free (err);
 	}
 
-	return file_content->str;
+	return content;
 }
 
 
@@ -650,10 +610,7 @@ void setup_url_combo (void)
 {
 	GtkListStore *store;
 	
-	combo = (GtkComboBoxEntry*) glade_xml_get_widget (glade, "radio_url_combo");
-	if (!combo) {
-		g_warning ("Konnte URL Combo nicht holen!");
-	}
+	combo = GTK_COMBO_BOX_ENTRY (interface_get_widget ("radio_url_combo"));
 	
 	store = gtk_list_store_new (COLS_URL, G_TYPE_STRING);
 	gtk_combo_box_set_model (GTK_COMBO_BOX (combo), GTK_TREE_MODEL (store));

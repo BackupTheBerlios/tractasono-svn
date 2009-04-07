@@ -24,10 +24,9 @@
 
 // Includes
 #include <gtk/gtk.h>
-#include <glade/glade.h>
+
 #include "player.h"
 #include "playlist.h"
-
 
 // Strukturen
 typedef struct {
@@ -43,7 +42,7 @@ typedef struct {
 
 
 // Globale Variablen
-GladeXML *glade;
+GtkBuilder *ui;
 GtkWidget *mainwindow;
 GtkWidget *vbox_placeholder;
 GtkWidget *keyboard;

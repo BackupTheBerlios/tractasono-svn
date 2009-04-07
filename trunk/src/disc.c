@@ -26,6 +26,7 @@
 #include "interface.h"
 #include "strukturen.h"
 #include "utils.h"
+
 #include <string.h>
 
 
@@ -538,10 +539,7 @@ void track_setup_tree (void)
 	GtkCellRenderer *artist_renderer;
 	
 	// TreeView holen
-	disc_tree = (GtkTreeView*) glade_xml_get_widget (glade, "treeview_disc");
-	if (disc_tree == NULL) {
-		g_warning ("Fehler: Konnte treeview_tracks nicht holen!");
-	}
+	disc_tree = GTK_TREE_VIEW (interface_get_widget ("treeview_disc"));
 	
 	// Toggle
 	toggle_renderer = gtk_cell_renderer_toggle_new ();

@@ -23,7 +23,7 @@
 #include "utils.h"
 
 #include <gtk/gtk.h>
-#include <libgnomevfs/gnome-vfs.h>
+#include <gio/gio.h>
 
 
 #define INSTALLED_STRUCTURE_SQL DATADIR"/tractasono/sql/tractasono.sql"
@@ -185,23 +185,20 @@ gboolean copy_file (const gchar *source, const gchar *target)
 // Vergleicht auch die Dateigrössen
 gboolean exist_target (const gchar *target, const gchar *source)
 {
-	if (g_file_test(target, G_FILE_TEST_EXISTS)) {
+	GFile *file_target;
+	file_target = g_file_new_for_path (target);
+	
+	if (g_file_query_exists (file_target, NULL)) {
 		
-		GnomeVFSFileInfo *info_source, *info_target;
+		GFile *file_source;
+		GFileInfo *info_target, *info_source;
 		
-		info_source = gnome_vfs_file_info_new ();
-		info_target = gnome_vfs_file_info_new ();
+		file_source = g_file_new_for_path (source);
 		
-		if (gnome_vfs_get_file_info (source, info_source, 0) != GNOME_VFS_OK) {
-				return FALSE;
-		}
+		info_target = g_file_query_info (file_target, G_FILE_ATTRIBUTE_STANDARD_SIZE, G_FILE_CREATE_NONE, NULL, NULL);
+		info_source = g_file_query_info (file_source, G_FILE_ATTRIBUTE_STANDARD_SIZE, G_FILE_CREATE_NONE, NULL, NULL);
 		
-		if (gnome_vfs_get_file_info (target, info_target, 0) != GNOME_VFS_OK) {
-				return FALSE;
-		}
-		
-		//g_debug ("Source size: %llu / Target size: %llu", info_source->size, info_target->size);
-		if (info_source->size == info_target->size) {
+		if (g_file_info_get_size (info_target) == g_file_info_get_size (info_source)) {
 				return TRUE;
 		}
 	}

@@ -30,8 +30,8 @@
 #include "database.h"
 
 
-#define SOURCE_GLADE SRCDIR"/data/tractasono.glade"
-#define INSTALLED_GLADE DATADIR"/tractasono/tractasono.glade"
+#define SOURCE_GLADE SRCDIR"/data/tractasono.ui"
+#define INSTALLED_GLADE DATADIR"/tractasono/tractasono.ui"
 #define INSTALLED_ICON  ICON_DIR"/tractasono-icon.png"
 
 
@@ -44,11 +44,7 @@ void interface_init (int argc, char *argv[])
 	g_message ("\tGTK init");
 	gtk_init(&argc, &argv);
 	
-	// Glade initialisieren
-	g_message ("\tGlade init");
-	glade_init();
-	
-	glade = NULL;
+	ui = NULL;
 	mainwindow = NULL;
 	vbox_placeholder = NULL;
 	keyboard = NULL;
@@ -66,7 +62,7 @@ void interface_init (int argc, char *argv[])
 	
 	// Das Interface laden
 	GString* buildfile = g_string_new(g_get_current_dir());
-	buildfile = g_string_append(buildfile, "/data/tractasono.glade");
+	buildfile = g_string_append(buildfile, "/data/tractasono.ui");
 	if (g_file_test(buildfile->str, G_FILE_TEST_EXISTS) == FALSE) {
 		buildfile = g_string_assign(buildfile, INSTALLED_GLADE);
 	}
@@ -74,20 +70,19 @@ void interface_init (int argc, char *argv[])
 		g_warning ("Die Glade Datei konnte nicht geladen werden!");
 		exit (0);
 	}
-	glade = glade_xml_new(buildfile->str, NULL, NULL);
-	if (glade == NULL) {
-		g_error ("Fehler beim Laden der Glade Datei!");
-		exit (0);
+	
+	GError* error = NULL;
+	ui = gtk_builder_new();
+	if (!gtk_builder_add_from_file (ui, buildfile->str, &error)) {
+		g_error ("Couldn't load builder file: %s", error->message);
+		g_error_free (error);
 	}
 	
 	// Verbinde die Signale automatisch mit dem Interface
-	glade_xml_signal_autoconnect(glade);
+	gtk_builder_connect_signals (ui, NULL);
 	
 	// Hauptfenster holen
-	mainwindow = glade_xml_get_widget(glade, "window_main");
-	if (mainwindow == NULL) {
-		g_print("Fehler: Konnte window_main nicht holen!\n");
-	}
+	mainwindow = interface_get_widget ("window_main");
 	
 	// Icon setzen
 	const gchar* icon = INSTALLED_ICON;
@@ -96,50 +91,32 @@ void interface_init (int argc, char *argv[])
 	}
 
 	// Placeholder holen
-	vbox_placeholder = glade_xml_get_widget(glade, "vbox_placeholder");
-	if (vbox_placeholder == NULL) {
-		g_print("Fehler: Konnte vbox_placeholder nicht holen!\n");
-	}
+	vbox_placeholder = interface_get_widget ("vbox_placeholder");
 	
 	// Tractasono Root holen
-	vbox_tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
-	if (vbox_tractasono == NULL) {
-		g_print("Fehler: Konnte vbox_tractasono nicht holen!\n");
-	}
+	vbox_tractasono = interface_get_widget ("vbox_tractasono");
 
 	// Die einzelnen Windows laden und referenzieren
-	module.music = g_object_ref(glade_xml_get_widget(glade, "modul_music"));
-	module.disc = g_object_ref(glade_xml_get_widget(glade, "vbox_disc"));
-	module.ipod = g_object_ref(glade_xml_get_widget(glade, "ipodmodul"));
-	module.settings = g_object_ref(glade_xml_get_widget(glade, "vbox_settings"));
-	module.radio = g_object_ref(glade_xml_get_widget(glade, "radiomodul"));
-	module.fullscreen = g_object_ref(glade_xml_get_widget(glade, "eventbox_fullscreen"));
+	module.music = g_object_ref (interface_get_widget ("modul_music"));
+	module.disc = g_object_ref (interface_get_widget ("vbox_disc"));
+	module.ipod = g_object_ref (interface_get_widget ("ipodmodul"));
+	module.settings = g_object_ref (interface_get_widget ("vbox_settings"));
+	module.radio = g_object_ref (interface_get_widget ("radiomodul"));
+	module.fullscreen = g_object_ref (interface_get_widget ("eventbox_fullscreen"));
 
 	// Keyboard laden
 	GtkWidget *vbox_placeholder_keyboard = NULL;
-	vbox_placeholder_keyboard = glade_xml_get_widget(glade, "vbox_placeholder_keyboard");
-	if (vbox_placeholder_keyboard == NULL) {
-		g_print("Fehler: Konnte vbox_placeholder_keyboard nicht holen!\n");
-	}
-	keyboard = glade_xml_get_widget(glade, "alignment_keyboard");
-	if (keyboard == NULL) {
-		g_print("Fehler: Konnte alignment_keyboard nicht holen!\n");
-	}
+	vbox_placeholder_keyboard = interface_get_widget ("vbox_placeholder_keyboard");
+	keyboard = interface_get_widget ("alignment_keyboard");
 	gtk_widget_reparent(keyboard, vbox_placeholder_keyboard);
 	gtk_widget_hide(keyboard);
 	
 	// Progressbar laden
-	progress = GTK_PROGRESS_BAR(glade_xml_get_widget(glade, "range_song"));
-	if (progress == NULL) {
-		g_print("Fehler: Konnte range_song nicht holen!\n");
-	}
+	progress = GTK_PROGRESS_BAR( interface_get_widget ("range_song"));
 	
 	// LCD
 	GtkWidget *lcdspace;
-	lcdspace = glade_xml_get_widget(glade, "lcdbox");
-	if (lcdspace == NULL) {
-		g_error("Konnte lcdbox nicht holen!\n");
-	}
+	lcdspace = interface_get_widget ("lcdbox");
 	lcd = lcd_new ();
 	gtk_container_add (GTK_CONTAINER (lcdspace), GTK_WIDGET (lcd));
 	
@@ -151,23 +128,11 @@ void interface_init (int argc, char *argv[])
 	gtk_widget_show (GTK_WIDGET (lcd));
 	
 	// Einzelne GUI Module initialisieren
-	
-	// Disc Modul init
 	disc_init ();
-	
-	// Radio Modul init
 	radio_init ();
-	
-	// Music Modul init
 	music_init ();
-	
-	// iPod Modul init
 	ipod_init ();
-	
-	// Settings Modul init
 	settings_init ();
-	
-	// Vollbild Modus init
 	fullscreen_init ();
 	
 	// Musik von Anfang an anzeigen
@@ -212,10 +177,7 @@ void interface_show_previous_module (void)
 	// Fullscreen Modus verlassen
 	GtkWidget *tractasono;
 	
-	tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
-	if (tractasono == NULL) {
-		g_warning ("Fehler: Konnte fullscreen widgets nicht holen!");
-	}
+	tractasono = interface_get_widget ("vbox_tractasono");
 	
 	gtk_widget_hide (module.fullscreen);
 	gtk_widget_show (tractasono);
@@ -251,11 +213,8 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 	GtkWidget *vbox_main;
 	GtkWidget *tractasono;
 	
-	vbox_main = glade_xml_get_widget(glade, "vbox_main");
-	tractasono = glade_xml_get_widget(glade, "vbox_tractasono");
-	if (vbox_main == NULL || tractasono == NULL) {
-		g_warning ("Fehler: Konnte fullscreen widgets nicht holen!");
-	}
+	vbox_main = interface_get_widget ("vbox_main");
+	tractasono = interface_get_widget ("vbox_tractasono");
 	
 	gtk_widget_hide (tractasono);
 	
@@ -448,21 +407,19 @@ gboolean on_range_song_motion_notify_event(GtkWidget *widget, GdkEventMotion *ev
 // Setzt auf dem Play Button auf Play oder Pause
 void interface_set_playimage(const gchar *stock_id)
 {
-        GtkImage *playimage = NULL;
-        
-        playimage = GTK_IMAGE(glade_xml_get_widget(glade, "image_play"));
-        if (playimage == NULL) {
-                g_print("Fehler beim play Bild holen!\n");
-        } else {
-                gtk_image_set_from_stock(playimage, stock_id, GTK_ICON_SIZE_BUTTON);
-        }
+	GtkImage *playimage = NULL;
+
+	playimage = GTK_IMAGE( interface_get_widget ("image_play"));
+	if (playimage != NULL) {
+		gtk_image_set_from_stock(playimage, stock_id, GTK_ICON_SIZE_BUTTON);
+	}
 }
 
 
 void interface_set_playing (PlayerState state)
 {
 	GtkWidget *progress_area;
-	progress_area = glade_xml_get_widget(glade, "alignment_progress");
+	progress_area = interface_get_widget ("alignment_progress");
 	
 	switch(state) {
 		case STATE_PLAY_LOCAL:	
@@ -539,7 +496,7 @@ GtkWidget* interface_get_widget (gchar *name)
 {
 	GtkWidget *widget;
 	
-	widget = glade_xml_get_widget(glade, name);
+	widget = GTK_WIDGET (gtk_builder_get_object (ui, name));
 	if (widget == NULL) {
 		g_error ("Das Widget '%s' konnte nicht geholt werden!", name);
 	}
