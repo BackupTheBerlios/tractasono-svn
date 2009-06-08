@@ -1,20 +1,14 @@
-INCLUDES = $(GTK_CFLAGS) \
-		   $(GNOMEVFS_CFLAGS) \
-		   $(GLADE_CFLAGS) \
-		   $(GSTREAMER_CFLAGS) \
-		   $(MUSICBRAINZ_CFLAGS) \
-		   $(SQLITE_CFLAGS) \
-		   $(TOTEMPLPARSE_CFLAGS) \
-		   $(TAGLIB_CFLAGS)
+INCLUDES = $(LIBS_CFLAGS)
 
 AM_CFLAGS = -Wall -Werror -g
-
 AM_CPPFLAGS = -DINSTALL_PREFIX=\"$(prefix)\" \
 			  -DDATADIR\="\"$(datadir)"\" \
 			  -DICON_DIR=\"$(datadir)/pixmaps\"
 
 bin_PROGRAMS = tractasono
 
+tractasono_LDADD = $(LIBS_LIBS)
+tractasono_LDFLAGS = -export-dynamic
 tractasono_SOURCES = main.c \
 					 drives.c \
 					 drives.h \
@@ -40,23 +34,11 @@ tractasono_SOURCES = main.c \
 					 database.h \
 					 lcd.c \
 					 lcd.h \
-					 ipod.c \
-					 ipod.h \
+					 server.c \
+					 server.h \
 					 playlist.c \
 					 playlist.h \
 					 strukturen.c \
 					 strukturen.h \
 					 utils.c \
 					 utils.h
-	
-tractasono_LDFLAGS = -export-dynamic
-
-tractasono_LDADD = $(GTK_LIBS) \
-				   $(GNOMEVFS_LIBS) \
-				   $(GLADE_LIBS) \
-				   $(GSTREAMER_LIBS) \
-				   $(MUSICBRAINZ_LIBS) \
-				   $(SQLITE_LIBS) \
-				   $(TOTEMPLPARSE_LIBS) \
-				   $(TAGLIB_LIBS) \
-				   -ltag_c

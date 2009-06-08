@@ -1,7 +1,7 @@
 /*
- *      ipod.c
+ *      server.h
  *      
- *      Copyright 2007 Patrik Obrist <patrik@valhalla>
+ *      Copyright 2009 Patrik Obrist <patrik@valhalla>
  *      
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by
@@ -19,12 +19,10 @@
  *      MA 02110-1301, USA.
  */
 
+#ifndef SERVER_H
+#define SERVER_H
 
-#include "ipod.h"
-#include "interface.h"
+// Prototypen
+void server_init (void);
 
-
-void ipod_init (void)
-{
-	g_message ("\tiPod Modul init");
-}
+#endif

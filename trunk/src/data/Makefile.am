@@ -8,7 +8,7 @@ share_DATA = tractasono.ui \
 			 settings.png \
 			 tractasono.png \
 			 internetradio.png \
-			 ipod.png			 
+			 server.png	 
 
 # App Icon
 pixmapdir = $(prefix)/share/pixmaps

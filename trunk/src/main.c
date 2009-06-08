@@ -31,8 +31,6 @@
 #include "musicbrainz.h"
 #include "player.h"
 
-#include <gio/gio.h>
-
 // Programmeinstieg
 int main (int argc, char *argv[])
 {

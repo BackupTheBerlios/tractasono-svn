@@ -32,7 +32,7 @@
 typedef struct {
 	GtkWidget *music;
 	GtkWidget *radio;
-	GtkWidget *ipod;
+	GtkWidget *server;
 	GtkWidget *import;
 	GtkWidget *settings;
 	GtkWidget *fullscreen;

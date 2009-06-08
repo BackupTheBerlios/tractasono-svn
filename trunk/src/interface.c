@@ -26,7 +26,7 @@
 #include "music.h"
 #include "settings.h"
 #include "lcd.h"
-#include "ipod.h"
+#include "server.h"
 #include "database.h"
 
 
@@ -53,7 +53,7 @@ void interface_init (int argc, char *argv[])
 	
 	module.music = NULL;
 	module.radio = NULL;
-	module.ipod = NULL;
+	module.server = NULL;
 	module.import = NULL;
 	module.settings = NULL;
 	module.fullscreen = NULL;
@@ -99,7 +99,7 @@ void interface_init (int argc, char *argv[])
 	// Die einzelnen Windows laden und referenzieren
 	module.music = g_object_ref (interface_get_widget ("modul_music"));
 	module.disc = g_object_ref (interface_get_widget ("vbox_disc"));
-	module.ipod = g_object_ref (interface_get_widget ("ipodmodul"));
+	module.server = g_object_ref (interface_get_widget ("servermodul"));
 	module.settings = g_object_ref (interface_get_widget ("vbox_settings"));
 	module.radio = g_object_ref (interface_get_widget ("radiomodul"));
 	module.fullscreen = g_object_ref (interface_get_widget ("eventbox_fullscreen"));
@@ -131,7 +131,7 @@ void interface_init (int argc, char *argv[])
 	disc_init ();
 	radio_init ();
 	music_init ();
-	ipod_init ();
+	server_init ();
 	settings_init ();
 	fullscreen_init ();
 	
@@ -229,10 +229,10 @@ void on_button_fullscreen_clicked(GtkWidget *widget, gpointer user_data)
 	
 }
 
-// Event-Handler für den iPod Button
-void on_button_ipod_clicked (GtkWidget *widget, gpointer user_data)
+// Event-Handler für den Server Button
+void on_button_server_clicked (GtkWidget *widget, gpointer user_data)
 {
-	interface_show_module(module.ipod);
+	interface_show_module(module.server);
 }
 
 // Event-Handler für den Internetradio Button
@@ -240,9 +240,6 @@ void on_button_internetradio_clicked(GtkWidget *widget, gpointer user_data)
 {
 	interface_show_module(module.radio);
 }
-
-
-
 
 // Räume alle Fenster im placeholder auf
 void interface_clean(){
