@@ -34,8 +34,6 @@ tractasono_SOURCES = main.c \
 					 database.h \
 					 lcd.c \
 					 lcd.h \
-					 server.c \
-					 server.h \
 					 playlist.c \
 					 playlist.h \
 					 strukturen.c \

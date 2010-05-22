@@ -122,9 +122,7 @@ void browse (ParentInfo *info)
 	if (error == NULL) {
 		gboolean bOk;
 		GUPnPDIDLLiteParser* parser = gupnp_didl_lite_parser_new ();
-		bOk = gupnp_didl_lite_parser_parse_didl (parser, didl,
-												 on_node_parsed,
-												 info, &error);
+		bOk = gupnp_didl_lite_parser_parse_didl (parser, didl, &error);
 		if (!bOk) {
 			g_warning ("DIDL Error: %s", error->message);
 			g_error_free (error);

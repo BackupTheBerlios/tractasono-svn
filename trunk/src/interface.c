@@ -26,7 +26,7 @@
 #include "music.h"
 #include "settings.h"
 #include "lcd.h"
-#include "server.h"
+//#include "server.h"
 #include "database.h"
 
 
@@ -131,7 +131,7 @@ void interface_init (int argc, char *argv[])
 	disc_init ();
 	radio_init ();
 	music_init ();
-	server_init ();
+	//server_init ();
 	settings_init ();
 	fullscreen_init ();
 	
